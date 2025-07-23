@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Karaoke ab Hof 🎤</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #2e255c;
+      color: white;
+      overflow-x: hidden;
+    }
+    h1 { text-align: center; margin-top: 1em; }
+    #search { margin: 1em auto; display: block; padding: 0.5em; width: 80%; font-size: 1.2em; }
+    .video-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+    .card { background: #e94d8f; border-radius: 10px; padding: 10px; width: 200px; cursor: pointer; transition: 0.3s; }
+    .card:hover { transform: scale(1.05); }
+    .card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
+    .title { margin-top: 0.5em; font-weight: bold; }
+    #playerContainer {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background-color: #000; justify-content: center; align-items: center; z-index: 1000;
+    }
+    video { width: 100vw; height: 100vh; object-fit: contain; background: #000; }
+    #closeBtn {
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(255, 0, 100, 0.8); color: white; border: none;
+      padding: 10px 20px; font-size: 1.2em; border-radius: 10px; cursor: pointer;
+      display: none; z-index: 1001;
+    }
+    #statsButton {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10;
+      background: #e94d8f;
+      padding: 10px;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #statsPage {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #1e1e1e;
+      z-index: 2000;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    #closeStats {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #e94d8f;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Karaoke ab Hof 🎤</h1>
+  <input type="text" id="search" placeholder="Lied suchen...">
+  <div class="video-grid" id="videoList"></div>
+  <div id="playerContainer">
+    <video id="videoPlayer" controls autoplay></video>
+    <button id="closeBtn" onclick="closePlayer()">✕ Zurück</button>
+  </div>
+  <button id="statsButton">📊 Statistik</button>
+  <div id="statsPage">
+    <button id="closeStats">✕</button>
+    <h2>Statistik</h2>
+    <canvas id="chart" width="800" height="400"></canvas>
+    <p><button onclick="exportStats()">Statistik exportieren</button></p>
+  </div>
+  <script>
+    let allVideos = [];
+    let playedLog = JSON.parse(localStorage.getItem("playedLog") || "[]");
+    let chartInstance = null;
+
+    async function loadVideos() {
+      const res = await fetch("videos.json");
+      allVideos = await res.json();
+      showRandomVideos();
+    }
+
+    function showRandomVideos() {
+      const sample = shuffle(allVideos).slice(0, 30);
+      renderCards(sample);
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function renderCards(videos) {
+      const container = document.getElementById("videoList");
+      container.innerHTML = "";
+      videos.forEach(v => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<img src="${v.cover}" onerror="this.src='fallback.jpg'"><div class="title">${v.title}</div>`;
+        div.onclick = () => playVideo(v);
+        container.appendChild(div);
+      });
+    }
+
+    function playVideo(video) {
+      const player = document.getElementById("videoPlayer");
+      const container = document.getElementById("playerContainer");
+      const btn = document.getElementById("closeBtn");
+
+      player.src = video.file;
+      container.style.display = "flex";
+      btn.style.display = "block";
+
+      const startTime = Date.now();
+      let ended = false;
+
+      player.onended = () => {
+        ended = true;
+        logPlay(video.title, startTime, Date.now(), true);
+        closePlayer();
+      };
+
+      player.onpause = () => {
+        if (!ended) logPlay(video.title, startTime, Date.now(), false);
+      };
+
+      logPlay(video.title, startTime, null, false);
+    }
+
+    function closePlayer() {
+      const player = document.getElementById("videoPlayer");
+      player.pause();
+      player.src = "";
+      document.getElementById("playerContainer").style.display = "none";
+    }
+
+    function logPlay(title, start, end, completed) {
+      playedLog.push({ title, start, end, completed });
+      localStorage.setItem("playedLog", JSON.stringify(playedLog));
+    }
+
+    document.getElementById("search").addEventListener("input", e => {
+      const query = e.target.value.toLowerCase();
+      const results = allVideos.filter(v => v.title.toLowerCase().includes(query));
+      renderCards(results);
+    });
+
+    document.addEventListener("mousemove", () => {
+      const btn = document.getElementById("closeBtn");
+      if (document.getElementById("playerContainer").style.display === "flex") {
+        btn.style.display = "block";
+        clearTimeout(window.hideTimer);
+        window.hideTimer = setTimeout(() => btn.style.display = "none", 2000);
+      }
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closePlayer();
+    });
+
+    document.getElementById("statsButton").onclick = () => {
+      document.getElementById("statsPage").style.display = "block";
+      renderChart();
+    };
+
+    document.getElementById("closeStats").onclick = () => {
+      document.getElementById("statsPage").style.display = "none";
+    };
+
+    function exportStats() {
+      const logs = JSON.parse(localStorage.getItem("playedLog") || "[]");
+      const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "karaoke_stats.json";
+      a.click();
+    }
+
+    function renderChart() {
+      const logs = JSON.parse(localStorage.getItem("playedLog") || "[]");
+      const count = {};
+      logs.forEach(l => count[l.title] = (count[l.title] || 0) + 1);
+
+      const labels = Object.keys(count);
+      const data = Object.values(count);
+      const ctx = document.getElementById('chart').getContext('2d');
+
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Wiedergaben',
+            data: data,
+            backgroundColor: '#e94d8f'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
+          },
+          scales: {
+            x: { ticks: { color: '#fff' } },
+            y: { ticks: { color: '#fff' } }
+          }
+        }
+      });
+    }
+
+    loadVideos();
+  </script>
+</body>
+</html>
