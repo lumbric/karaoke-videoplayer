@@ -3,4 +3,25 @@
     "title": "bohemian rhapsody",
     "file": "videos/bohemian_rhapsody.mp4",
     "cover": ""
+  },
+  {
+    "title": "dont stop believin",
+    "file": "videos/dont_stop_believin.mp4",
+    "cover": ""
+  },
+  {
+    "title": "i want it that way",
+    "file": "videos/i_want_it_that_way.mp4",
+    "cover": ""
+  },
+  {
+    "title": "livin on a prayer",
+    "file": "videos/livin_on_a_prayer.mp4",
+    "cover": ""
+  },
+  {
+    "title": "sweet caroline",
+    "file": "videos/sweet_caroline.mp4",
+    "cover": ""
   }
+]

@@ -3,7 +3,7 @@
 # Karaoke Video Data Generator
 # Generates videos.json, downloads cover art, and stores spotdl metadata
 
-set -e  # Exit on any error
+# Note: Not using 'set -e' because download failures shouldn't stop the entire process
 
 # Configuration
 VIDEOS_DIR="videos"
