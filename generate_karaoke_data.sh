@@ -56,7 +56,7 @@ clean_filename() {
     echo "$filename"
 }
 
-# Function to download cover art using yt-dlp or spotdl
+# Function to download cover art using available tools
 download_cover() {
     local video_file="$1"
     local cover_base="$2"
@@ -72,49 +72,56 @@ download_cover() {
     
     print_status "Downloading cover for: $search_query"
     
-    # Try with spotdl first (if available)
+    # Try with spotdl first (if available) - this is the preferred method
     if command_exists spotdl; then
-        print_status "Using spotdl to download cover..."
+        print_status "Trying spotdl..."
         local metadata_file="$METADATA_DIR/$cover_base.spotdl"
         mkdir -p "$METADATA_DIR"
         
-        # Use spotdl to get metadata and cover
-        if spotdl save "$search_query" --output "$metadata_file" --format json 2>/dev/null; then
+        # Use spotdl to search and save metadata
+        if spotdl save "$search_query" --output "$metadata_file" --format json >/dev/null 2>&1; then
+            print_success "Saved spotdl metadata: $metadata_file"
+            
             # Try to extract cover URL from metadata and download
             if command_exists jq && [[ -f "$metadata_file" ]]; then
                 local cover_url=$(jq -r '.album.images[0].url // .track.album.images[0].url // empty' "$metadata_file" 2>/dev/null)
                 if [[ -n "$cover_url" && "$cover_url" != "null" ]]; then
-                    if curl -s -L "$cover_url" -o "$COVERS_DIR/$cover_base.jpg"; then
-                        print_success "Downloaded cover via spotdl metadata"
+                    if curl -s -L "$cover_url" -o "$COVERS_DIR/$cover_base.jpg" >/dev/null 2>&1; then
+                        print_success "Downloaded cover via spotdl"
                         return 0
                     fi
                 fi
             fi
+        else
+            print_warning "spotdl could not find: $search_query"
         fi
     fi
     
-    # Try with yt-dlp (if available)
+    # Try with yt-dlp only if spotdl failed
     if command_exists yt-dlp; then
-        print_status "Using yt-dlp to download cover..."
-        # Search for the song and get thumbnail
+        print_status "Trying yt-dlp..."
         local search_result=$(yt-dlp "ytsearch1:$search_query" --get-thumbnail --no-download 2>/dev/null | head -1)
-        if [[ -n "$search_result" ]]; then
-            if curl -s -L "$search_result" -o "$COVERS_DIR/$cover_base.jpg"; then
+        if [[ -n "$search_result" && "$search_result" != "NA" ]]; then
+            if curl -s -L "$search_result" -o "$COVERS_DIR/$cover_base.jpg" >/dev/null 2>&1; then
                 print_success "Downloaded cover via yt-dlp"
                 return 0
             fi
+        else
+            print_warning "yt-dlp could not find: $search_query"
         fi
     fi
     
-    # Try with youtube-dl as fallback
+    # Try with youtube-dl only if both spotdl and yt-dlp failed
     if command_exists youtube-dl; then
-        print_status "Using youtube-dl to download cover..."
+        print_status "Trying youtube-dl..."
         local search_result=$(youtube-dl "ytsearch1:$search_query" --get-thumbnail --no-download 2>/dev/null | head -1)
-        if [[ -n "$search_result" ]]; then
-            if curl -s -L "$search_result" -o "$COVERS_DIR/$cover_base.jpg"; then
+        if [[ -n "$search_result" && "$search_result" != "NA" ]]; then
+            if curl -s -L "$search_result" -o "$COVERS_DIR/$cover_base.jpg" >/dev/null 2>&1; then
                 print_success "Downloaded cover via youtube-dl"
                 return 0
             fi
+        else
+            print_warning "youtube-dl could not find: $search_query"
         fi
     fi
     
@@ -186,8 +193,7 @@ main() {
         print_status "Processing: $filename"
         
         # Try to download cover art
-        download_cover "$file" "$base" "$clean_title"
-        if [[ $? -eq 0 ]]; then
+        if download_cover "$file" "$base" "$clean_title"; then
             ((cover_downloaded++))
         fi
         

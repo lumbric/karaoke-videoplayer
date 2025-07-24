@@ -1,27 +1,6 @@
 [
   {
-    "title": "Bohemian Rhapsody - Queen",
+    "title": "bohemian rhapsody",
     "file": "videos/bohemian_rhapsody.mp4",
-    "cover": "covers/bohemian_rhapsody.jpg"
-  },
-  {
-    "title": "Don't Stop Believin' - Journey",
-    "file": "videos/dont_stop_believin.mp4",
-    "cover": "covers/dont_stop_believin.jpg"
-  },
-  {
-    "title": "Sweet Caroline - Neil Diamond",
-    "file": "videos/sweet_caroline.mp4",
-    "cover": "covers/sweet_caroline.jpg"
-  },
-  {
-    "title": "Livin' on a Prayer - Bon Jovi",
-    "file": "videos/livin_on_a_prayer.mp4",
-    "cover": "covers/livin_on_a_prayer.jpg"
-  },
-  {
-    "title": "I Want It That Way - Backstreet Boys",
-    "file": "videos/i_want_it_that_way.mp4",
-    "cover": "covers/i_want_it_that_way.jpg"
+    "cover": ""
   }
-]
