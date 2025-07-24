@@ -3,28 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <title>Karaoke ab Hof 🎤</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
+      font-family: 'RocknRoll One', sans-serif;
       background: #2e255c;
       color: white;
       overflow-x: hidden;
+      line-height: 1.4;
     }
-    h1 { text-align: center; margin-top: 1em; }
-    #search { margin: 1em auto; display: block; padding: 0.5em; width: 80%; font-size: 1.2em; }
-    .search-info {
+    h1 { 
+      text-align: center; 
+      margin: 1em 0 0.5em 0; 
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    #search { 
+      margin: 1.5em auto 2em auto; 
+      display: block; 
+      padding: 1em 1.5em; 
+      width: min(600px, 80%); 
+      font-size: 1.2em;
+      font-family: 'RocknRoll One', sans-serif;
+      border: 3px solid #e94d8f;
+      border-radius: 25px;
+      background: rgba(255,255,255,0.1);
+      color: white;
       text-align: center;
-      margin: 0.5em;
-      font-size: 0.9em;
-      color: #ccc;
+      transition: all 0.3s ease;
+      outline: none;
     }
-    .video-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
-    .card { background: #e94d8f; border-radius: 10px; padding: 10px; width: 200px; cursor: pointer; transition: 0.3s; }
-    .card:hover { transform: scale(1.05); }
-    .card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
-    .title { margin-top: 0.5em; font-weight: bold; }
+    #search:focus {
+      background: rgba(255,255,255,0.2);
+      box-shadow: 0 0 20px rgba(233, 77, 143, 0.5);
+      transform: scale(1.02);
+    }
+    #search::placeholder {
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+    }
+    .search-info {
+      display: none;
+    }
+    .video-grid { 
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: flex-start; 
+      gap: 25px; 
+      padding: 20px 40px; 
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .card { 
+      background: #e94d8f; 
+      border-radius: 15px; 
+      padding: 15px; 
+      width: 250px; 
+      cursor: pointer; 
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .card:hover { 
+      transform: scale(1.05) translateY(-5px); 
+      box-shadow: 0 8px 25px rgba(233, 77, 143, 0.4);
+    }
+    .card img { 
+      width: 100%; 
+      height: 250px; 
+      object-fit: cover; 
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .title { 
+      margin-top: 1em; 
+      font-weight: bold; 
+      font-size: 1.1em;
+      text-align: center;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
     #playerContainer {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background-color: #000; justify-content: center; align-items: center; z-index: 1000;
@@ -80,13 +140,51 @@
       padding: 10px;
       border-radius: 5px;
       cursor: pointer;
+      font-family: 'RocknRoll One', sans-serif;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .video-grid {
+        padding: 20px 20px;
+        gap: 20px;
+        justify-content: center;
+      }
+      .card {
+        width: 200px;
+      }
+      .card img {
+        height: 200px;
+      }
+      h1 {
+        font-size: 2em;
+      }
+      #search {
+        width: 90%;
+        font-size: 1.1em;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .video-grid {
+        padding: 15px 15px;
+        gap: 15px;
+      }
+      .card {
+        width: 160px;
+      }
+      .card img {
+        height: 160px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Karaoke ab Hof 🎤</h1>
   <input type="text" id="search" placeholder="Lied suchen...">
-  <div class="search-info" id="searchInfo"></div>
   <div class="video-grid" id="videoList"></div>
   <div id="playerContainer">
     <video id="videoPlayer" controls autoplay></video>
@@ -106,7 +204,7 @@
     
     // Configuration for video display and search
     const CONFIG = {
-      MAX_DISPLAY_COUNT: 30       // Maximum number of videos to display (both start page and search results)
+      MAX_DISPLAY_COUNT: 50       // Maximum number of videos to display (both start page and search results)
     };
 
     async function loadVideos() {
@@ -116,14 +214,12 @@
         showRandomVideos();
       } catch (error) {
         console.error("Error loading videos:", error);
-        updateSearchInfo("Fehler beim Laden der Videos");
       }
     }
 
     function showRandomVideos() {
       const sample = shuffle([...allVideos]).slice(0, CONFIG.MAX_DISPLAY_COUNT);
       renderCards(sample);
-      updateSearchInfo(`Zeige ${sample.length} zufällige Videos von ${allVideos.length} verfügbaren`);
     }
 
     function shuffle(arr) {
@@ -152,9 +248,7 @@
       });
     }
 
-    function updateSearchInfo(message) {
-      document.getElementById("searchInfo").textContent = message;
-    }
+
 
     function handleSearch(query) {
       if (!query || query.length === 0) {
@@ -170,20 +264,12 @@
 
       if (filteredVideos.length === 0) {
         renderCards([]);
-        updateSearchInfo("Keine Videos gefunden");
         return;
       }
 
       // Limit results to same number as start page
       const limitedResults = filteredVideos.slice(0, CONFIG.MAX_DISPLAY_COUNT);
       renderCards(limitedResults);
-      
-      // Update info message
-      if (filteredVideos.length > CONFIG.MAX_DISPLAY_COUNT) {
-        updateSearchInfo(`Zeige ${CONFIG.MAX_DISPLAY_COUNT} von ${filteredVideos.length} gefundenen Videos`);
-      } else {
-        updateSearchInfo(`${filteredVideos.length} Videos gefunden`);
-      }
     }
 
     function playVideo(video) {
