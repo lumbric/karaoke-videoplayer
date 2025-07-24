@@ -95,11 +95,9 @@
     let playedLog = JSON.parse(localStorage.getItem("playedLog") || "[]");
     let chartInstance = null;
     
-    // Configuration for intelligent search and display limits
+    // Configuration for video display and search
     const CONFIG = {
-      MIN_SEARCH_CHARS: 3,        // Minimum characters before showing search results
-      MAX_DISPLAY_LIMIT: 50,      // Maximum number of videos to display at once
-      RANDOM_DISPLAY_COUNT: 30    // Number of random videos to show when not searching
+      MAX_DISPLAY_COUNT: 30       // Maximum number of videos to display (both start page and search results)
     };
 
     async function loadVideos() {
@@ -114,7 +112,7 @@
     }
 
     function showRandomVideos() {
-      const sample = shuffle([...allVideos]).slice(0, CONFIG.RANDOM_DISPLAY_COUNT);
+      const sample = shuffle([...allVideos]).slice(0, CONFIG.MAX_DISPLAY_COUNT);
       renderCards(sample);
       updateSearchInfo(`Zeige ${sample.length} zufällige Videos von ${allVideos.length} verfügbaren`);
     }
@@ -150,13 +148,13 @@
     }
 
     function handleSearch(query) {
-      if (!query || query.length < CONFIG.MIN_SEARCH_CHARS) {
-        // Show random videos when search is empty or too short
+      if (!query || query.length === 0) {
+        // Show random videos when search is empty
         showRandomVideos();
         return;
       }
 
-      // Filter videos based on search query
+      // Filter videos based on search query (search starts immediately with any character)
       const filteredVideos = allVideos.filter(v => 
         v.title.toLowerCase().includes(query.toLowerCase())
       );
@@ -167,13 +165,13 @@
         return;
       }
 
-      // Limit results for performance
-      const limitedResults = filteredVideos.slice(0, CONFIG.MAX_DISPLAY_LIMIT);
+      // Limit results to same number as start page
+      const limitedResults = filteredVideos.slice(0, CONFIG.MAX_DISPLAY_COUNT);
       renderCards(limitedResults);
       
       // Update info message
-      if (filteredVideos.length > CONFIG.MAX_DISPLAY_LIMIT) {
-        updateSearchInfo(`Zeige ${CONFIG.MAX_DISPLAY_LIMIT} von ${filteredVideos.length} gefundenen Videos (verfeinere deine Suche für bessere Ergebnisse)`);
+      if (filteredVideos.length > CONFIG.MAX_DISPLAY_COUNT) {
+        updateSearchInfo(`Zeige ${CONFIG.MAX_DISPLAY_COUNT} von ${filteredVideos.length} gefundenen Videos`);
       } else {
         updateSearchInfo(`${filteredVideos.length} Videos gefunden`);
       }
