@@ -28,6 +28,10 @@
     #playerContainer {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background-color: #000; justify-content: center; align-items: center; z-index: 1000;
+      cursor: none;
+    }
+    #playerContainer.show-cursor {
+      cursor: default;
     }
     video { width: 100vw; height: 100vh; object-fit: contain; background: #000; }
     #closeBtn {
@@ -35,6 +39,11 @@
       background: rgba(255, 0, 100, 0.8); color: white; border: none;
       padding: 10px 20px; font-size: 1.2em; border-radius: 10px; cursor: pointer;
       display: none; z-index: 1001;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #closeBtn.visible {
+      opacity: 1;
     }
     #statsButton {
       position: fixed;
@@ -185,6 +194,10 @@
       player.src = video.file;
       container.style.display = "flex";
       btn.style.display = "block";
+      
+      // Hide cursor and button initially
+      container.classList.remove("show-cursor");
+      btn.classList.remove("visible");
 
       const startTime = Date.now();
       let ended = false;
@@ -204,9 +217,16 @@
 
     function closePlayer() {
       const player = document.getElementById("videoPlayer");
+      const container = document.getElementById("playerContainer");
+      const btn = document.getElementById("closeBtn");
+      
       player.pause();
       player.src = "";
-      document.getElementById("playerContainer").style.display = "none";
+      container.style.display = "none";
+      
+      // Reset cursor and button state
+      container.classList.remove("show-cursor");
+      btn.classList.remove("visible");
     }
 
     function logPlay(title, start, end, completed) {
@@ -222,11 +242,20 @@
 
     // Mouse movement handling for video player
     document.addEventListener("mousemove", () => {
+      const container = document.getElementById("playerContainer");
       const btn = document.getElementById("closeBtn");
-      if (document.getElementById("playerContainer").style.display === "flex") {
-        btn.style.display = "block";
+      
+      if (container.style.display === "flex") {
+        // Show cursor and button on mouse movement
+        container.classList.add("show-cursor");
+        btn.classList.add("visible");
+        
+        // Hide again after 3 seconds of no movement
         clearTimeout(window.hideTimer);
-        window.hideTimer = setTimeout(() => btn.style.display = "none", 2000);
+        window.hideTimer = setTimeout(() => {
+          container.classList.remove("show-cursor");
+          btn.classList.remove("visible");
+        }, 3000);
       }
     });
 
