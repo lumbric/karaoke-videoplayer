@@ -11,15 +11,7 @@
     body {
       margin: 0;
       font-family: 'RocknRoll One', sans-serif;
-      /* Farm-themed background with poster inspiration */
-      background: 
-        linear-gradient(135deg, rgba(56, 142, 60, 0.7) 0%, rgba(76, 175, 80, 0.7) 25%, rgba(139, 195, 74, 0.7) 50%, rgba(174, 213, 129, 0.7) 75%, rgba(200, 230, 201, 0.7) 100%),
-        url('images/poster_2025.jpeg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      /* Fallback gradient if image doesn't load */
-      background-color: #388e3c;
+      background: linear-gradient(135deg, #2e255c 0%, #4a3d7a 25%, #6b5b95 50%, #8e7db8 75%, #b19cd9 100%);
       min-height: 100vh;
       color: white;
       overflow-x: hidden;
@@ -27,7 +19,7 @@
       position: relative;
     }
     
-    /* Farm-themed poster-inspired overlay */
+    /* Static poster-inspired overlay without animations */
     body::before {
       content: '';
       position: fixed;
@@ -36,53 +28,33 @@
       right: 0;
       bottom: 0;
       background: 
-        radial-gradient(circle at 15% 25%, rgba(129, 199, 132, 0.08) 0%, transparent 30%),
-        radial-gradient(circle at 85% 75%, rgba(139, 195, 74, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 50% 50%, rgba(255, 235, 59, 0.03) 0%, transparent 60%);
+        radial-gradient(circle at 15% 25%, rgba(233, 77, 143, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 85% 75%, rgba(255, 105, 180, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.03) 0%, transparent 60%);
       background-size: 400px 400px, 600px 600px, 800px 800px;
       pointer-events: none;
       z-index: 0;
       opacity: 0.4;
     }
-    /* Header section with chicken mascot */
-    .header-section {
-      text-align: center;
-      margin: 1em 0 0.5em 0;
+    h1 { 
+      text-align: center; 
+      margin: 1em 0 0.5em 0; 
+      font-size: 3em;
+      color: black;
+      text-shadow: 
+        3px 3px 0px #e94d8f,
+        6px 6px 10px rgba(233, 77, 143, 0.6);
       position: relative;
       z-index: 1;
-    }
-    
-    .chicken-mascot {
-      width: 80px;
-      height: 80px;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 20px;
-      filter: drop-shadow(3px 3px 6px rgba(46, 37, 92, 0.5));
-      border-radius: 50%;
-      background: linear-gradient(145deg, #ffeb3b, #ffc107);
-      padding: 8px;
-      box-shadow: 0 4px 15px rgba(255, 235, 59, 0.4);
-    }
-    
-    h1 { 
-      display: inline-block;
-      margin: 0;
-      font-size: 3em;
-      color: #2d5016;
-      text-shadow: 
-        3px 3px 0px #81c784,
-        6px 6px 10px rgba(129, 199, 132, 0.6);
       letter-spacing: 2px;
-      vertical-align: middle;
     }
     
-    /* Farm-themed decorative elements around title */
+    /* Static decorative elements around title (no animations) */
     h1::before,
     h1::after {
-      content: '🌾';
+      content: '✨';
       font-size: 0.6em;
-      color: #8bc34a;
+      color: #ff1493;
       margin: 0 20px;
       text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.3);
     }
@@ -93,27 +65,27 @@
       width: min(600px, 80%); 
       font-size: 1.2em;
       font-family: 'RocknRoll One', sans-serif;
-      border: 3px solid #8bc34a;
+      border: 3px solid #e94d8f;
       border-radius: 25px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(139,195,74,0.05));
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(233,77,143,0.05));
       color: white;
       text-align: center;
       transition: all 0.3s ease;
       outline: none;
       box-shadow: 
-        0 4px 15px rgba(56, 142, 60, 0.3),
-        inset 0 2px 5px rgba(139, 195, 74, 0.1);
+        0 4px 15px rgba(46, 37, 92, 0.3),
+        inset 0 2px 5px rgba(255, 105, 180, 0.1);
       position: relative;
       z-index: 1;
     }
     #search:focus {
-      background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(139,195,74,0.1));
+      background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(233,77,143,0.1));
       box-shadow: 
-        0 0 25px rgba(139, 195, 74, 0.6),
-        0 6px 20px rgba(56, 142, 60, 0.4),
-        inset 0 2px 5px rgba(139, 195, 74, 0.2);
+        0 0 25px rgba(255, 105, 180, 0.6),
+        0 6px 20px rgba(46, 37, 92, 0.4),
+        inset 0 2px 5px rgba(255, 105, 180, 0.2);
       transform: scale(1.02);
-      border-color: #aed581;
+      border-color: #ff69b4;
     }
     #search::placeholder {
       color: rgba(255, 255, 255, 0.7);
@@ -132,21 +104,21 @@
       margin: 0 auto;
     }
     .card { 
-      background: linear-gradient(145deg, #8bc34a 0%, #689f38 50%, #558b2f 100%);
-      border: 3px solid #aed581;
+      background: linear-gradient(145deg, #e94d8f 0%, #d63384 50%, #c72c78 100%);
+      border: 3px solid #ff69b4;
       border-radius: 15px; 
       padding: 15px; 
       width: 250px; 
       cursor: pointer; 
       transition: all 0.3s ease;
       box-shadow: 
-        0 6px 20px rgba(56, 142, 60, 0.4),
-        inset 0 1px 3px rgba(174, 213, 129, 0.3);
+        0 6px 20px rgba(46, 37, 92, 0.4),
+        inset 0 1px 3px rgba(255, 182, 193, 0.3);
       position: relative;
       z-index: 1;
     }
     
-    /* Farm-themed glowing frame effect */
+    /* Glowing cosmic frame effect */
     .card::before {
       content: '';
       position: absolute;
@@ -154,38 +126,19 @@
       left: -3px;
       right: -3px;
       bottom: -3px;
-      background: linear-gradient(45deg, #8bc34a, #aed581, #c8e6c9, #dcedc8);
+      background: linear-gradient(45deg, #ff1493, #ff69b4, #da70d6, #ba55d3);
       border-radius: 18px;
       z-index: -1;
       opacity: 0.7;
     }
     
-    /* Add chicken decoration to cards */
-    .card::after {
-      content: '';
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 24px;
-      height: 24px;
-      background: url('images/singing-chicken.png') no-repeat center;
-      background-size: contain;
-      opacity: 0.3;
-      z-index: 2;
-    }
-    
     .card:hover { 
       transform: scale(1.05) translateY(-8px); 
       box-shadow: 
-        0 15px 35px rgba(139, 195, 74, 0.5),
-        0 5px 15px rgba(56, 142, 60, 0.3),
-        inset 0 1px 3px rgba(174, 213, 129, 0.4);
-      background: linear-gradient(145deg, #aed581 0%, #8bc34a 50%, #689f38 100%);
-    }
-    
-    .card:hover::after {
-      opacity: 0.6;
-      transform: scale(1.1);
+        0 15px 35px rgba(255, 105, 180, 0.5),
+        0 5px 15px rgba(46, 37, 92, 0.3),
+        inset 0 1px 3px rgba(255, 182, 193, 0.4);
+      background: linear-gradient(145deg, #ff69b4 0%, #e94d8f 50%, #da70d6 100%);
     }
     
     .card img { 
@@ -194,9 +147,9 @@
       object-fit: cover; 
       border-radius: 12px;
       box-shadow: 
-        0 4px 15px rgba(56, 142, 60, 0.4),
-        inset 0 0 10px rgba(139, 195, 74, 0.1);
-      border: 2px solid #8bc34a;
+        0 4px 15px rgba(46, 37, 92, 0.4),
+        inset 0 0 10px rgba(255, 105, 180, 0.1);
+      border: 2px solid #ff1493;
     }
     
     .title { 
@@ -206,8 +159,8 @@
       text-align: center;
       color: white;
       text-shadow: 
-        2px 2px 0px #2d5016,
-        3px 3px 6px rgba(45, 80, 22, 0.8);
+        2px 2px 0px #2e255c,
+        3px 3px 6px rgba(46, 37, 92, 0.8);
     }
     #playerContainer {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -220,9 +173,9 @@
     video { width: 100vw; height: 100vh; object-fit: contain; background: #000; }
     #closeBtn {
       position: absolute; top: 20px; left: 20px;
-      background: linear-gradient(145deg, #8bc34a, #689f38);
+      background: linear-gradient(145deg, #e94d8f, #d63384);
       color: white;
-      border: 3px solid #aed581;
+      border: 3px solid #ff69b4;
       padding: 12px 16px;
       font-size: 1.2em;
       border-radius: 12px;
@@ -233,46 +186,46 @@
       transition: opacity 0.3s ease;
       font-family: 'RocknRoll One', sans-serif;
       box-shadow: 
-        0 4px 15px rgba(56, 142, 60, 0.4),
-        inset 0 1px 3px rgba(174, 213, 129, 0.3);
-      text-shadow: 2px 2px 4px rgba(45, 80, 22, 0.8);
+        0 4px 15px rgba(46, 37, 92, 0.4),
+        inset 0 1px 3px rgba(255, 182, 193, 0.3);
+      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
     }
     #closeBtn.visible {
       opacity: 1;
     }
     #closeBtn:hover {
-      background: linear-gradient(145deg, #aed581, #8bc34a);
+      background: linear-gradient(145deg, #ff69b4, #e94d8f);
       box-shadow: 
-        0 6px 20px rgba(139, 195, 74, 0.5),
-        inset 0 1px 3px rgba(174, 213, 129, 0.4);
+        0 6px 20px rgba(255, 105, 180, 0.5),
+        inset 0 1px 3px rgba(255, 182, 193, 0.4);
     }
     #statsButton {
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 10;
-      background: linear-gradient(145deg, #8bc34a, #689f38);
+      background: linear-gradient(145deg, #e94d8f, #d63384);
       padding: 15px 20px;
-      border: 3px solid #aed581;
+      border: 3px solid #ff69b4;
       color: white;
       border-radius: 15px;
       cursor: pointer;
       font-family: 'RocknRoll One', sans-serif;
       font-size: 0.9em;
-      text-shadow: 2px 2px 4px rgba(45, 80, 22, 0.8);
+      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
       box-shadow: 
-        0 4px 15px rgba(56, 142, 60, 0.4),
-        inset 0 1px 3px rgba(174, 213, 129, 0.3);
+        0 4px 15px rgba(46, 37, 92, 0.4),
+        inset 0 1px 3px rgba(255, 182, 193, 0.3);
       transition: all 0.3s ease;
     }
     
     #statsButton:hover {
-      background: linear-gradient(145deg, #aed581, #8bc34a);
+      background: linear-gradient(145deg, #ff69b4, #e94d8f);
       transform: translateY(-2px);
       box-shadow: 
-        0 6px 20px rgba(139, 195, 74, 0.5),
-        0 3px 10px rgba(56, 142, 60, 0.3),
-        inset 0 1px 3px rgba(174, 213, 129, 0.4);
+        0 6px 20px rgba(255, 105, 180, 0.5),
+        0 3px 10px rgba(46, 37, 92, 0.3),
+        inset 0 1px 3px rgba(255, 182, 193, 0.4);
     }
     #statsPage {
       display: none;
@@ -291,54 +244,38 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      background: linear-gradient(145deg, #8bc34a, #689f38);
+      background: linear-gradient(145deg, #e94d8f, #d63384);
       color: white;
-      border: 2px solid #aed581;
+      border: 2px solid #ff69b4;
       padding: 12px 16px;
       border-radius: 10px;
       cursor: pointer;
       font-family: 'RocknRoll One', sans-serif;
-      text-shadow: 2px 2px 4px rgba(45, 80, 22, 0.8);
-      box-shadow: 0 4px 10px rgba(56, 142, 60, 0.3);
+      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
+      box-shadow: 0 4px 10px rgba(46, 37, 92, 0.3);
       transition: all 0.3s ease;
     }
     
     #closeStats:hover {
-      background: linear-gradient(145deg, #aed581, #8bc34a);
+      background: linear-gradient(145deg, #ff69b4, #e94d8f);
       transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(139, 195, 74, 0.4);
+      box-shadow: 0 6px 15px rgba(255, 105, 180, 0.4);
     }
     
-    /* Farm-themed decorative elements */
-    .farm-decoration {
+    /* Static cosmic/party decorative elements (no animations) */
+    .cosmic-decoration {
       position: fixed;
       font-size: 2em;
       opacity: 0.15;
       z-index: 0;
       pointer-events: none;
-      color: #8bc34a;
+      color: #ff69b4;
     }
     
-    .farm-decoration:nth-child(1) { top: 10%; left: 5%; }
-    .farm-decoration:nth-child(2) { top: 20%; right: 8%; }
-    .farm-decoration:nth-child(3) { bottom: 15%; left: 10%; }
-    .farm-decoration:nth-child(4) { bottom: 25%; right: 15%; }
-    
-    /* Chicken decorations */
-    .chicken-decoration {
-      position: fixed;
-      width: 40px;
-      height: 40px;
-      background: url('images/singing-chicken.png') no-repeat center;
-      background-size: contain;
-      opacity: 0.1;
-      z-index: 0;
-      pointer-events: none;
-    }
-    
-    .chicken-decoration:nth-child(5) { top: 30%; left: 15%; transform: rotate(-15deg); }
-    .chicken-decoration:nth-child(6) { top: 60%; right: 20%; transform: rotate(20deg); }
-    .chicken-decoration:nth-child(7) { bottom: 40%; left: 25%; transform: rotate(-10deg); }
+    .cosmic-decoration:nth-child(1) { top: 10%; left: 5%; }
+    .cosmic-decoration:nth-child(2) { top: 20%; right: 8%; }
+    .cosmic-decoration:nth-child(3) { bottom: 15%; left: 10%; }
+    .cosmic-decoration:nth-child(4) { bottom: 25%; right: 15%; }
     
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -366,8 +303,7 @@
         font-size: 1.1em;
         padding: 0.8em 1.2em;
       }
-      .farm-decoration,
-      .chicken-decoration {
+      .cosmic-decoration {
         display: none;
       }
     }
@@ -399,21 +335,13 @@
   </style>
 </head>
 <body>
-  <!-- Farm-themed decorative background elements -->
-  <div class="farm-decoration" style="top: 10%; left: 5%;">�</div>
-  <div class="farm-decoration" style="top: 20%; right: 8%;">🎵</div>
-  <div class="farm-decoration" style="bottom: 15%; left: 10%;">🎤</div>
-  <div class="farm-decoration" style="bottom: 25%; right: 15%;">🌻</div>
+  <!-- Cosmic/party decorative background elements -->
+  <div class="cosmic-decoration" style="top: 10%; left: 5%;">🎵</div>
+  <div class="cosmic-decoration" style="top: 20%; right: 8%;">⭐</div>
+  <div class="cosmic-decoration" style="bottom: 15%; left: 10%;">🎤</div>
+  <div class="cosmic-decoration" style="bottom: 25%; right: 15%;">🎶</div>
   
-  <!-- Chicken decorations -->
-  <div class="chicken-decoration" style="top: 30%; left: 15%; transform: rotate(-15deg);"></div>
-  <div class="chicken-decoration" style="top: 60%; right: 20%; transform: rotate(20deg);"></div>
-  <div class="chicken-decoration" style="bottom: 40%; left: 25%; transform: rotate(-10deg);"></div>
-  
-  <div class="header-section">
-    <img src="images/singing-chicken.png" alt="Singing Chicken" class="chicken-mascot">
-    <h1>Karaoke ab Hof 🎤</h1>
-  </div>
+  <h1>Karaoke ab Hof 🎤</h1>
   <input type="text" id="search" placeholder="Lied suchen...">
   <div class="video-grid" id="videoList"></div>
   <div id="playerContainer">
@@ -652,7 +580,7 @@
           datasets: [{
             label: 'Wiedergaben',
             data: data,
-            backgroundColor: '#8bc34a'
+            backgroundColor: '#e94d8f'
           }]
         },
         options: {
