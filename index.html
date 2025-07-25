@@ -19,7 +19,7 @@
       position: relative;
     }
     
-    /* Cosmic sparkle overlay matching the poster */
+    /* Static poster-inspired overlay without animations */
     body::before {
       content: '';
       position: fixed;
@@ -28,34 +28,28 @@
       right: 0;
       bottom: 0;
       background: 
-        radial-gradient(circle at 15% 25%, rgba(233, 77, 143, 0.1) 0%, transparent 30%),
-        radial-gradient(circle at 85% 75%, rgba(255, 105, 180, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.05) 0%, transparent 60%);
+        radial-gradient(circle at 15% 25%, rgba(233, 77, 143, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 85% 75%, rgba(255, 105, 180, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.03) 0%, transparent 60%);
       background-size: 400px 400px, 600px 600px, 800px 800px;
       pointer-events: none;
       z-index: 0;
-      animation: sparkle 20s ease-in-out infinite;
-    }
-    
-    @keyframes sparkle {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.6; }
+      opacity: 0.4;
     }
     h1 { 
       text-align: center; 
       margin: 1em 0 0.5em 0; 
       font-size: 3em;
-      color: #ff69b4;
+      color: black;
       text-shadow: 
         3px 3px 0px #e94d8f,
-        6px 6px 10px rgba(46, 37, 92, 0.5),
-        0 0 30px rgba(255, 105, 180, 0.8);
+        6px 6px 10px rgba(233, 77, 143, 0.6);
       position: relative;
       z-index: 1;
       letter-spacing: 2px;
     }
     
-    /* Cosmic/party decorative elements around title */
+    /* Static decorative elements around title (no animations) */
     h1::before,
     h1::after {
       content: '✨';
@@ -63,12 +57,6 @@
       color: #ff1493;
       margin: 0 20px;
       text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.3);
-      animation: twinkle 2s ease-in-out infinite alternate;
-    }
-    
-    @keyframes twinkle {
-      0% { opacity: 0.5; transform: scale(1); }
-      100% { opacity: 1; transform: scale(1.1); }
     }
     #search { 
       margin: 1.5em auto 2em auto; 
@@ -184,15 +172,32 @@
     }
     video { width: 100vw; height: 100vh; object-fit: contain; background: #000; }
     #closeBtn {
-      position: absolute; top: 20px; right: 20px;
-      background: rgba(255, 0, 100, 0.8); color: white; border: none;
-      padding: 10px 20px; font-size: 1.2em; border-radius: 10px; cursor: pointer;
-      display: none; z-index: 1001;
+      position: absolute; top: 20px; left: 20px;
+      background: linear-gradient(145deg, #e94d8f, #d63384);
+      color: white;
+      border: 3px solid #ff69b4;
+      padding: 12px 16px;
+      font-size: 1.2em;
+      border-radius: 12px;
+      cursor: pointer;
+      display: none;
+      z-index: 1001;
       opacity: 0;
       transition: opacity 0.3s ease;
+      font-family: 'RocknRoll One', sans-serif;
+      box-shadow: 
+        0 4px 15px rgba(46, 37, 92, 0.4),
+        inset 0 1px 3px rgba(255, 182, 193, 0.3);
+      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
     }
     #closeBtn.visible {
       opacity: 1;
+    }
+    #closeBtn:hover {
+      background: linear-gradient(145deg, #ff69b4, #e94d8f);
+      box-shadow: 
+        0 6px 20px rgba(255, 105, 180, 0.5),
+        inset 0 1px 3px rgba(255, 182, 193, 0.4);
     }
     #statsButton {
       position: fixed;
@@ -257,7 +262,7 @@
       box-shadow: 0 6px 15px rgba(255, 105, 180, 0.4);
     }
     
-    /* Cosmic/party decorative elements */
+    /* Static cosmic/party decorative elements (no animations) */
     .cosmic-decoration {
       position: fixed;
       font-size: 2em;
@@ -265,18 +270,12 @@
       z-index: 0;
       pointer-events: none;
       color: #ff69b4;
-      animation: float 6s ease-in-out infinite;
     }
     
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    .cosmic-decoration:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
-    .cosmic-decoration:nth-child(2) { top: 20%; right: 8%; animation-delay: 1.5s; }
-    .cosmic-decoration:nth-child(3) { bottom: 15%; left: 10%; animation-delay: 3s; }
-    .cosmic-decoration:nth-child(4) { bottom: 25%; right: 15%; animation-delay: 4.5s; }
+    .cosmic-decoration:nth-child(1) { top: 10%; left: 5%; }
+    .cosmic-decoration:nth-child(2) { top: 20%; right: 8%; }
+    .cosmic-decoration:nth-child(3) { bottom: 15%; left: 10%; }
+    .cosmic-decoration:nth-child(4) { bottom: 25%; right: 15%; }
     
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -347,7 +346,7 @@
   <div class="video-grid" id="videoList"></div>
   <div id="playerContainer">
     <video id="videoPlayer" controls autoplay></video>
-    <button id="closeBtn" onclick="closePlayer()">✕ Zurück</button>
+    <button id="closeBtn" onclick="closePlayer()">← Zurück</button>
   </div>
   <button id="statsButton">📊 Statistik</button>
   <div id="statsPage">
@@ -506,16 +505,31 @@
 
     // Keyboard shortcuts
     document.addEventListener("keydown", e => {
+      const playerContainer = document.getElementById("playerContainer");
+      const statsPage = document.getElementById("statsPage");
+      const searchField = document.getElementById("search");
+      
       if (e.key === "Escape") {
-        closePlayer();
-        document.getElementById("statsPage").style.display = "none";
+        // If video is playing, close it
+        if (playerContainer.style.display === "flex") {
+          closePlayer();
+        }
+        // If stats page is open, close it
+        else if (statsPage.style.display === "block") {
+          statsPage.style.display = "none";
+        }
+        // If neither video nor stats are open, clear search field
+        else {
+          searchField.value = "";
+          showRandomVideos();
+        }
       }
       // Clear search with Ctrl+K or Cmd+K
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
-        document.getElementById("search").value = "";
+        searchField.value = "";
         showRandomVideos();
-        document.getElementById("search").focus();
+        searchField.focus();
       }
     });
 

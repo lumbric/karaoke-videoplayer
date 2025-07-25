@@ -7,6 +7,8 @@ This is a client-side karaoke application called "Karaoke ab Hof" (Karaoke from 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Design preferences: Purple/pink color scheme from poster, no CPU-intensive animations, black text with pink shadow for titles.
+UI preferences: Back button in top-left corner with left arrow, ESC key clears search when no video playing.
 
 ## System Architecture
 
