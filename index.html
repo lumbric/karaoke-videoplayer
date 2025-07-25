@@ -11,15 +11,15 @@
     body {
       margin: 0;
       font-family: 'RocknRoll One', sans-serif;
-      background: linear-gradient(135deg, #d4a574 0%, #c8956a 25%, #b8845c 50%, #a67651 75%, #8b6344 100%);
+      background: linear-gradient(135deg, #2e255c 0%, #4a3d7a 25%, #6b5b95 50%, #8e7db8 75%, #b19cd9 100%);
       min-height: 100vh;
-      color: #2c1810;
+      color: white;
       overflow-x: hidden;
       line-height: 1.4;
       position: relative;
     }
     
-    /* Rustic wood texture overlay */
+    /* Cosmic sparkle overlay matching the poster */
     body::before {
       content: '';
       position: fixed;
@@ -28,36 +28,47 @@
       right: 0;
       bottom: 0;
       background: 
-        radial-gradient(circle at 20% 20%, rgba(139, 99, 68, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(212, 165, 116, 0.1) 0%, transparent 50%),
-        linear-gradient(45deg, rgba(44, 24, 16, 0.05) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(44, 24, 16, 0.05) 25%, transparent 25%);
-      background-size: 200px 200px, 300px 300px, 60px 60px, 60px 60px;
+        radial-gradient(circle at 15% 25%, rgba(233, 77, 143, 0.1) 0%, transparent 30%),
+        radial-gradient(circle at 85% 75%, rgba(255, 105, 180, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.05) 0%, transparent 60%);
+      background-size: 400px 400px, 600px 600px, 800px 800px;
       pointer-events: none;
       z-index: 0;
+      animation: sparkle 20s ease-in-out infinite;
+    }
+    
+    @keyframes sparkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
     }
     h1 { 
       text-align: center; 
       margin: 1em 0 0.5em 0; 
       font-size: 3em;
-      color: #8b4513;
+      color: #ff69b4;
       text-shadow: 
-        3px 3px 0px #654321,
-        6px 6px 10px rgba(44, 24, 16, 0.3),
-        0 0 30px rgba(255, 215, 0, 0.5);
+        3px 3px 0px #e94d8f,
+        6px 6px 10px rgba(46, 37, 92, 0.5),
+        0 0 30px rgba(255, 105, 180, 0.8);
       position: relative;
       z-index: 1;
       letter-spacing: 2px;
     }
     
-    /* Farm/rustic decorative elements around title */
+    /* Cosmic/party decorative elements around title */
     h1::before,
     h1::after {
-      content: '🌾';
+      content: '✨';
       font-size: 0.6em;
-      color: #cd853f;
+      color: #ff1493;
       margin: 0 20px;
-      text-shadow: 2px 2px 4px rgba(44, 24, 16, 0.3);
+      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.3);
+      animation: twinkle 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.5; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.1); }
     }
     #search { 
       margin: 1.5em auto 2em auto; 
@@ -66,30 +77,30 @@
       width: min(600px, 80%); 
       font-size: 1.2em;
       font-family: 'RocknRoll One', sans-serif;
-      border: 4px solid #8b4513;
-      border-radius: 15px;
-      background: linear-gradient(145deg, rgba(255,248,220,0.9), rgba(245,238,210,0.9));
-      color: #2c1810;
+      border: 3px solid #e94d8f;
+      border-radius: 25px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(233,77,143,0.05));
+      color: white;
       text-align: center;
       transition: all 0.3s ease;
       outline: none;
       box-shadow: 
-        inset 2px 2px 5px rgba(139, 69, 19, 0.2),
-        0 4px 10px rgba(44, 24, 16, 0.3);
+        0 4px 15px rgba(46, 37, 92, 0.3),
+        inset 0 2px 5px rgba(255, 105, 180, 0.1);
       position: relative;
       z-index: 1;
     }
     #search:focus {
-      background: linear-gradient(145deg, rgba(255,248,220,1), rgba(245,238,210,1));
+      background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(233,77,143,0.1));
       box-shadow: 
-        inset 2px 2px 5px rgba(139, 69, 19, 0.3),
-        0 0 20px rgba(205, 133, 63, 0.6),
-        0 6px 15px rgba(44, 24, 16, 0.4);
+        0 0 25px rgba(255, 105, 180, 0.6),
+        0 6px 20px rgba(46, 37, 92, 0.4),
+        inset 0 2px 5px rgba(255, 105, 180, 0.2);
       transform: scale(1.02);
-      border-color: #cd853f;
+      border-color: #ff69b4;
     }
     #search::placeholder {
-      color: rgba(44, 24, 16, 0.6);
+      color: rgba(255, 255, 255, 0.7);
       text-align: center;
     }
     .search-info {
@@ -105,21 +116,21 @@
       margin: 0 auto;
     }
     .card { 
-      background: linear-gradient(145deg, #f5eed2 0%, #e6d7b8 50%, #d4c5a0 100%);
-      border: 3px solid #8b4513;
+      background: linear-gradient(145deg, #e94d8f 0%, #d63384 50%, #c72c78 100%);
+      border: 3px solid #ff69b4;
       border-radius: 15px; 
       padding: 15px; 
       width: 250px; 
       cursor: pointer; 
       transition: all 0.3s ease;
       box-shadow: 
-        0 6px 15px rgba(44, 24, 16, 0.3),
-        inset 0 1px 3px rgba(255, 248, 220, 0.8);
+        0 6px 20px rgba(46, 37, 92, 0.4),
+        inset 0 1px 3px rgba(255, 182, 193, 0.3);
       position: relative;
       z-index: 1;
     }
     
-    /* Rustic wood frame effect */
+    /* Glowing cosmic frame effect */
     .card::before {
       content: '';
       position: absolute;
@@ -127,28 +138,30 @@
       left: -3px;
       right: -3px;
       bottom: -3px;
-      background: linear-gradient(45deg, #654321, #8b4513, #a0522d);
+      background: linear-gradient(45deg, #ff1493, #ff69b4, #da70d6, #ba55d3);
       border-radius: 18px;
       z-index: -1;
+      opacity: 0.7;
     }
     
     .card:hover { 
       transform: scale(1.05) translateY(-8px); 
       box-shadow: 
-        0 12px 30px rgba(44, 24, 16, 0.4),
-        inset 0 1px 3px rgba(255, 248, 220, 0.9);
-      background: linear-gradient(145deg, #fff8dc 0%, #f0e6c7 50%, #dcc9a8 100%);
+        0 15px 35px rgba(255, 105, 180, 0.5),
+        0 5px 15px rgba(46, 37, 92, 0.3),
+        inset 0 1px 3px rgba(255, 182, 193, 0.4);
+      background: linear-gradient(145deg, #ff69b4 0%, #e94d8f 50%, #da70d6 100%);
     }
     
     .card img { 
       width: 100%; 
       height: 250px; 
       object-fit: cover; 
-      border-radius: 10px;
+      border-radius: 12px;
       box-shadow: 
-        inset 0 0 15px rgba(44, 24, 16, 0.2),
-        0 4px 12px rgba(44, 24, 16, 0.4);
-      border: 2px solid #a0522d;
+        0 4px 15px rgba(46, 37, 92, 0.4),
+        inset 0 0 10px rgba(255, 105, 180, 0.1);
+      border: 2px solid #ff1493;
     }
     
     .title { 
@@ -156,10 +169,10 @@
       font-weight: bold; 
       font-size: 1.1em;
       text-align: center;
-      color: #2c1810;
+      color: white;
       text-shadow: 
-        1px 1px 0px #f5eed2,
-        2px 2px 4px rgba(44, 24, 16, 0.3);
+        2px 2px 0px #2e255c,
+        3px 3px 6px rgba(46, 37, 92, 0.8);
     }
     #playerContainer {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -186,27 +199,28 @@
       bottom: 20px;
       right: 20px;
       z-index: 10;
-      background: linear-gradient(145deg, #cd853f, #a0522d);
+      background: linear-gradient(145deg, #e94d8f, #d63384);
       padding: 15px 20px;
-      border: 3px solid #8b4513;
-      color: #fff8dc;
+      border: 3px solid #ff69b4;
+      color: white;
       border-radius: 15px;
       cursor: pointer;
       font-family: 'RocknRoll One', sans-serif;
       font-size: 0.9em;
-      text-shadow: 1px 1px 2px rgba(44, 24, 16, 0.5);
+      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
       box-shadow: 
-        0 4px 10px rgba(44, 24, 16, 0.3),
-        inset 0 1px 3px rgba(255, 248, 220, 0.3);
+        0 4px 15px rgba(46, 37, 92, 0.4),
+        inset 0 1px 3px rgba(255, 182, 193, 0.3);
       transition: all 0.3s ease;
     }
     
     #statsButton:hover {
-      background: linear-gradient(145deg, #daa520, #b8860b);
+      background: linear-gradient(145deg, #ff69b4, #e94d8f);
       transform: translateY(-2px);
       box-shadow: 
-        0 6px 15px rgba(44, 24, 16, 0.4),
-        inset 0 1px 3px rgba(255, 248, 220, 0.4);
+        0 6px 20px rgba(255, 105, 180, 0.5),
+        0 3px 10px rgba(46, 37, 92, 0.3),
+        inset 0 1px 3px rgba(255, 182, 193, 0.4);
     }
     #statsPage {
       display: none;
@@ -225,37 +239,44 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      background: linear-gradient(145deg, #cd853f, #a0522d);
-      color: #fff8dc;
-      border: 2px solid #8b4513;
+      background: linear-gradient(145deg, #e94d8f, #d63384);
+      color: white;
+      border: 2px solid #ff69b4;
       padding: 12px 16px;
       border-radius: 10px;
       cursor: pointer;
       font-family: 'RocknRoll One', sans-serif;
-      text-shadow: 1px 1px 2px rgba(44, 24, 16, 0.5);
-      box-shadow: 0 2px 5px rgba(44, 24, 16, 0.3);
+      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
+      box-shadow: 0 4px 10px rgba(46, 37, 92, 0.3);
       transition: all 0.3s ease;
     }
     
     #closeStats:hover {
-      background: linear-gradient(145deg, #daa520, #b8860b);
+      background: linear-gradient(145deg, #ff69b4, #e94d8f);
       transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(255, 105, 180, 0.4);
     }
     
-    /* Farm decorative elements */
-    .farm-decoration {
+    /* Cosmic/party decorative elements */
+    .cosmic-decoration {
       position: fixed;
       font-size: 2em;
-      opacity: 0.1;
+      opacity: 0.15;
       z-index: 0;
       pointer-events: none;
-      color: #8b4513;
+      color: #ff69b4;
+      animation: float 6s ease-in-out infinite;
     }
     
-    .farm-decoration:nth-child(1) { top: 10%; left: 5%; content: '🚜'; }
-    .farm-decoration:nth-child(2) { top: 20%; right: 8%; content: '🌾'; }
-    .farm-decoration:nth-child(3) { bottom: 15%; left: 10%; content: '🐄'; }
-    .farm-decoration:nth-child(4) { bottom: 25%; right: 15%; content: '🌻'; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .cosmic-decoration:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+    .cosmic-decoration:nth-child(2) { top: 20%; right: 8%; animation-delay: 1.5s; }
+    .cosmic-decoration:nth-child(3) { bottom: 15%; left: 10%; animation-delay: 3s; }
+    .cosmic-decoration:nth-child(4) { bottom: 25%; right: 15%; animation-delay: 4.5s; }
     
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -283,7 +304,7 @@
         font-size: 1.1em;
         padding: 0.8em 1.2em;
       }
-      .farm-decoration {
+      .cosmic-decoration {
         display: none;
       }
     }
@@ -315,11 +336,11 @@
   </style>
 </head>
 <body>
-  <!-- Farm decorative background elements -->
-  <div class="farm-decoration" style="top: 10%; left: 5%;">🚜</div>
-  <div class="farm-decoration" style="top: 20%; right: 8%;">🌾</div>
-  <div class="farm-decoration" style="bottom: 15%; left: 10%;">🐄</div>
-  <div class="farm-decoration" style="bottom: 25%; right: 15%;">🌻</div>
+  <!-- Cosmic/party decorative background elements -->
+  <div class="cosmic-decoration" style="top: 10%; left: 5%;">🎵</div>
+  <div class="cosmic-decoration" style="top: 20%; right: 8%;">⭐</div>
+  <div class="cosmic-decoration" style="bottom: 15%; left: 10%;">🎤</div>
+  <div class="cosmic-decoration" style="bottom: 25%; right: 15%;">🎶</div>
   
   <h1>Karaoke ab Hof 🎤</h1>
   <input type="text" id="search" placeholder="Lied suchen...">
