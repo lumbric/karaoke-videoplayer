@@ -485,7 +485,7 @@
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
         <div class="chart-container">
-          <h3>� Hidden Gems (Rare but Loved)</h3>
+          <h3>💎 Hidden Gems (Rare but Loved)</h3>
           <div id="hiddenGemsList" style="max-height: 300px; overflow-y: auto;"></div>
         </div>
         <div class="chart-container">
@@ -494,27 +494,21 @@
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-        <div class="chart-container">
-          <h3>�📅 Daily Activity (Last 7 Days)</h3>
-          <canvas id="activityChart" width="400" height="300"></canvas>
-        </div>
-        <div class="chart-container">
-          <h3>📊 Completion Rate Distribution</h3>
-          <canvas id="completionChart" width="400" height="300"></canvas>
-        </div>
+      <div class="chart-container" style="margin-bottom: 30px;">
+        <h3>📊 Completion Rate Distribution</h3>
+        <canvas id="completionChart" width="400" height="300"></canvas>
       </div>
 
       <!-- New Hourly Activity Chart -->
       <div class="chart-container" style="margin-bottom: 30px;">
-        <h3>🕐 Hourly Activity Distribution</h3>
+        <h3>� Activity Last 50 Hours (Completed vs Aborted)</h3>
         <canvas id="hourlyChart" width="800" height="400"></canvas>
       </div>
 
       <!-- Recent Activity -->
       <div class="chart-container">
         <h3>🕐 Recent Activity</h3>
-        <div id="recentActivity" style="max-height: 200px; overflow-y: auto;"></div>
+        <div id="recentActivity" style="max-height: 400px; overflow-y: auto;"></div>
       </div>
 
       <div style="text-align: center; margin-top: 30px;">
@@ -785,7 +779,6 @@
       // Render charts
       renderMostPlayedChart(stats.mostPlayedSongs);
       renderPlayTimeChart(stats.playTimeDistribution);
-      renderActivityChart(stats.dailyActivity);
       renderHourlyChart(stats.hourlyActivity);
       renderSkippedList(stats.skippedSongs);
       renderInstantSkipsList(stats.instantSkips);
@@ -798,7 +791,11 @@
     function calculateStatistics(logs) {
       const songStats = {};
       const dailyActivity = {};
-      const hourlyActivity = Array(24).fill(0); // Array for 24 hours
+      const hourlyActivity = {
+        completed: Array(50).fill(0),
+        aborted: Array(50).fill(0),
+        labels: []
+      };
       let totalPlayTime = 0;
       let completedSongs = 0;
 
@@ -831,9 +828,29 @@
         const date = new Date(log.timestamp).toDateString();
         dailyActivity[date] = (dailyActivity[date] || 0) + 1;
 
-        // Hourly activity
-        const hour = new Date(log.timestamp).getHours();
-        hourlyActivity[hour]++;
+      });
+
+      // Generate labels for last 50 hours
+      const now = new Date();
+      for (let i = 49; i >= 0; i--) {
+        const hourTime = new Date(now.getTime() - i * 60 * 60 * 1000);
+        const label = `${hourTime.getDate().toString().padStart(2, '0')}.${(hourTime.getMonth() + 1).toString().padStart(2, '0')} ${hourTime.getHours().toString().padStart(2, '0')}:00`;
+        hourlyActivity.labels.push(label);
+      }
+
+      // Count activities in last 50 hours
+      logs.forEach(log => {
+        const logTime = new Date(log.timestamp);
+        const hoursAgo = Math.floor((now - logTime) / (1000 * 60 * 60));
+        
+        if (hoursAgo >= 0 && hoursAgo < 50) {
+          const index = 49 - hoursAgo; // Reverse index (0 = 49 hours ago, 49 = current hour)
+          if (log.completed) {
+            hourlyActivity.completed[index]++;
+          } else {
+            hourlyActivity.aborted[index]++;
+          }
+        }
       });
 
       // Calculate average completion rates and detect restarts
@@ -1009,95 +1026,64 @@
       });
     }
 
-    function renderActivityChart(dailyActivity) {
-      const ctx = document.getElementById('activityChart').getContext('2d');
-      
-      if (window.activityChartInstance) window.activityChartInstance.destroy();
-
-      const last7Days = Object.entries(dailyActivity)
-        .slice(-7)
-        .map(([date, count]) => ({
-          date: new Date(date).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric' }),
-          count
-        }));
-
-      window.activityChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: last7Days.map(d => d.date),
-          datasets: [{
-            label: 'Songs Played',
-            data: last7Days.map(d => d.count),
-            borderColor: '#cd6391',
-            backgroundColor: 'rgba(205, 99, 145, 0.1)',
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            x: { 
-              ticks: { color: '#fff' },
-              grid: { color: 'rgba(255, 255, 255, 0.1)' }
-            },
-            y: { 
-              ticks: { color: '#fff' },
-              grid: { color: 'rgba(255, 255, 255, 0.1)' }
-            }
-          }
-        }
-      });
-    }
-
     function renderHourlyChart(hourlyActivity) {
       const ctx = document.getElementById('hourlyChart').getContext('2d');
       
       if (window.hourlyChartInstance) window.hourlyChartInstance.destroy();
 
-      const hourLabels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-
       window.hourlyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: hourLabels,
-          datasets: [{
-            label: 'Songs Played',
-            data: hourlyActivity,
-            backgroundColor: 'rgba(205, 99, 145, 0.8)',
-            borderColor: '#cd6391',
-            borderWidth: 1
-          }]
+          labels: hourlyActivity.labels,
+          datasets: [
+            {
+              label: 'Completed Songs',
+              data: hourlyActivity.completed,
+              backgroundColor: 'rgba(75, 192, 75, 0.8)',
+              borderColor: '#4bc04b',
+              borderWidth: 1
+            },
+            {
+              label: 'Aborted Songs',
+              data: hourlyActivity.aborted,
+              backgroundColor: 'rgba(255, 99, 99, 0.8)',
+              borderColor: '#ff6363',
+              borderWidth: 1
+            }
+          ]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: { display: false },
+            legend: { 
+              display: true,
+              labels: { color: '#fff' }
+            },
             tooltip: {
+              mode: 'index',
+              intersect: false,
               callbacks: {
                 title: function(tooltipItems) {
-                  const hour = tooltipItems[0].dataIndex;
-                  return `${hour.toString().padStart(2, '0')}:00 - ${((hour + 1) % 24).toString().padStart(2, '0')}:00`;
+                  return tooltipItems[0].label;
                 }
               }
             }
           },
           scales: {
             x: { 
+              stacked: true,
               ticks: { 
                 color: '#fff',
                 maxRotation: 45,
                 callback: function(value, index) {
-                  // Show every 4th hour label to avoid crowding
-                  return index % 4 === 0 ? this.getLabelForValue(value) : '';
+                  // Show every 6th label to avoid crowding (50 hours / 8 ≈ 6)
+                  return index % 6 === 0 ? this.getLabelForValue(value) : '';
                 }
               },
               grid: { color: 'rgba(255, 255, 255, 0.1)' }
             },
             y: { 
+              stacked: true,
               ticks: { color: '#fff' },
               grid: { color: 'rgba(255, 255, 255, 0.1)' },
               title: {
