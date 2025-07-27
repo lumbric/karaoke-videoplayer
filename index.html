@@ -136,6 +136,52 @@
         object-fit: contain;
         background: #000;
     }
+    
+    /* Hide video controls to prevent fast-forwarding */
+    video::-webkit-media-controls-timeline {
+      display: none !important;
+    }
+    
+    video::-moz-range-progress {
+      display: none !important;
+    }
+    
+    video::-moz-range-track {
+      display: none !important;
+    }
+    
+    /* Alternative: Completely hide all controls and add custom ones */
+    .video-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 1002;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .video-overlay.visible {
+      opacity: 1;
+    }
+    
+    .video-control-btn {
+      background: rgba(68, 70, 127, 0.9);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'RocknRoll One', sans-serif;
+      font-size: 0.9em;
+      backdrop-filter: blur(10px);
+    }
+    
+    .video-control-btn:hover {
+      background: rgba(205, 99, 145, 0.9);
+    }
 
     button {
       background: #44467f;
@@ -379,8 +425,14 @@
   <input type="text" id="search" placeholder="Lied suchen...">
   <div class="video-grid" id="videoList"></div>
   <div id="playerContainer">
-    <video id="videoPlayer" controls autoplay></video>
+    <video id="videoPlayer" autoplay></video>
     <button id="closeBtn" onclick="closePlayer()">← Zurück</button>
+    <div class="video-overlay" id="videoOverlay">
+      <button class="video-control-btn" onclick="togglePlayPause()">⏯️ Play/Pause</button>
+      <button class="video-control-btn" onclick="toggleMute()">🔊 Mute</button>
+      <button class="video-control-btn" onclick="adjustVolume(-0.1)">🔉 -</button>
+      <button class="video-control-btn" onclick="adjustVolume(0.1)">🔊 +</button>
+    </div>
   </div>
   <button id="statsButton">📊 Statistik</button>
   <div id="statsPage">
@@ -422,13 +474,41 @@
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
         <div class="chart-container">
-          <h3>⭐ Favorite Songs (>80% completion)</h3>
-          <div id="favoritesList" style="max-height: 300px; overflow-y: auto;"></div>
+          <h3>🚫 Most Skipped Songs (Low Completion)</h3>
+          <div id="skippedList" style="max-height: 300px; overflow-y: auto;"></div>
         </div>
         <div class="chart-container">
-          <h3>📅 Activity Over Time</h3>
+          <h3>⚡ Instant Skips (<30 seconds)</h3>
+          <div id="instantSkipsList" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="chart-container">
+          <h3>� Hidden Gems (Rare but Loved)</h3>
+          <div id="hiddenGemsList" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+        <div class="chart-container">
+          <h3>🔄 Retry Songs (Often Restarted)</h3>
+          <div id="retryList" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="chart-container">
+          <h3>�📅 Daily Activity (Last 7 Days)</h3>
           <canvas id="activityChart" width="400" height="300"></canvas>
         </div>
+        <div class="chart-container">
+          <h3>📊 Completion Rate Distribution</h3>
+          <canvas id="completionChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+
+      <!-- New Hourly Activity Chart -->
+      <div class="chart-container" style="margin-bottom: 30px;">
+        <h3>🕐 Hourly Activity Distribution</h3>
+        <canvas id="hourlyChart" width="800" height="400"></canvas>
       </div>
 
       <!-- Recent Activity -->
@@ -438,8 +518,7 @@
       </div>
 
       <div style="text-align: center; margin-top: 30px;">
-        <button onclick="exportStats()" style="margin-right: 10px;">📁 Export Data</button>
-        <button onclick="clearStats()" style="background: #d32f2f;">🗑️ Clear All Data</button>
+        <button onclick="exportStats()">📁 Export Data</button>
       </div>
     </div>
   </div>
@@ -596,20 +675,44 @@
     document.addEventListener("mousemove", () => {
       const container = document.getElementById("playerContainer");
       const btn = document.getElementById("closeBtn");
-
+      const overlay = document.getElementById("videoOverlay");
+      
       if (container.style.display === "flex") {
-        // Show cursor and button on mouse movement
+        // Show cursor, button, and controls on mouse movement
         container.classList.add("show-cursor");
         btn.classList.add("visible");
-
+        overlay.classList.add("visible");
+        
         // Hide again after 3 seconds of no movement
         clearTimeout(window.hideTimer);
         window.hideTimer = setTimeout(() => {
           container.classList.remove("show-cursor");
           btn.classList.remove("visible");
+          overlay.classList.remove("visible");
         }, 3000);
       }
     });
+
+    // Custom video control functions
+    function togglePlayPause() {
+      const player = document.getElementById("videoPlayer");
+      if (player.paused) {
+        player.play();
+      } else {
+        player.pause();
+      }
+    }
+
+    function toggleMute() {
+      const player = document.getElementById("videoPlayer");
+      player.muted = !player.muted;
+    }
+
+    function adjustVolume(change) {
+      const player = document.getElementById("videoPlayer");
+      const newVolume = Math.max(0, Math.min(1, player.volume + change));
+      player.volume = newVolume;
+    }
 
     // Keyboard shortcuts
     document.addEventListener("keydown", e => {
@@ -683,13 +786,19 @@
       renderMostPlayedChart(stats.mostPlayedSongs);
       renderPlayTimeChart(stats.playTimeDistribution);
       renderActivityChart(stats.dailyActivity);
-      renderFavoritesList(stats.favoriteSongs);
+      renderHourlyChart(stats.hourlyActivity);
+      renderSkippedList(stats.skippedSongs);
+      renderInstantSkipsList(stats.instantSkips);
+      renderHiddenGemsList(stats.hiddenGems);
+      renderRetryList(stats.retrySongs);
+      renderCompletionChart(stats.completionDistribution);
       renderRecentActivity(logs.slice(-10).reverse());
     }
 
     function calculateStatistics(logs) {
       const songStats = {};
       const dailyActivity = {};
+      const hourlyActivity = Array(24).fill(0); // Array for 24 hours
       let totalPlayTime = 0;
       let completedSongs = 0;
 
@@ -700,7 +809,9 @@
             totalPlayTime: 0,
             totalDuration: 0,
             completions: 0,
-            avgCompletion: 0
+            avgCompletion: 0,
+            instantSkips: 0, // <30 seconds
+            restarts: 0 // Multiple plays in short time
           };
         }
 
@@ -709,6 +820,9 @@
         song.totalPlayTime += log.playedSeconds || 0;
         if (log.totalDuration > 0) song.totalDuration = log.totalDuration;
         if (log.completed) song.completions++;
+        
+        // Count instant skips (<30 seconds)
+        if (log.playedSeconds < 30) song.instantSkips++;
 
         totalPlayTime += log.playedSeconds || 0;
         if (log.completed) completedSongs++;
@@ -716,12 +830,21 @@
         // Daily activity
         const date = new Date(log.timestamp).toDateString();
         dailyActivity[date] = (dailyActivity[date] || 0) + 1;
+
+        // Hourly activity
+        const hour = new Date(log.timestamp).getHours();
+        hourlyActivity[hour]++;
       });
 
-      // Calculate average completion rates
+      // Calculate average completion rates and detect restarts
       Object.keys(songStats).forEach(title => {
         const song = songStats[title];
         song.avgCompletion = song.playCount > 0 ? (song.completions / song.playCount) * 100 : 0;
+        
+        // Simple restart detection: high play count vs completion rate
+        if (song.playCount > 3 && song.avgCompletion < 50) {
+          song.restarts = song.playCount - song.completions;
+        }
       });
 
       // Get most played songs (top 10)
@@ -729,10 +852,28 @@
         .sort(([,a], [,b]) => b.playCount - a.playCount)
         .slice(0, 10);
 
-      // Get favorite songs (>80% completion rate, min 2 plays)
-      const favoriteSongs = Object.entries(songStats)
-        .filter(([,song]) => song.avgCompletion > 80 && song.playCount >= 2)
+      // Get most skipped songs (played multiple times but low completion rate)
+      const skippedSongs = Object.entries(songStats)
+        .filter(([,song]) => song.playCount >= 2 && song.avgCompletion < 40)
+        .sort(([,a], [,b]) => a.avgCompletion - b.avgCompletion)
+        .slice(0, 10);
+
+      // Get instant skip songs (most songs stopped within 30 seconds)
+      const instantSkips = Object.entries(songStats)
+        .filter(([,song]) => song.instantSkips >= 2)
+        .sort(([,a], [,b]) => b.instantSkips - a.instantSkips)
+        .slice(0, 10);
+
+      // Get hidden gems (rarely played but high completion when they are)
+      const hiddenGems = Object.entries(songStats)
+        .filter(([,song]) => song.playCount <= 3 && song.avgCompletion > 70 && song.playCount > 0)
         .sort(([,a], [,b]) => b.avgCompletion - a.avgCompletion)
+        .slice(0, 10);
+
+      // Get retry songs (often restarted)
+      const retrySongs = Object.entries(songStats)
+        .filter(([,song]) => song.restarts > 0)
+        .sort(([,a], [,b]) => b.restarts - a.restarts)
         .slice(0, 10);
 
       // Play time distribution
@@ -750,15 +891,37 @@
         else playTimeRanges['76-100%']++;
       });
 
+      // Completion rate distribution for all songs
+      const completionDistribution = {
+        'Very Low (0-20%)': 0,
+        'Low (21-40%)': 0,
+        'Medium (41-60%)': 0,
+        'High (61-80%)': 0,
+        'Very High (81-100%)': 0
+      };
+
+      Object.values(songStats).forEach(song => {
+        if (song.avgCompletion <= 20) completionDistribution['Very Low (0-20%)']++;
+        else if (song.avgCompletion <= 40) completionDistribution['Low (21-40%)']++;
+        else if (song.avgCompletion <= 60) completionDistribution['Medium (41-60%)']++;
+        else if (song.avgCompletion <= 80) completionDistribution['High (61-80%)']++;
+        else completionDistribution['Very High (81-100%)']++;
+      });
+
       return {
         totalSongs: Object.keys(songStats).length,
         totalPlayTime: Math.round(totalPlayTime / 60),
         mostPlayedSong: mostPlayedSongs[0] ? mostPlayedSongs[0][0] : '-',
         completionRate: Math.round((completedSongs / logs.length) * 100),
         mostPlayedSongs,
-        favoriteSongs,
+        skippedSongs,
+        instantSkips,
+        hiddenGems,
+        retrySongs,
         playTimeDistribution: playTimeRanges,
-        dailyActivity
+        completionDistribution,
+        dailyActivity,
+        hourlyActivity
       };
     }
 
@@ -890,20 +1053,163 @@
       });
     }
 
-    function renderFavoritesList(favoriteSongs) {
-      const container = document.getElementById('favoritesList');
+    function renderHourlyChart(hourlyActivity) {
+      const ctx = document.getElementById('hourlyChart').getContext('2d');
       
-      if (favoriteSongs.length === 0) {
-        container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 2em;">No favorites yet. Complete more songs!</div>';
+      if (window.hourlyChartInstance) window.hourlyChartInstance.destroy();
+
+      const hourLabels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+
+      window.hourlyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: hourLabels,
+          datasets: [{
+            label: 'Songs Played',
+            data: hourlyActivity,
+            backgroundColor: 'rgba(205, 99, 145, 0.8)',
+            borderColor: '#cd6391',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: function(tooltipItems) {
+                  const hour = tooltipItems[0].dataIndex;
+                  return `${hour.toString().padStart(2, '0')}:00 - ${((hour + 1) % 24).toString().padStart(2, '0')}:00`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { 
+              ticks: { 
+                color: '#fff',
+                maxRotation: 45,
+                callback: function(value, index) {
+                  // Show every 4th hour label to avoid crowding
+                  return index % 4 === 0 ? this.getLabelForValue(value) : '';
+                }
+              },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            y: { 
+              ticks: { color: '#fff' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+              title: {
+                display: true,
+                text: 'Number of Songs',
+                color: '#fff'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderSkippedList(skippedSongs) {
+      const container = document.getElementById('skippedList');
+      
+      if (skippedSongs.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 2em;">No skipped songs yet.<br>Songs appear here when played multiple times but rarely completed.</div>';
         return;
       }
 
-      container.innerHTML = favoriteSongs.map(([title, song]) => `
+      container.innerHTML = skippedSongs.map(([title, song]) => `
         <div class="favorite-item">
           <div class="song-title">${title}</div>
-          <div class="completion">${Math.round(song.avgCompletion)}% • ${song.playCount} plays</div>
+          <div class="completion" style="color: #ff6b6b;">${Math.round(song.avgCompletion)}% completion • ${song.playCount} attempts</div>
         </div>
       `).join('');
+    }
+
+    function renderInstantSkipsList(instantSkips) {
+      const container = document.getElementById('instantSkipsList');
+      
+      if (instantSkips.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 2em;">No instant skips detected.<br>Songs appear here when stopped within 30 seconds multiple times.</div>';
+        return;
+      }
+
+      container.innerHTML = instantSkips.map(([title, song]) => `
+        <div class="favorite-item">
+          <div class="song-title">${title}</div>
+          <div class="completion" style="color: #ff9800;">${song.instantSkips} instant skips • ${song.playCount} total plays</div>
+        </div>
+      `).join('');
+    }
+
+    function renderHiddenGemsList(hiddenGems) {
+      const container = document.getElementById('hiddenGemsList');
+      
+      if (hiddenGems.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 2em;">No hidden gems found.<br>Songs appear here when rarely played but highly completed.</div>';
+        return;
+      }
+
+      container.innerHTML = hiddenGems.map(([title, song]) => `
+        <div class="favorite-item">
+          <div class="song-title">${title}</div>
+          <div class="completion" style="color: #4caf50;">${Math.round(song.avgCompletion)}% completion • Only ${song.playCount} plays</div>
+        </div>
+      `).join('');
+    }
+
+    function renderRetryList(retrySongs) {
+      const container = document.getElementById('retryList');
+      
+      if (retrySongs.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 2em;">No retry patterns detected.<br>Songs appear here when frequently restarted.</div>';
+        return;
+      }
+
+      container.innerHTML = retrySongs.map(([title, song]) => `
+        <div class="favorite-item">
+          <div class="song-title">${title}</div>
+          <div class="completion" style="color: #ff9800;">${song.restarts} restarts • ${song.playCount} total plays</div>
+        </div>
+      `).join('');
+    }
+
+    function renderCompletionChart(completionDistribution) {
+      const ctx = document.getElementById('completionChart').getContext('2d');
+      
+      if (window.completionChartInstance) window.completionChartInstance.destroy();
+
+      window.completionChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(completionDistribution),
+          datasets: [{
+            data: Object.values(completionDistribution),
+            backgroundColor: [
+              'rgba(244, 67, 54, 0.8)',
+              'rgba(255, 152, 0, 0.8)',
+              'rgba(255, 235, 59, 0.8)',
+              'rgba(139, 195, 74, 0.8)',
+              'rgba(76, 175, 80, 0.8)'
+            ],
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { 
+              position: 'bottom',
+              labels: { 
+                color: '#fff',
+                font: { size: 10 }
+              }
+            }
+          }
+        }
+      });
     }
 
     function renderRecentActivity(recentLogs) {
@@ -920,15 +1226,6 @@
           <div class="time">${new Date(log.timestamp).toLocaleString('de-DE')} • ${log.playPercentage}%</div>
         </div>
       `).join('');
-    }
-
-    function clearStats() {
-      if (confirm('Are you sure you want to clear all statistics? This cannot be undone.')) {
-        localStorage.removeItem('playedLog');
-        playedLog = [];
-        renderChart();
-        alert('Statistics cleared successfully!');
-      }
     }
 
     // Initialize the application
