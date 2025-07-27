@@ -11,7 +11,7 @@
     body {
       margin: 0;
       font-family: 'RocknRoll One', sans-serif;
-      background: #2f2b5e;
+      background: #332e5d;
       min-height: 100vh;
       color: white;
       overflow-x: hidden;
@@ -30,6 +30,7 @@
       letter-spacing: 2px;
     }
 
+    /*
     h1::before,
     h1::after {
       content: '✨';
@@ -38,6 +39,7 @@
       margin: 0 20px;
       text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.3);
     }
+    */
 
     #search {
       margin: 1.5em auto 2em auto;
@@ -51,7 +53,7 @@
       background: white;
       color: #4E4E4E;
       text-align: center;
-      transition: all 0.3s ease;
+      transition: all 0.1s ease;
       outline: none;
       position: relative;
       z-index: 1;
@@ -210,9 +212,16 @@
     .cosmic-decoration:nth-child(3) { bottom: 15%; left: 10%; }
     .cosmic-decoration:nth-child(4) { bottom: 25%; right: 15%; }
 
+    .header-box {
+        position: relative;
+        width:1000px;
+        margin:auto;
+    }
+
     .singing-chicken {
         position: absolute;
-        left: -200px;
+        left: -90px;
+        top:-10px;
         width: 220px;
     }
 
@@ -280,7 +289,7 @@
   <div class="cosmic-decoration" style="bottom: 15%; left: 10%;">🎤</div>
   <div class="cosmic-decoration" style="bottom: 25%; right: 15%;">🎶</div>
 
-  <div class="title-box">
+  <div class="header-box">
     <h1>Karaoke ab Hof 🎤</h1>
     <img src="images/singing-chicken_manual.png" class="singing-chicken">
   </div>
