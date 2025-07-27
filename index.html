@@ -184,11 +184,70 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: #1e1e1e;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       z-index: 2000;
       padding: 20px;
       box-sizing: border-box;
       overflow-y: auto;
+    }
+
+    .stat-card {
+      background: linear-gradient(145deg, #cd6391 0%, #b8578a 100%);
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(205, 99, 145, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 1em;
+      color: white;
+      opacity: 0.9;
+    }
+
+    .stat-number {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .chart-container {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .chart-container h3 {
+      margin: 0 0 15px 0;
+      color: #cd6391;
+      font-size: 1.2em;
+      text-align: center;
+    }
+
+    .favorite-item, .activity-item {
+      background: rgba(205, 99, 145, 0.2);
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #cd6391;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .favorite-item .song-title, .activity-item .song-title {
+      font-weight: bold;
+      color: white;
+    }
+
+    .favorite-item .completion, .activity-item .time {
+      color: #cd6391;
+      font-size: 0.9em;
     }
 
     #closeStats {
@@ -270,6 +329,14 @@
       .cosmic-decoration {
         display: none;
       }
+      
+      /* Statistics responsive */
+      #statsPage div[style*="grid-template-columns: 1fr 1fr"] {
+        display: block !important;
+      }
+      .chart-container {
+        margin-bottom: 20px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -318,9 +385,63 @@
   <button id="statsButton">📊 Statistik</button>
   <div id="statsPage">
     <button id="closeStats">✕</button>
-    <h2>Statistik</h2>
-    <canvas id="chart" width="800" height="400"></canvas>
-    <p><button onclick="exportStats()">Statistik exportieren</button></p>
+    <div style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+      <h2 style="color: #cd6391; text-align: center; margin-bottom: 30px; font-size: 2.5em;">📊 Karaoke Statistiken</h2>
+      
+      <!-- Statistics Summary Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+        <div class="stat-card">
+          <h3>🎵 Total Songs</h3>
+          <div class="stat-number" id="totalSongs">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>⏱️ Total Play Time</h3>
+          <div class="stat-number" id="totalPlayTime">0min</div>
+        </div>
+        <div class="stat-card">
+          <h3>🏆 Most Played</h3>
+          <div class="stat-number" id="mostPlayed">-</div>
+        </div>
+        <div class="stat-card">
+          <h3>📈 Completion Rate</h3>
+          <div class="stat-number" id="completionRate">0%</div>
+        </div>
+      </div>
+
+      <!-- Charts Container -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="chart-container">
+          <h3>🎤 Most Played Songs (Top 10)</h3>
+          <canvas id="mostPlayedChart" width="400" height="300"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>🕒 Play Time Distribution</h3>
+          <canvas id="playTimeChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div class="chart-container">
+          <h3>⭐ Favorite Songs (>80% completion)</h3>
+          <div id="favoritesList" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+        <div class="chart-container">
+          <h3>📅 Activity Over Time</h3>
+          <canvas id="activityChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="chart-container">
+        <h3>🕐 Recent Activity</h3>
+        <div id="recentActivity" style="max-height: 200px; overflow-y: auto;"></div>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px;">
+        <button onclick="exportStats()" style="margin-right: 10px;">📁 Export Data</button>
+        <button onclick="clearStats()" style="background: #d32f2f;">🗑️ Clear All Data</button>
+      </div>
+    </div>
   </div>
   <script>
     let allVideos = [];
@@ -411,19 +532,32 @@
       btn.classList.remove("visible");
 
       const startTime = Date.now();
+      let playStartTime = 0;
+      let totalDuration = 0;
       let ended = false;
+
+      // Get video duration when metadata loads
+      player.onloadedmetadata = () => {
+        totalDuration = player.duration;
+        playStartTime = player.currentTime;
+      };
 
       player.onended = () => {
         ended = true;
-        logPlay(video.title, startTime, Date.now(), true);
+        const playedSeconds = player.currentTime - playStartTime;
+        logPlay(video.title, startTime, playedSeconds, totalDuration, true);
         closePlayer();
       };
 
       player.onpause = () => {
-        if (!ended) logPlay(video.title, startTime, Date.now(), false);
+        if (!ended) {
+          const playedSeconds = player.currentTime - playStartTime;
+          logPlay(video.title, startTime, playedSeconds, totalDuration, false);
+        }
       };
 
-      logPlay(video.title, startTime, null, false);
+      // Initial log entry
+      logPlay(video.title, startTime, 0, 0, false);
     }
 
     function closePlayer() {
@@ -440,8 +574,15 @@
       btn.classList.remove("visible");
     }
 
-    function logPlay(title, start, end, completed) {
-      playedLog.push({ title, start, end, completed });
+    function logPlay(title, timestamp, playedSeconds, totalDuration, completed) {
+      playedLog.push({ 
+        title, 
+        timestamp, 
+        playedSeconds: Math.round(playedSeconds), 
+        totalDuration: Math.round(totalDuration), 
+        completed,
+        playPercentage: totalDuration > 0 ? Math.round((playedSeconds / totalDuration) * 100) : 0
+      });
       localStorage.setItem("playedLog", JSON.stringify(playedLog));
     }
 
@@ -523,45 +664,271 @@
 
     function renderChart() {
       const logs = JSON.parse(localStorage.getItem("playedLog") || "[]");
-      const count = {};
-      logs.forEach(l => count[l.title] = (count[l.title] || 0) + 1);
-
-      const labels = Object.keys(count);
-      const data = Object.values(count);
-      const ctx = document.getElementById('chart').getContext('2d');
-
-      if (chartInstance) chartInstance.destroy();
-
-      if (labels.length === 0) {
-        ctx.fillStyle = '#fff';
-        ctx.font = '16px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Noch keine Statistiken verfügbar', ctx.canvas.width / 2, ctx.canvas.height / 2);
+      
+      if (logs.length === 0) {
+        document.getElementById('totalSongs').textContent = '0';
+        document.getElementById('totalPlayTime').textContent = '0min';
+        document.getElementById('mostPlayed').textContent = '-';
+        document.getElementById('completionRate').textContent = '0%';
         return;
       }
 
-      chartInstance = new Chart(ctx, {
+      // Calculate statistics
+      const stats = calculateStatistics(logs);
+      
+      // Update summary cards
+      updateSummaryCards(stats);
+      
+      // Render charts
+      renderMostPlayedChart(stats.mostPlayedSongs);
+      renderPlayTimeChart(stats.playTimeDistribution);
+      renderActivityChart(stats.dailyActivity);
+      renderFavoritesList(stats.favoriteSongs);
+      renderRecentActivity(logs.slice(-10).reverse());
+    }
+
+    function calculateStatistics(logs) {
+      const songStats = {};
+      const dailyActivity = {};
+      let totalPlayTime = 0;
+      let completedSongs = 0;
+
+      logs.forEach(log => {
+        if (!songStats[log.title]) {
+          songStats[log.title] = {
+            playCount: 0,
+            totalPlayTime: 0,
+            totalDuration: 0,
+            completions: 0,
+            avgCompletion: 0
+          };
+        }
+
+        const song = songStats[log.title];
+        song.playCount++;
+        song.totalPlayTime += log.playedSeconds || 0;
+        if (log.totalDuration > 0) song.totalDuration = log.totalDuration;
+        if (log.completed) song.completions++;
+
+        totalPlayTime += log.playedSeconds || 0;
+        if (log.completed) completedSongs++;
+
+        // Daily activity
+        const date = new Date(log.timestamp).toDateString();
+        dailyActivity[date] = (dailyActivity[date] || 0) + 1;
+      });
+
+      // Calculate average completion rates
+      Object.keys(songStats).forEach(title => {
+        const song = songStats[title];
+        song.avgCompletion = song.playCount > 0 ? (song.completions / song.playCount) * 100 : 0;
+      });
+
+      // Get most played songs (top 10)
+      const mostPlayedSongs = Object.entries(songStats)
+        .sort(([,a], [,b]) => b.playCount - a.playCount)
+        .slice(0, 10);
+
+      // Get favorite songs (>80% completion rate, min 2 plays)
+      const favoriteSongs = Object.entries(songStats)
+        .filter(([,song]) => song.avgCompletion > 80 && song.playCount >= 2)
+        .sort(([,a], [,b]) => b.avgCompletion - a.avgCompletion)
+        .slice(0, 10);
+
+      // Play time distribution
+      const playTimeRanges = {
+        '0-25%': 0,
+        '26-50%': 0,
+        '51-75%': 0,
+        '76-100%': 0
+      };
+
+      logs.forEach(log => {
+        if (log.playPercentage <= 25) playTimeRanges['0-25%']++;
+        else if (log.playPercentage <= 50) playTimeRanges['26-50%']++;
+        else if (log.playPercentage <= 75) playTimeRanges['51-75%']++;
+        else playTimeRanges['76-100%']++;
+      });
+
+      return {
+        totalSongs: Object.keys(songStats).length,
+        totalPlayTime: Math.round(totalPlayTime / 60),
+        mostPlayedSong: mostPlayedSongs[0] ? mostPlayedSongs[0][0] : '-',
+        completionRate: Math.round((completedSongs / logs.length) * 100),
+        mostPlayedSongs,
+        favoriteSongs,
+        playTimeDistribution: playTimeRanges,
+        dailyActivity
+      };
+    }
+
+    function updateSummaryCards(stats) {
+      document.getElementById('totalSongs').textContent = stats.totalSongs;
+      document.getElementById('totalPlayTime').textContent = `${stats.totalPlayTime}min`;
+      document.getElementById('mostPlayed').textContent = stats.mostPlayedSong;
+      document.getElementById('completionRate').textContent = `${stats.completionRate}%`;
+    }
+
+    function renderMostPlayedChart(mostPlayedSongs) {
+      const ctx = document.getElementById('mostPlayedChart').getContext('2d');
+      
+      if (window.mostPlayedChartInstance) window.mostPlayedChartInstance.destroy();
+      
+      if (mostPlayedSongs.length === 0) {
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        return;
+      }
+
+      window.mostPlayedChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: labels,
+          labels: mostPlayedSongs.map(([title]) => title.length > 20 ? title.substring(0, 20) + '...' : title),
           datasets: [{
-            label: 'Wiedergaben',
-            data: data,
-            backgroundColor: '#e94d8f'
+            label: 'Play Count',
+            data: mostPlayedSongs.map(([, song]) => song.playCount),
+            backgroundColor: 'rgba(205, 99, 145, 0.8)',
+            borderColor: '#cd6391',
+            borderWidth: 1
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
+            legend: { display: false }
           },
           scales: {
-            x: { ticks: { color: '#fff' } },
-            y: { ticks: { color: '#fff' } }
+            x: { 
+              ticks: { color: '#fff', maxRotation: 45 },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            y: { 
+              ticks: { color: '#fff' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            }
           }
         }
       });
+    }
+
+    function renderPlayTimeChart(playTimeDistribution) {
+      const ctx = document.getElementById('playTimeChart').getContext('2d');
+      
+      if (window.playTimeChartInstance) window.playTimeChartInstance.destroy();
+
+      window.playTimeChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(playTimeDistribution),
+          datasets: [{
+            data: Object.values(playTimeDistribution),
+            backgroundColor: [
+              'rgba(244, 67, 54, 0.8)',
+              'rgba(255, 152, 0, 0.8)',
+              'rgba(255, 235, 59, 0.8)',
+              'rgba(76, 175, 80, 0.8)'
+            ],
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { 
+              position: 'bottom',
+              labels: { color: '#fff' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderActivityChart(dailyActivity) {
+      const ctx = document.getElementById('activityChart').getContext('2d');
+      
+      if (window.activityChartInstance) window.activityChartInstance.destroy();
+
+      const last7Days = Object.entries(dailyActivity)
+        .slice(-7)
+        .map(([date, count]) => ({
+          date: new Date(date).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric' }),
+          count
+        }));
+
+      window.activityChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: last7Days.map(d => d.date),
+          datasets: [{
+            label: 'Songs Played',
+            data: last7Days.map(d => d.count),
+            borderColor: '#cd6391',
+            backgroundColor: 'rgba(205, 99, 145, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: { 
+              ticks: { color: '#fff' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            y: { 
+              ticks: { color: '#fff' },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderFavoritesList(favoriteSongs) {
+      const container = document.getElementById('favoritesList');
+      
+      if (favoriteSongs.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 2em;">No favorites yet. Complete more songs!</div>';
+        return;
+      }
+
+      container.innerHTML = favoriteSongs.map(([title, song]) => `
+        <div class="favorite-item">
+          <div class="song-title">${title}</div>
+          <div class="completion">${Math.round(song.avgCompletion)}% • ${song.playCount} plays</div>
+        </div>
+      `).join('');
+    }
+
+    function renderRecentActivity(recentLogs) {
+      const container = document.getElementById('recentActivity');
+      
+      if (recentLogs.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 1em;">No recent activity</div>';
+        return;
+      }
+
+      container.innerHTML = recentLogs.map(log => `
+        <div class="activity-item">
+          <div class="song-title">${log.title}</div>
+          <div class="time">${new Date(log.timestamp).toLocaleString('de-DE')} • ${log.playPercentage}%</div>
+        </div>
+      `).join('');
+    }
+
+    function clearStats() {
+      if (confirm('Are you sure you want to clear all statistics? This cannot be undone.')) {
+        localStorage.removeItem('playedLog');
+        playedLog = [];
+        renderChart();
+        alert('Statistics cleared successfully!');
+      }
     }
 
     // Initialize the application
