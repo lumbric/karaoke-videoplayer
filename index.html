@@ -11,45 +11,25 @@
     body {
       margin: 0;
       font-family: 'RocknRoll One', sans-serif;
-      background: linear-gradient(135deg, #2e255c 0%, #4a3d7a 25%, #6b5b95 50%, #8e7db8 75%, #b19cd9 100%);
+      background: #2f2b5e;
       min-height: 100vh;
       color: white;
       overflow-x: hidden;
       line-height: 1.4;
       position: relative;
     }
-    
-    /* Static poster-inspired overlay without animations */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 15% 25%, rgba(233, 77, 143, 0.08) 0%, transparent 30%),
-        radial-gradient(circle at 85% 75%, rgba(255, 105, 180, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.03) 0%, transparent 60%);
-      background-size: 400px 400px, 600px 600px, 800px 800px;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
-    }
-    h1 { 
-      text-align: center; 
-      margin: 1em 0 0.5em 0; 
-      font-size: 3em;
-      color: black;
-      text-shadow: 
-        3px 3px 0px #e94d8f,
-        6px 6px 10px rgba(233, 77, 143, 0.6);
+
+    h1 {
+      text-align: center;
+      margin: 1em 0 0.5em 0;
+      font-size: 4em;
+      color: #cd6391;
+      font-weight: bolder;
       position: relative;
       z-index: 1;
       letter-spacing: 2px;
     }
-    
-    /* Static decorative elements around title (no animations) */
+
     h1::before,
     h1::after {
       content: '✨';
@@ -58,175 +38,143 @@
       margin: 0 20px;
       text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.3);
     }
-    #search { 
-      margin: 1.5em auto 2em auto; 
-      display: block; 
-      padding: 1em 1.5em; 
-      width: min(600px, 80%); 
+
+    #search {
+      margin: 1.5em auto 2em auto;
+      display: block;
+      padding: 1em 1.5em;
+      width: min(600px, 80%);
       font-size: 1.2em;
       font-family: 'RocknRoll One', sans-serif;
-      border: 3px solid #e94d8f;
+      border: 0px;
       border-radius: 25px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(233,77,143,0.05));
-      color: white;
+      background: white;
+      color: #4E4E4E;
       text-align: center;
       transition: all 0.3s ease;
       outline: none;
-      box-shadow: 
-        0 4px 15px rgba(46, 37, 92, 0.3),
-        inset 0 2px 5px rgba(255, 105, 180, 0.1);
       position: relative;
       z-index: 1;
     }
     #search:focus {
-      background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(233,77,143,0.1));
-      box-shadow: 
-        0 0 25px rgba(255, 105, 180, 0.6),
-        0 6px 20px rgba(46, 37, 92, 0.4),
-        inset 0 2px 5px rgba(255, 105, 180, 0.2);
-      transform: scale(1.02);
-      border-color: #ff69b4;
+      transform: scale(1.06);
     }
     #search::placeholder {
-      color: rgba(255, 255, 255, 0.7);
       text-align: center;
+      color: #a791b5;
     }
     .search-info {
       display: none;
     }
-    .video-grid { 
-      display: flex; 
-      flex-wrap: wrap; 
-      justify-content: center; 
-      gap: 25px; 
-      padding: 20px 40px; 
+
+    .video-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 25px;
+      padding: 20px 40px;
       max-width: 1400px;
       margin: 0 auto;
     }
-    .card { 
-      background: linear-gradient(145deg, #e94d8f 0%, #d63384 50%, #c72c78 100%);
-      border: 3px solid #ff69b4;
-      border-radius: 15px; 
-      padding: 15px; 
-      width: 250px; 
-      cursor: pointer; 
-      transition: all 0.3s ease;
-      box-shadow: 
-        0 6px 20px rgba(46, 37, 92, 0.4),
-        inset 0 1px 3px rgba(255, 182, 193, 0.3);
+
+    .card {
+      background: #cd6391;
+      border: 0px;
+      border-radius: 15px;
+      padding: 15px;
+      width: 250px;
+      cursor: pointer;
+      transition: all 0.2s ease;
       position: relative;
       z-index: 1;
     }
-    
-    /* Glowing cosmic frame effect */
-    .card::before {
-      content: '';
-      position: absolute;
-      top: -3px;
-      left: -3px;
-      right: -3px;
-      bottom: -3px;
-      background: linear-gradient(45deg, #ff1493, #ff69b4, #da70d6, #ba55d3);
-      border-radius: 18px;
-      z-index: -1;
-      opacity: 0.7;
+
+
+    .card:hover {
+      transform: scale(1.08) translateY(0px);
     }
-    
-    .card:hover { 
-      transform: scale(1.05) translateY(-8px); 
-      box-shadow: 
-        0 15px 35px rgba(255, 105, 180, 0.5),
-        0 5px 15px rgba(46, 37, 92, 0.3),
-        inset 0 1px 3px rgba(255, 182, 193, 0.4);
-      background: linear-gradient(145deg, #ff69b4 0%, #e94d8f 50%, #da70d6 100%);
+
+    .card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 15px;
+      border: 0px;
     }
-    
-    .card img { 
-      width: 100%; 
-      height: 250px; 
-      object-fit: cover; 
-      border-radius: 12px;
-      box-shadow: 
-        0 4px 15px rgba(46, 37, 92, 0.4),
-        inset 0 0 10px rgba(255, 105, 180, 0.1);
-      border: 2px solid #ff1493;
-    }
-    
-    .title { 
-      margin-top: 1em; 
-      font-weight: bold; 
+
+    .title {
+      margin-top: 1em;
+      font-weight: bold;
       font-size: 1.1em;
       text-align: center;
       color: white;
-      text-shadow: 
-        2px 2px 0px #2e255c,
-        3px 3px 6px rgba(46, 37, 92, 0.8);
     }
+
     #playerContainer {
-      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background-color: #000; justify-content: center; align-items: center; z-index: 1000;
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
       cursor: none;
     }
+
     #playerContainer.show-cursor {
       cursor: default;
     }
-    video { width: 100vw; height: 100vh; object-fit: contain; background: #000; }
-    #closeBtn {
-      position: absolute; top: 20px; left: 20px;
-      background: linear-gradient(145deg, #e94d8f, #d63384);
+
+    video {
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+        background: #000;
+    }
+
+    button {
+      background: #44467f;
       color: white;
-      border: 3px solid #ff69b4;
+      font-family: 'RocknRoll One', sans-serif;
+      padding: 15px 20px;
+      border: 0px;
+      color: white;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+        background: #cd6391;
+    }
+
+    #closeBtn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
       padding: 12px 16px;
       font-size: 1.2em;
-      border-radius: 12px;
-      cursor: pointer;
       display: none;
       z-index: 1001;
       opacity: 0;
       transition: opacity 0.3s ease;
-      font-family: 'RocknRoll One', sans-serif;
-      box-shadow: 
-        0 4px 15px rgba(46, 37, 92, 0.4),
-        inset 0 1px 3px rgba(255, 182, 193, 0.3);
-      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
     }
+
     #closeBtn.visible {
       opacity: 1;
     }
-    #closeBtn:hover {
-      background: linear-gradient(145deg, #ff69b4, #e94d8f);
-      box-shadow: 
-        0 6px 20px rgba(255, 105, 180, 0.5),
-        inset 0 1px 3px rgba(255, 182, 193, 0.4);
-    }
+
     #statsButton {
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 10;
-      background: linear-gradient(145deg, #e94d8f, #d63384);
-      padding: 15px 20px;
-      border: 3px solid #ff69b4;
-      color: white;
-      border-radius: 15px;
-      cursor: pointer;
-      font-family: 'RocknRoll One', sans-serif;
-      font-size: 0.9em;
-      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
-      box-shadow: 
-        0 4px 15px rgba(46, 37, 92, 0.4),
-        inset 0 1px 3px rgba(255, 182, 193, 0.3);
-      transition: all 0.3s ease;
     }
-    
-    #statsButton:hover {
-      background: linear-gradient(145deg, #ff69b4, #e94d8f);
-      transform: translateY(-2px);
-      box-shadow: 
-        0 6px 20px rgba(255, 105, 180, 0.5),
-        0 3px 10px rgba(46, 37, 92, 0.3),
-        inset 0 1px 3px rgba(255, 182, 193, 0.4);
-    }
+
     #statsPage {
       display: none;
       position: fixed;
@@ -240,28 +188,13 @@
       box-sizing: border-box;
       overflow-y: auto;
     }
+
     #closeStats {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: linear-gradient(145deg, #e94d8f, #d63384);
-      color: white;
-      border: 2px solid #ff69b4;
-      padding: 12px 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-family: 'RocknRoll One', sans-serif;
-      text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.8);
-      box-shadow: 0 4px 10px rgba(46, 37, 92, 0.3);
-      transition: all 0.3s ease;
     }
-    
-    #closeStats:hover {
-      background: linear-gradient(145deg, #ff69b4, #e94d8f);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(255, 105, 180, 0.4);
-    }
-    
+
     /* Static cosmic/party decorative elements (no animations) */
     .cosmic-decoration {
       position: fixed;
@@ -271,12 +204,18 @@
       pointer-events: none;
       color: #ff69b4;
     }
-    
+
     .cosmic-decoration:nth-child(1) { top: 10%; left: 5%; }
     .cosmic-decoration:nth-child(2) { top: 20%; right: 8%; }
     .cosmic-decoration:nth-child(3) { bottom: 15%; left: 10%; }
     .cosmic-decoration:nth-child(4) { bottom: 25%; right: 15%; }
-    
+
+    .singing-chicken {
+        position: absolute;
+        left: -200px;
+        width: 220px;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .video-grid {
@@ -307,7 +246,7 @@
         display: none;
       }
     }
-    
+
     @media (max-width: 480px) {
       .video-grid {
         padding: 15px 15px;
@@ -340,8 +279,11 @@
   <div class="cosmic-decoration" style="top: 20%; right: 8%;">⭐</div>
   <div class="cosmic-decoration" style="bottom: 15%; left: 10%;">🎤</div>
   <div class="cosmic-decoration" style="bottom: 25%; right: 15%;">🎶</div>
-  
-  <h1>Karaoke ab Hof 🎤</h1>
+
+  <div class="title-box">
+    <h1>Karaoke ab Hof 🎤</h1>
+    <img src="images/singing-chicken_manual.png" class="singing-chicken">
+  </div>
   <input type="text" id="search" placeholder="Lied suchen...">
   <div class="video-grid" id="videoList"></div>
   <div id="playerContainer">
@@ -359,7 +301,7 @@
     let allVideos = [];
     let playedLog = JSON.parse(localStorage.getItem("playedLog") || "[]");
     let chartInstance = null;
-    
+
     // Configuration for video display and search
     const CONFIG = {
       MAX_DISPLAY_COUNT: 50       // Maximum number of videos to display (both start page and search results)
@@ -391,12 +333,12 @@
     function renderCards(videos) {
       const container = document.getElementById("videoList");
       container.innerHTML = "";
-      
+
       if (videos.length === 0) {
         container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 2em;">Keine Videos gefunden</div>';
         return;
       }
-      
+
       videos.forEach(v => {
         const div = document.createElement("div");
         div.className = "card";
@@ -416,7 +358,7 @@
       }
 
       // Filter videos based on search query (search starts immediately with any character)
-      const filteredVideos = allVideos.filter(v => 
+      const filteredVideos = allVideos.filter(v =>
         v.title.toLowerCase().includes(query.toLowerCase())
       );
 
@@ -438,7 +380,7 @@
       player.src = video.file;
       container.style.display = "flex";
       btn.style.display = "block";
-      
+
       // Hide cursor and button initially
       container.classList.remove("show-cursor");
       btn.classList.remove("visible");
@@ -463,11 +405,11 @@
       const player = document.getElementById("videoPlayer");
       const container = document.getElementById("playerContainer");
       const btn = document.getElementById("closeBtn");
-      
+
       player.pause();
       player.src = "";
       container.style.display = "none";
-      
+
       // Reset cursor and button state
       container.classList.remove("show-cursor");
       btn.classList.remove("visible");
@@ -488,12 +430,12 @@
     document.addEventListener("mousemove", () => {
       const container = document.getElementById("playerContainer");
       const btn = document.getElementById("closeBtn");
-      
+
       if (container.style.display === "flex") {
         // Show cursor and button on mouse movement
         container.classList.add("show-cursor");
         btn.classList.add("visible");
-        
+
         // Hide again after 3 seconds of no movement
         clearTimeout(window.hideTimer);
         window.hideTimer = setTimeout(() => {
@@ -508,7 +450,7 @@
       const playerContainer = document.getElementById("playerContainer");
       const statsPage = document.getElementById("statsPage");
       const searchField = document.getElementById("search");
-      
+
       if (e.key === "Escape") {
         // If video is playing, close it
         if (playerContainer.style.display === "flex") {
@@ -564,7 +506,7 @@
       const ctx = document.getElementById('chart').getContext('2d');
 
       if (chartInstance) chartInstance.destroy();
-      
+
       if (labels.length === 0) {
         ctx.fillStyle = '#fff';
         ctx.font = '16px sans-serif';
