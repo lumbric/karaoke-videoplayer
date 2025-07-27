@@ -219,13 +219,29 @@
     }
 
     .singing-chicken {
-        position: absolute;
-        left: -90px;
-        top:-10px;
-        width: 220px;
+        position: fixed;
+        left: 20px;
+        top: 10px;
+        width: 400px;
     }
 
     /* Responsive Design */
+
+    @media (max-width: 2000px) {
+        .singing-chicken {
+          position: absolute;
+          left: -90px;
+          top:-10px;
+          width: 220px;
+        }
+    }
+
+    @media (max-width: 1275px) {
+        .singing-chicken {
+            display: none;
+        }
+    }
+
     @media (max-width: 768px) {
       .video-grid {
         padding: 20px 20px;
