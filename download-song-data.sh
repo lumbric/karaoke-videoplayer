@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# Karaoke Video Data Generator
-# Generates videos.json, downloads cover art, and stores spotdl metadata
-
-# Note: Not using 'set -e' because download failures shouldn't stop the entire process
+# Download Song Data Script
+# Downloads metadata and cover art for karaoke videos
+# Run this after downloading videos with spot-dl or adding new video files
 
 # Configuration
 VIDEOS_DIR="videos"
@@ -39,6 +38,32 @@ print_error() {
 # Function to check if command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
+}
+
+# Function to parse artist and title from filename
+parse_artist_title() {
+    local filename="$1"
+    local artist=""
+    local title=""
+    
+    # Try different patterns
+    if [[ "$filename" =~ ^(.+)\ -\ (.+)$ ]]; then
+        # "Artist - Title" format
+        artist="${BASH_REMATCH[1]}"
+        title="${BASH_REMATCH[2]}"
+    elif [[ "$filename" =~ ^(.+)\ (.+)$ ]]; then
+        # "Title Artist" format - last word as artist
+        words=($filename)
+        artist="${words[-1]}"
+        title="${words[@]:0:${#words[@]}-1}"
+        title="${title// / }"
+    else
+        # Fallback: use filename as title
+        artist=""
+        title="$filename"
+    fi
+    
+    echo "$artist|$title"
 }
 
 # Function to clean filename for search
@@ -141,9 +166,54 @@ find_cover() {
     echo ""
 }
 
+# Function to create metadata file
+create_metadata_file() {
+    local video_file="$1"
+    local filename="$2"
+    local artist="$3"
+    local title="$4"
+    
+    local metadata_file="$METADATA_DIR/$filename.spotdl"
+    
+    # Skip if metadata file already exists
+    if [[ -f "$metadata_file" ]]; then
+        return 0
+    fi
+    
+    # Get file size
+    local file_size=$(stat -f%z "$video_file" 2>/dev/null || stat -c%s "$video_file" 2>/dev/null || echo "0")
+    local file_size_mb=$(echo "scale=1; $file_size / 1024 / 1024" | bc -l 2>/dev/null || echo "0")
+    
+    # Get video duration using ffprobe if available
+    local duration="unknown"
+    if command_exists ffprobe; then
+        duration=$(ffprobe -v quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$video_file" 2>/dev/null)
+        if [[ -n "$duration" && "$duration" != "N/A" ]]; then
+            # Convert seconds to mm:ss format
+            duration=$(printf '%d:%02d' $((${duration%.*}/60)) $((${duration%.*}%60)))
+        else
+            duration="unknown"
+        fi
+    fi
+    
+    # Create metadata file
+    cat > "$metadata_file" << EOF
+{
+  "filename": "$filename",
+  "artist": "$artist",
+  "title": "$title",
+  "duration": "$duration",
+  "downloaded_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "file_size_mb": $file_size_mb
+}
+EOF
+    
+    print_success "Created metadata: $metadata_file"
+}
+
 # Main function
 main() {
-    print_status "Starting Karaoke Video Data Generator..."
+    print_status "Starting Download Song Data Script..."
     
     # Check if videos directory exists
     if [[ ! -d "$VIDEOS_DIR" ]]; then
@@ -190,34 +260,40 @@ main() {
         local base="${filename%.*}"
         local clean_title=$(clean_filename "$filename")
         
-        print_status "Processing: $filename"
+        # Parse artist and title from filename
+        local artist_title=$(parse_artist_title "$base")
+        local artist="${artist_title%|*}"
+        local title="${artist_title#*|}"
+        
+        print_status "Processing: $filename → Artist: '$artist', Title: '$title'"
+        
+        # Create metadata file
+        create_metadata_file "$file" "$base" "$artist" "$title"
         
         # Try to download cover art
         if download_cover "$file" "$base" "$clean_title"; then
             ((cover_downloaded++))
         fi
-        
+
         # Find the best available cover
         local cover_path=$(find_cover "$base")
         if [[ -z "$cover_path" ]]; then
             cover_path=""
         fi
-        
+
         # Add comma if not first entry
         if [[ "$first" == true ]]; then
             first=false
         else
             echo "," >> "$OUTPUT_JSON"
         fi
-        
-        # Write JSON entry
+
+        # Write JSON entry in new format
         echo "  {" >> "$OUTPUT_JSON"
-        echo "    \"title\": \"${clean_title//\"/\\\"}\"," >> "$OUTPUT_JSON"
-        echo "    \"file\": \"$file\"," >> "$OUTPUT_JSON"
-        echo "    \"cover\": \"$cover_path\"" >> "$OUTPUT_JSON"
-        echo -n "  }" >> "$OUTPUT_JSON"
-        
-        ((video_count++))
+        echo "    \"filename\": \"${base//\"/\\\"}\"," >> "$OUTPUT_JSON"
+        echo "    \"artist\": \"${artist//\"/\\\"}\"," >> "$OUTPUT_JSON"
+        echo "    \"title\": \"${title//\"/\\\"}\"" >> "$OUTPUT_JSON"
+        echo -n "  }" >> "$OUTPUT_JSON"        ((video_count++))
     done
     
     # Close JSON array
@@ -237,7 +313,7 @@ main() {
 
 # Show help
 show_help() {
-    echo "Karaoke Video Data Generator"
+    echo "Download Song Data Script"
     echo ""
     echo "Usage: $0 [OPTIONS]"
     echo ""
@@ -247,9 +323,9 @@ show_help() {
     echo ""
     echo "This script will:"
     echo "  1. Scan the 'videos' directory for video files"
-    echo "  2. Generate a videos.json file with metadata"
+    echo "  2. Generate a videos.json file with artist/title metadata"
     echo "  3. Download cover art for each video (if tools available)"
-    echo "  4. Store spotdl metadata in 'metadata' directory"
+    echo "  4. Store detailed metadata in 'metadata' directory"
     echo ""
     echo "Required directories:"
     echo "  - videos/     (must exist, contains video files)"

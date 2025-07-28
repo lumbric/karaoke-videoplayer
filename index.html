@@ -530,7 +530,17 @@
     async function loadVideos() {
       try {
         const res = await fetch("videos.json");
-        allVideos = await res.json();
+        const rawVideos = await res.json();
+        
+        // Transform to include computed file paths and display title
+        allVideos = rawVideos.map(video => ({
+          ...video,
+          file: `videos/${video.filename}.mp4`,
+          cover: `covers/${video.filename}.jpg`,
+          displayTitle: `${video.artist} - ${video.title}`,
+          searchText: `${video.artist} ${video.title}`.toLowerCase()
+        }));
+        
         showRandomVideos();
       } catch (error) {
         console.error("Error loading videos:", error);
@@ -562,7 +572,7 @@
       videos.forEach(v => {
         const div = document.createElement("div");
         div.className = "card";
-        div.innerHTML = `<img src="${v.cover}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNDQ0Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IiNjY2MiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+S2VpbiBCaWxkPC90ZXh0Pgo8L3N2Zz4='"><div class="title">${v.title}</div>`;
+        div.innerHTML = `<img src="${v.cover}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNDQ0Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IiNjY2MiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+S2VpbiBCaWxkPC90ZXh0Pgo8L3N2Zz4='"><div class="title">${v.displayTitle}</div>`;
         div.onclick = () => playVideo(v);
         container.appendChild(div);
       });
@@ -577,9 +587,9 @@
         return;
       }
 
-      // Filter videos based on search query (search starts immediately with any character)
+      // Filter videos based on search query (search in artist and title)
       const filteredVideos = allVideos.filter(v =>
-        v.title.toLowerCase().includes(query.toLowerCase())
+        v.searchText.includes(query.toLowerCase())
       );
 
       if (filteredVideos.length === 0) {
@@ -619,19 +629,19 @@
       player.onended = () => {
         ended = true;
         const playedSeconds = player.currentTime - playStartTime;
-        logPlay(video.title, startTime, playedSeconds, totalDuration, true);
+        logPlay(video.displayTitle, startTime, playedSeconds, totalDuration, true);
         closePlayer();
       };
 
       player.onpause = () => {
         if (!ended) {
           const playedSeconds = player.currentTime - playStartTime;
-          logPlay(video.title, startTime, playedSeconds, totalDuration, false);
+          logPlay(video.displayTitle, startTime, playedSeconds, totalDuration, false);
         }
       };
 
       // Initial log entry
-      logPlay(video.title, startTime, 0, 0, false);
+      logPlay(video.displayTitle, startTime, 0, 0, false);
     }
 
     function closePlayer() {
