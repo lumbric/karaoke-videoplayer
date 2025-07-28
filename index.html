@@ -463,13 +463,19 @@
       <!-- Charts Container -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
         <div class="chart-container">
-          <h3>🎤 Most Played Songs (Top 10)</h3>
-          <canvas id="mostPlayedChart" width="400" height="300"></canvas>
+          <h3>📊 Completion Rate Distribution</h3>
+          <canvas id="completionChart" width="400" height="250"></canvas>
         </div>
         <div class="chart-container">
           <h3>🕒 Play Time Distribution</h3>
           <canvas id="playTimeChart" width="400" height="300"></canvas>
         </div>
+      </div>
+
+      <!-- Large Most Played Chart -->
+      <div class="chart-container" style="margin-bottom: 30px;">
+        <h3>🎤 Most Played Songs (Top 15)</h3>
+        <canvas id="mostPlayedChart" width="800" height="400"></canvas>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
@@ -492,11 +498,6 @@
           <h3>🔄 Retry Songs (Often Restarted)</h3>
           <div id="retryList" style="max-height: 300px; overflow-y: auto;"></div>
         </div>
-      </div>
-
-      <div class="chart-container" style="margin-bottom: 30px;">
-        <h3>📊 Completion Rate Distribution</h3>
-        <canvas id="completionChart" width="400" height="300"></canvas>
       </div>
 
       <!-- New Hourly Activity Chart -->
@@ -864,10 +865,10 @@
         }
       });
 
-      // Get most played songs (top 10)
+      // Get most played songs (top 15)
       const mostPlayedSongs = Object.entries(songStats)
         .sort(([,a], [,b]) => b.playCount - a.playCount)
-        .slice(0, 10);
+        .slice(0, 15);
 
       // Get most skipped songs (played multiple times but low completion rate)
       const skippedSongs = Object.entries(songStats)
@@ -965,7 +966,7 @@
       window.mostPlayedChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: mostPlayedSongs.map(([title]) => title.length > 20 ? title.substring(0, 20) + '...' : title),
+          labels: mostPlayedSongs.map(([title]) => title.length > 25 ? title.substring(0, 25) + '...' : title),
           datasets: [{
             label: 'Play Count',
             data: mostPlayedSongs.map(([, song]) => song.playCount),
@@ -981,12 +982,21 @@
           },
           scales: {
             x: { 
-              ticks: { color: '#fff', maxRotation: 45 },
+              ticks: { 
+                color: '#fff', 
+                maxRotation: 45,
+                font: { size: 10 }
+              },
               grid: { color: 'rgba(255, 255, 255, 0.1)' }
             },
             y: { 
               ticks: { color: '#fff' },
-              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+              title: {
+                display: true,
+                text: 'Play Count',
+                color: '#fff'
+              }
             }
           }
         }
