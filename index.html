@@ -458,6 +458,19 @@
         </div>
       </div>
 
+      <!-- Large Most Played Chart -->
+      <div class="chart-container" style="margin-bottom: 30px;">
+        <h3>♪ Most Played Songs (Top 15)</h3>
+        <canvas id="mostPlayedChart" width="800" height="400"></canvas>
+      </div>
+      
+
+      <!-- New Hourly Activity Chart -->
+      <div class="chart-container" style="margin-bottom: 30px;">
+        <h3>Activity Last 50 Hours (Completed vs Aborted)</h3>
+        <canvas id="hourlyChart" width="800" height="400"></canvas>
+      </div>
+
       <!-- Charts Container -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
         <div class="chart-container">
@@ -468,12 +481,6 @@
           <h3>⏰ Play Time Distribution</h3>
           <canvas id="playTimeChart" width="400" height="300"></canvas>
         </div>
-      </div>
-
-      <!-- Large Most Played Chart -->
-      <div class="chart-container" style="margin-bottom: 30px;">
-        <h3>♪ Most Played Songs (Top 15)</h3>
-        <canvas id="mostPlayedChart" width="800" height="400"></canvas>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
@@ -496,12 +503,6 @@
           <h3>🔄 Retry Songs (Often Restarted)</h3>
           <div id="retryList" style="max-height: 300px; overflow-y: auto;"></div>
         </div>
-      </div>
-
-      <!-- New Hourly Activity Chart -->
-      <div class="chart-container" style="margin-bottom: 30px;">
-        <h3>� Activity Last 50 Hours (Completed vs Aborted)</h3>
-        <canvas id="hourlyChart" width="800" height="400"></canvas>
       </div>
 
       <!-- Recent Activity -->
