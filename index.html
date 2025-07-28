@@ -150,6 +150,15 @@
       display: none !important;
     }
     
+    /* Hide picture-in-picture button */
+    video::-webkit-media-controls-picture-in-picture-button {
+      display: none !important;
+    }
+    
+    video::-webkit-media-controls-fullscreen-button {
+      display: none !important;
+    }
+    
     /* Alternative: Completely hide all controls and add custom ones */
     .video-overlay {
       position: absolute;
@@ -601,6 +610,11 @@
       renderCards(limitedResults);
     }
 
+    // Global session tracking variables
+    let currentSessionStartTime = null;
+    let currentVideoTitle = null;
+    let isNewPlaySession = true;
+
     function playVideo(video) {
       const player = document.getElementById("videoPlayer");
       const container = document.getElementById("playerContainer");
@@ -614,7 +628,11 @@
       container.classList.remove("show-cursor");
       btn.classList.remove("visible");
 
-      const startTime = Date.now();
+      // Initialize session tracking
+      currentSessionStartTime = Date.now();
+      currentVideoTitle = video.displayTitle;
+      isNewPlaySession = true;
+      
       let playStartTime = 0;
       let totalDuration = 0;
       let ended = false;
@@ -630,8 +648,10 @@
 
       player.onended = () => {
         ended = true;
-        const playedSeconds = player.currentTime - playStartTime;
-        logPlay(video.displayTitle, startTime, playedSeconds, totalDuration, true);
+        // Only log completion if this was a real play session
+        if (isNewPlaySession) {
+          logPlay(currentVideoTitle, currentSessionStartTime, totalDuration, totalDuration, true);
+        }
         // Update button text when video ends
         const playPauseBtn = document.getElementById("playPauseBtn");
         playPauseBtn.textContent = "▶ Play";
@@ -639,10 +659,7 @@
       };
 
       player.onpause = () => {
-        if (!ended) {
-          const playedSeconds = player.currentTime - playStartTime;
-          logPlay(video.displayTitle, startTime, playedSeconds, totalDuration, false);
-        }
+        // Don't log on pause - we only want to log actual plays, not pauses
         // Update button text when video is paused
         const playPauseBtn = document.getElementById("playPauseBtn");
         playPauseBtn.textContent = "▶ Play";
@@ -652,10 +669,15 @@
         // Update button text when video starts playing
         const playPauseBtn = document.getElementById("playPauseBtn");
         playPauseBtn.textContent = "⏸ Pause";
+        
+        // If resuming from pause, don't count as new play
+        if (player.currentTime > 1) { // If we're more than 1 second in, it's a resume
+          isNewPlaySession = false;
+        }
       };
 
-      // Initial log entry
-      logPlay(video.displayTitle, startTime, 0, 0, false);
+      // Log initial play (only when video actually starts from beginning)
+      logPlay(currentVideoTitle, currentSessionStartTime, 0, 0, false);
     }
 
     function closePlayer() {
@@ -739,9 +761,20 @@
     function restartVideo() {
       const player = document.getElementById("videoPlayer");
       const playPauseBtn = document.getElementById("playPauseBtn");
+      
+      // Reset to beginning and mark as new play session
       player.currentTime = 0;
       player.play();
       playPauseBtn.textContent = "⏸ Pause";
+      
+      // This counts as a new play session
+      currentSessionStartTime = Date.now();
+      isNewPlaySession = true;
+      
+      // Log the restart as a new play
+      if (currentVideoTitle) {
+        logPlay(currentVideoTitle, currentSessionStartTime, 0, 0, false);
+      }
     }
 
     // Keyboard shortcuts
