@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Karaoke ab Hof 🎤</title>
+  <title>Karaoke ab Hof</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
@@ -413,13 +413,13 @@
 </head>
 <body>
   <!-- Cosmic/party decorative background elements -->
-  <div class="cosmic-decoration" style="top: 10%; left: 5%;">🎵</div>
-  <div class="cosmic-decoration" style="top: 20%; right: 8%;">⭐</div>
-  <div class="cosmic-decoration" style="bottom: 15%; left: 10%;">🎤</div>
-  <div class="cosmic-decoration" style="bottom: 25%; right: 15%;">🎶</div>
+  <div class="cosmic-decoration" style="top: 10%; left: 5%;">♪</div>
+  <div class="cosmic-decoration" style="top: 20%; right: 8%;">★</div>
+  <div class="cosmic-decoration" style="bottom: 15%; left: 10%;">♫</div>
+  <div class="cosmic-decoration" style="bottom: 25%; right: 15%;">♬</div>
 
   <div class="header-box">
-    <h1>Karaoke ab Hof 🎤</h1>
+    <h1>Karaoke ab Hof</h1>
     <img src="images/singing-chicken.png" class="singing-chicken">
   </div>
   <input type="text" id="search" placeholder="Lied suchen...">
@@ -428,34 +428,32 @@
     <video id="videoPlayer" autoplay></video>
     <button id="closeBtn" onclick="closePlayer()">← Zurück</button>
     <div class="video-overlay" id="videoOverlay">
-      <button class="video-control-btn" onclick="togglePlayPause()">⏯️ Play/Pause</button>
-      <button class="video-control-btn" onclick="toggleMute()">🔊 Mute</button>
-      <button class="video-control-btn" onclick="adjustVolume(-0.1)">🔉 -</button>
-      <button class="video-control-btn" onclick="adjustVolume(0.1)">🔊 +</button>
+      <button class="video-control-btn" onclick="togglePlayPause()">▶/⏸ Play/Pause</button>
+      <button class="video-control-btn" onclick="restartVideo()">⏪ Restart</button>
     </div>
   </div>
-  <button id="statsButton">📊 Statistik</button>
+  <button id="statsButton">� Statistik</button>
   <div id="statsPage">
     <button id="closeStats">✕</button>
     <div style="padding: 20px; max-width: 1200px; margin: 0 auto;">
-      <h2 style="color: #cd6391; text-align: center; margin-bottom: 30px; font-size: 2.5em;">📊 Karaoke Statistiken</h2>
+      <h2 style="color: #cd6391; text-align: center; margin-bottom: 30px; font-size: 2.5em;">� Karaoke Statistiken</h2>
       
       <!-- Statistics Summary Cards -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
         <div class="stat-card">
-          <h3>🎵 Total Songs</h3>
+          <h3>♪ Total Songs</h3>
           <div class="stat-number" id="totalSongs">0</div>
         </div>
         <div class="stat-card">
-          <h3>⏱️ Total Play Time</h3>
+          <h3>⏱ Total Play Time</h3>
           <div class="stat-number" id="totalPlayTime">0min</div>
         </div>
         <div class="stat-card">
-          <h3>🏆 Most Played</h3>
+          <h3>★ Most Played</h3>
           <div class="stat-number" id="mostPlayed">-</div>
         </div>
         <div class="stat-card">
-          <h3>📈 Completion Rate</h3>
+          <h3>↗ Completion Rate</h3>
           <div class="stat-number" id="completionRate">0%</div>
         </div>
       </div>
@@ -463,18 +461,18 @@
       <!-- Charts Container -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
         <div class="chart-container">
-          <h3>📊 Completion Rate Distribution</h3>
+          <h3>� Completion Rate Distribution</h3>
           <canvas id="completionChart" width="400" height="250"></canvas>
         </div>
         <div class="chart-container">
-          <h3>🕒 Play Time Distribution</h3>
+          <h3>⏰ Play Time Distribution</h3>
           <canvas id="playTimeChart" width="400" height="300"></canvas>
         </div>
       </div>
 
       <!-- Large Most Played Chart -->
       <div class="chart-container" style="margin-bottom: 30px;">
-        <h3>🎤 Most Played Songs (Top 15)</h3>
+        <h3>♪ Most Played Songs (Top 15)</h3>
         <canvas id="mostPlayedChart" width="800" height="400"></canvas>
       </div>
 
@@ -717,6 +715,12 @@
       const player = document.getElementById("videoPlayer");
       const newVolume = Math.max(0, Math.min(1, player.volume + change));
       player.volume = newVolume;
+    }
+
+    function restartVideo() {
+      const player = document.getElementById("videoPlayer");
+      player.currentTime = 0;
+      player.play();
     }
 
     // Keyboard shortcuts
