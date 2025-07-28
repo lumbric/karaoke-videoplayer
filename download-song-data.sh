@@ -293,7 +293,9 @@ main() {
         echo "    \"filename\": \"${base//\"/\\\"}\"," >> "$OUTPUT_JSON"
         echo "    \"artist\": \"${artist//\"/\\\"}\"," >> "$OUTPUT_JSON"
         echo "    \"title\": \"${title//\"/\\\"}\"" >> "$OUTPUT_JSON"
-        echo -n "  }" >> "$OUTPUT_JSON"        ((video_count++))
+        echo -n "  }" >> "$OUTPUT_JSON"
+
+        ((video_count++))
     done
     
     # Close JSON array
