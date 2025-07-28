@@ -428,11 +428,11 @@
     <video id="videoPlayer" autoplay></video>
     <button id="closeBtn" onclick="closePlayer()">← Zurück</button>
     <div class="video-overlay" id="videoOverlay">
-      <button class="video-control-btn" onclick="togglePlayPause()">▶/⏸ Play/Pause</button>
-      <button class="video-control-btn" onclick="restartVideo()">⏪ Restart</button>
+      <button class="video-control-btn" id="playPauseBtn" onclick="togglePlayPause()">⏸ Pause</button>
+      <button class="video-control-btn" onclick="restartVideo()">↻ Restart</button>
     </div>
   </div>
-  <button id="statsButton">📊 Statistik</button>
+  <button id="statsButton">Stats</button>
   <div id="statsPage">
     <button id="closeStats">✕</button>
     <div style="padding: 20px; max-width: 1200px; margin: 0 auto;">
@@ -623,12 +623,18 @@
       player.onloadedmetadata = () => {
         totalDuration = player.duration;
         playStartTime = player.currentTime;
+        // Update button text when video starts playing (autoplay)
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        playPauseBtn.textContent = "⏸ Pause";
       };
 
       player.onended = () => {
         ended = true;
         const playedSeconds = player.currentTime - playStartTime;
         logPlay(video.displayTitle, startTime, playedSeconds, totalDuration, true);
+        // Update button text when video ends
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        playPauseBtn.textContent = "▶ Play";
         closePlayer();
       };
 
@@ -637,6 +643,15 @@
           const playedSeconds = player.currentTime - playStartTime;
           logPlay(video.displayTitle, startTime, playedSeconds, totalDuration, false);
         }
+        // Update button text when video is paused
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        playPauseBtn.textContent = "▶ Play";
+      };
+
+      player.onplay = () => {
+        // Update button text when video starts playing
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        playPauseBtn.textContent = "⏸ Pause";
       };
 
       // Initial log entry
@@ -700,10 +715,13 @@
     // Custom video control functions
     function togglePlayPause() {
       const player = document.getElementById("videoPlayer");
+      const playPauseBtn = document.getElementById("playPauseBtn");
       if (player.paused) {
         player.play();
+        playPauseBtn.textContent = "⏸ Pause";
       } else {
         player.pause();
+        playPauseBtn.textContent = "▶ Play";
       }
     }
 
@@ -720,8 +738,10 @@
 
     function restartVideo() {
       const player = document.getElementById("videoPlayer");
+      const playPauseBtn = document.getElementById("playPauseBtn");
       player.currentTime = 0;
       player.play();
+      playPauseBtn.textContent = "⏸ Pause";
     }
 
     // Keyboard shortcuts
