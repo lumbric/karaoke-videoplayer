@@ -1,15 +1,16 @@
 #!/bin/bash
 
 # Download Song Data Script
-# Downloads metadata and cover art for karaoke videos
+# Uses spotdl to retrieve accurate metadata and cover art for karaoke videos
 # Run this after downloading videos with spot-dl or adding new video files
 
 # Configuration
 VIDEOS_DIR="videos"
 COVERS_DIR="covers"
-METADATA_DIR="metadata"
 OUTPUT_JSON="videos.json"
+METADATA_JSON="metadata.json"
 COVER_FORMATS=("jpg" "jpeg" "png" "webp")
+VIDEO_FORMATS=("mp4" "avi" "mkv" "mov" "webm" "flv" "m4v")
 
 # Colors for output
 RED='\033[0;31m'
@@ -40,8 +41,63 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Function to parse artist and title from filename
-parse_artist_title() {
+# Function to get metadata from spotdl
+get_spotdl_metadata() {
+    local filename="$1"
+    local search_query="$2"
+    
+    print_status "Getting metadata for: $search_query"
+    
+    # Create temporary file for spotdl metadata
+    local temp_file=$(mktemp)
+    
+    if command_exists spotdl; then
+        # Use spotdl to save metadata
+        if spotdl save "$search_query" --save-file "$temp_file" >/dev/null 2>&1; then
+            if [[ -f "$temp_file" ]]; then
+                print_success "Retrieved spotdl metadata for: $search_query"
+                cat "$temp_file"
+                rm -f "$temp_file"
+                return 0
+            fi
+        fi
+    fi
+    
+    # Fallback: create basic metadata structure
+    print_warning "Could not retrieve spotdl metadata for: $search_query"
+    rm -f "$temp_file"
+    
+    # Parse basic artist and title from filename as fallback
+    local artist_title=$(parse_artist_title_fallback "$filename")
+    local artist="${artist_title%|*}"
+    local title="${artist_title#*|}"
+    
+    # Create minimal JSON structure
+    cat << EOF
+{
+  "name": "$title",
+  "artists": [{"name": "$artist"}],
+  "album": {"name": "Unknown Album"},
+  "duration_ms": 0,
+  "explicit": false,
+  "external_urls": {},
+  "genres": [],
+  "popularity": 0,
+  "preview_url": null,
+  "track_number": 1,
+  "disc_number": 1,
+  "lyrics": null,
+  "copyright_text": null,
+  "isrc": null,
+  "release_date": "1900-01-01",
+  "images": []
+}
+EOF
+    return 1
+}
+
+# Function to parse artist and title from filename (fallback)
+parse_artist_title_fallback() {
     local filename="$1"
     local artist=""
     local title=""
@@ -59,7 +115,7 @@ parse_artist_title() {
         title="${title// / }"
     else
         # Fallback: use filename as title
-        artist=""
+        artist="Unknown Artist"
         title="$filename"
     fi
     
@@ -81,11 +137,12 @@ clean_filename() {
     echo "$filename"
 }
 
-# Function to download cover art using available tools
+# Function to download cover art from spotdl metadata or fallback sources
 download_cover() {
     local video_file="$1"
     local cover_base="$2"
-    local search_query="$3"
+    local metadata="$3"
+    local search_query="$4"
     
     # Check if cover already exists
     for ext in "${COVER_FORMATS[@]}"; do
@@ -97,56 +154,38 @@ download_cover() {
     
     print_status "Downloading cover for: $search_query"
     
-    # Try with spotdl first (if available) - this is the preferred method
-    if command_exists spotdl; then
-        print_status "Trying spotdl..."
-        local metadata_file="$METADATA_DIR/$cover_base.spotdl"
-        mkdir -p "$METADATA_DIR"
-        
-        # Use spotdl to search and save metadata
-        if spotdl save "$search_query" --output "$metadata_file" --format json >/dev/null 2>&1; then
-            print_success "Saved spotdl metadata: $metadata_file"
-            
-            # Try to extract cover URL from metadata and download
-            if command_exists jq && [[ -f "$metadata_file" ]]; then
-                local cover_url=$(jq -r '.album.images[0].url // .track.album.images[0].url // empty' "$metadata_file" 2>/dev/null)
-                if [[ -n "$cover_url" && "$cover_url" != "null" ]]; then
-                    if curl -s -L "$cover_url" -o "$COVERS_DIR/$cover_base.jpg" >/dev/null 2>&1; then
-                        print_success "Downloaded cover via spotdl"
-                        return 0
-                    fi
-                fi
+    # Try to extract cover URL from spotdl metadata
+    if command_exists jq && [[ -n "$metadata" ]]; then
+        local cover_url=$(echo "$metadata" | jq -r '.album.images[0].url // .images[0].url // empty' 2>/dev/null)
+        if [[ -n "$cover_url" && "$cover_url" != "null" ]]; then
+            if curl -s -L "$cover_url" -o "$COVERS_DIR/$cover_base.jpg" >/dev/null 2>&1; then
+                print_success "Downloaded cover via spotdl metadata"
+                return 0
             fi
-        else
-            print_warning "spotdl could not find: $search_query"
         fi
     fi
     
-    # Try with yt-dlp only if spotdl failed
+    # Fallback to yt-dlp
     if command_exists yt-dlp; then
-        print_status "Trying yt-dlp..."
+        print_status "Trying yt-dlp fallback..."
         local search_result=$(yt-dlp "ytsearch1:$search_query" --get-thumbnail --no-download 2>/dev/null | head -1)
         if [[ -n "$search_result" && "$search_result" != "NA" ]]; then
             if curl -s -L "$search_result" -o "$COVERS_DIR/$cover_base.jpg" >/dev/null 2>&1; then
                 print_success "Downloaded cover via yt-dlp"
                 return 0
             fi
-        else
-            print_warning "yt-dlp could not find: $search_query"
         fi
     fi
     
-    # Try with youtube-dl only if both spotdl and yt-dlp failed
+    # Fallback to youtube-dl
     if command_exists youtube-dl; then
-        print_status "Trying youtube-dl..."
+        print_status "Trying youtube-dl fallback..."
         local search_result=$(youtube-dl "ytsearch1:$search_query" --get-thumbnail --no-download 2>/dev/null | head -1)
         if [[ -n "$search_result" && "$search_result" != "NA" ]]; then
             if curl -s -L "$search_result" -o "$COVERS_DIR/$cover_base.jpg" >/dev/null 2>&1; then
                 print_success "Downloaded cover via youtube-dl"
                 return 0
             fi
-        else
-            print_warning "youtube-dl could not find: $search_query"
         fi
     fi
     
@@ -154,61 +193,41 @@ download_cover() {
     return 1
 }
 
-# Function to find existing cover
+# Function to find existing cover with different extensions
 find_cover() {
     local base="$1"
     for ext in "${COVER_FORMATS[@]}"; do
         if [[ -f "$COVERS_DIR/$base.$ext" ]]; then
-            echo "$COVERS_DIR/$base.$ext"
+            echo "$base.$ext"
             return 0
         fi
     done
     echo ""
 }
 
-# Function to create metadata file
-create_metadata_file() {
+# Function to find video file with different extensions
+find_video_file() {
+    local base="$1"
+    for ext in "${VIDEO_FORMATS[@]}"; do
+        if [[ -f "$VIDEOS_DIR/$base.$ext" ]]; then
+            echo "$base.$ext"
+            return 0
+        fi
+    done
+    echo ""
+}
+
+# Function to get video duration using ffprobe
+get_video_duration() {
     local video_file="$1"
-    local filename="$2"
-    local artist="$3"
-    local title="$4"
-    
-    local metadata_file="$METADATA_DIR/$filename.spotdl"
-    
-    # Skip if metadata file already exists
-    if [[ -f "$metadata_file" ]]; then
-        return 0
-    fi
-    
-    # Get file size
-    local file_size=$(stat -f%z "$video_file" 2>/dev/null || stat -c%s "$video_file" 2>/dev/null || echo "0")
-    local file_size_mb=$(echo "scale=1; $file_size / 1024 / 1024" | bc -l 2>/dev/null || echo "0")
-    
-    # Get video duration using ffprobe if available
-    local duration="unknown"
     if command_exists ffprobe; then
-        duration=$(ffprobe -v quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$video_file" 2>/dev/null)
+        local duration=$(ffprobe -v quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$video_file" 2>/dev/null)
         if [[ -n "$duration" && "$duration" != "N/A" ]]; then
-            # Convert seconds to mm:ss format
-            duration=$(printf '%d:%02d' $((${duration%.*}/60)) $((${duration%.*}%60)))
-        else
-            duration="unknown"
+            echo "$duration"
+            return 0
         fi
     fi
-    
-    # Create metadata file
-    cat > "$metadata_file" << EOF
-{
-  "filename": "$filename",
-  "artist": "$artist",
-  "title": "$title",
-  "duration": "$duration",
-  "downloaded_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "file_size_mb": $file_size_mb
-}
-EOF
-    
-    print_success "Created metadata: $metadata_file"
+    echo "0"
 }
 
 # Main function
@@ -223,7 +242,6 @@ main() {
     
     # Create necessary directories
     mkdir -p "$COVERS_DIR"
-    mkdir -p "$METADATA_DIR"
     
     # Check for required tools
     if ! command_exists curl; then
@@ -231,18 +249,31 @@ main() {
         exit 1
     fi
     
-    # Check for optional tools
-    if ! command_exists spotdl && ! command_exists yt-dlp && ! command_exists youtube-dl; then
-        print_warning "No download tools found (spotdl, yt-dlp, youtube-dl). Cover download will be skipped."
+    # Check for spotdl (recommended)
+    if ! command_exists spotdl; then
+        print_warning "spotdl not found. Install with: pip install spotdl"
+        print_warning "Falling back to basic filename parsing."
     fi
     
-    # Start generating JSON
-    print_status "Generating $OUTPUT_JSON..."
+    # Check for optional tools
+    if ! command_exists jq; then
+        print_warning "jq not found. Install for better JSON processing: apt install jq"
+    fi
+    
+    # Initialize metadata.json and videos.json
+    print_status "Initializing JSON files..."
+    echo "{}" > "$METADATA_JSON"
     echo "[" > "$OUTPUT_JSON"
     
     local first=true
     local video_count=0
     local cover_downloaded=0
+    local metadata_retrieved=0
+    
+    # Create temporary file for metadata collection
+    local temp_metadata=$(mktemp)
+    echo "{" > "$temp_metadata"
+    local first_metadata=true
     
     # Process each video file
     for file in "$VIDEOS_DIR"/*; do
@@ -260,62 +291,126 @@ main() {
         local base="${filename%.*}"
         local clean_title=$(clean_filename "$filename")
         
-        # Parse artist and title from filename
-        local artist_title=$(parse_artist_title "$base")
-        local artist="${artist_title%|*}"
-        local title="${artist_title#*|}"
+        print_status "Processing: $filename"
         
-        print_status "Processing: $filename → Artist: '$artist', Title: '$title'"
+        # Get metadata from spotdl
+        local metadata=$(get_spotdl_metadata "$base" "$clean_title")
+        local metadata_success=$?
         
-        # Create metadata file
-        create_metadata_file "$file" "$base" "$artist" "$title"
+        if [[ $metadata_success -eq 0 ]]; then
+            ((metadata_retrieved++))
+        fi
+        
+        # Extract info from metadata using jq or fallback
+        local artist=""
+        local title=""
+        local genre=""
+        local duration_ms=0
+        
+        if command_exists jq && [[ -n "$metadata" ]]; then
+            artist=$(echo "$metadata" | jq -r '.artists[0].name // "Unknown Artist"' 2>/dev/null)
+            title=$(echo "$metadata" | jq -r '.name // "Unknown Title"' 2>/dev/null)
+            genre=$(echo "$metadata" | jq -r '.genres[0] // ""' 2>/dev/null)
+            duration_ms=$(echo "$metadata" | jq -r '.duration_ms // 0' 2>/dev/null)
+        else
+            # Fallback parsing
+            local artist_title=$(parse_artist_title_fallback "$base")
+            artist="${artist_title%|*}"
+            title="${artist_title#*|}"
+        fi
+        
+        print_success "→ Artist: '$artist', Title: '$title'$([ -n "$genre" ] && echo ", Genre: '$genre'")"
+        
+        # Store full metadata
+        if [[ "$first_metadata" == true ]]; then
+            first_metadata=false
+        else
+            echo "," >> "$temp_metadata"
+        fi
+        echo "  \"$base\": $metadata" >> "$temp_metadata"
         
         # Try to download cover art
-        if download_cover "$file" "$base" "$clean_title"; then
+        if download_cover "$file" "$base" "$metadata" "$clean_title"; then
             ((cover_downloaded++))
         fi
-
-        # Find the best available cover
-        local cover_path=$(find_cover "$base")
-        if [[ -z "$cover_path" ]]; then
-            cover_path=""
-        fi
-
-        # Add comma if not first entry
+        
+        # Find the actual video and cover files (with extensions)
+        local video_filename="$filename"
+        local cover_filename=$(find_cover "$base")
+        
+        # Get video duration
+        local video_duration=$(get_video_duration "$file")
+        
+        # Add comma if not first entry in videos.json
         if [[ "$first" == true ]]; then
             first=false
         else
             echo "," >> "$OUTPUT_JSON"
         fi
-
-        # Write JSON entry in new format
+        
+        # Write JSON entry with enhanced metadata
         echo "  {" >> "$OUTPUT_JSON"
         echo "    \"filename\": \"${base//\"/\\\"}\"," >> "$OUTPUT_JSON"
         echo "    \"artist\": \"${artist//\"/\\\"}\"," >> "$OUTPUT_JSON"
-        echo "    \"title\": \"${title//\"/\\\"}\"" >> "$OUTPUT_JSON"
+        echo "    \"title\": \"${title//\"/\\\"}\"," >> "$OUTPUT_JSON"
+        
+        # Optional fields
+        if [[ -n "$genre" && "$genre" != "null" && "$genre" != "" ]]; then
+            echo "    \"genre\": \"${genre//\"/\\\"}\"," >> "$OUTPUT_JSON"
+        fi
+        
+        if [[ "$video_filename" != "$base.mp4" ]]; then
+            echo "    \"video_filename\": \"${video_filename//\"/\\\"}\"," >> "$OUTPUT_JSON"
+        fi
+        
+        if [[ -n "$cover_filename" && "$cover_filename" != "$base.jpg" ]]; then
+            echo "    \"cover_filename\": \"${cover_filename//\"/\\\"}\"," >> "$OUTPUT_JSON"
+        fi
+        
+        if [[ "$video_duration" != "0" ]]; then
+            echo "    \"duration_seconds\": $video_duration," >> "$OUTPUT_JSON"
+        fi
+        
+        if [[ "$duration_ms" != "0" ]]; then
+            echo "    \"duration_ms\": $duration_ms," >> "$OUTPUT_JSON"
+        fi
+        
+        # Remove trailing comma from last field
+        echo "    \"processed_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"" >> "$OUTPUT_JSON"
         echo -n "  }" >> "$OUTPUT_JSON"
-
+        
         ((video_count++))
     done
     
-    # Close JSON array
+    # Close JSON files
     echo "" >> "$OUTPUT_JSON"
     echo "]" >> "$OUTPUT_JSON"
+    
+    echo "" >> "$temp_metadata"
+    echo "}" >> "$temp_metadata"
+    
+    # Move temporary metadata to final location
+    mv "$temp_metadata" "$METADATA_JSON"
     
     # Print summary
     print_success "Finished processing!"
     print_status "Videos processed: $video_count"
+    print_status "Metadata retrieved: $metadata_retrieved"
     print_status "Covers downloaded: $cover_downloaded"
-    print_status "JSON file created: $OUTPUT_JSON"
+    print_status "JSON files created: $OUTPUT_JSON, $METADATA_JSON"
     
     if [[ $video_count -eq 0 ]]; then
         print_warning "No video files found in $VIDEOS_DIR"
+    fi
+    
+    if [[ $metadata_retrieved -lt $video_count ]]; then
+        print_warning "Consider installing spotdl for better metadata: pip install spotdl"
     fi
 }
 
 # Show help
 show_help() {
-    echo "Download Song Data Script"
+    echo "Download Song Data Script (Enhanced with SpotDL)"
     echo ""
     echo "Usage: $0 [OPTIONS]"
     echo ""
@@ -325,20 +420,37 @@ show_help() {
     echo ""
     echo "This script will:"
     echo "  1. Scan the 'videos' directory for video files"
-    echo "  2. Generate a videos.json file with artist/title metadata"
-    echo "  3. Download cover art for each video (if tools available)"
-    echo "  4. Store detailed metadata in 'metadata' directory"
+    echo "  2. Use spotdl to retrieve accurate artist, title, and metadata"
+    echo "  3. Generate videos.json with enhanced metadata (including genre if available)"
+    echo "  4. Create metadata.json with complete spotdl metadata (lyrics, etc.)"
+    echo "  5. Download cover art from spotdl or fallback sources"
+    echo ""
+    echo "Generated files:"
+    echo "  - videos.json     (main video catalog with artist/title/genre)"
+    echo "  - metadata.json   (complete spotdl metadata by filename)"
     echo ""
     echo "Required directories:"
-    echo "  - videos/     (must exist, contains video files)"
-    echo "  - covers/     (created automatically)"
-    echo "  - metadata/   (created automatically)"
+    echo "  - videos/         (must exist, contains video files)"
+    echo "  - covers/         (created automatically)"
     echo ""
-    echo "Optional tools for cover download:"
-    echo "  - spotdl      (preferred)"
-    echo "  - yt-dlp      (fallback)"
-    echo "  - youtube-dl  (fallback)"
-    echo "  - jq          (for JSON parsing)"
+    echo "Required tools:"
+    echo "  - curl            (for downloading covers)"
+    echo ""
+    echo "Recommended tools:"
+    echo "  - spotdl          (pip install spotdl) - for accurate metadata"
+    echo "  - jq              (apt install jq) - for JSON processing"
+    echo "  - ffprobe         (apt install ffmpeg) - for video duration"
+    echo ""
+    echo "Fallback tools (for cover download):"
+    echo "  - yt-dlp          (pip install yt-dlp)"
+    echo "  - youtube-dl      (pip install youtube-dl)"
+    echo ""
+    echo "Enhanced features:"
+    echo "  - Uses spotdl to search and retrieve accurate metadata"
+    echo "  - Supports optional video_filename and cover_filename fields"
+    echo "  - Includes genre information when available"
+    echo "  - Complete metadata storage in metadata.json"
+    echo "  - Support for various video and image formats"
 }
 
 # Parse command line arguments
