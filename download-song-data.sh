@@ -52,7 +52,7 @@ get_spotdl_metadata() {
     local temp_file=$(mktemp)
     
     if command_exists spotdl; then
-        # Use spotdl to save metadata
+        # Use spotdl to save metadata - pass the filename directly
         if spotdl save "$search_query" --save-file "$temp_file" >/dev/null 2>&1; then
             if [[ -f "$temp_file" ]]; then
                 print_success "Retrieved spotdl metadata for: $search_query"
@@ -63,78 +63,10 @@ get_spotdl_metadata() {
         fi
     fi
     
-    # Fallback: create basic metadata structure
+    # If spotdl failed, return empty (no fallback parsing)
     print_warning "Could not retrieve spotdl metadata for: $search_query"
     rm -f "$temp_file"
-    
-    # Parse basic artist and title from filename as fallback
-    local artist_title=$(parse_artist_title_fallback "$filename")
-    local artist="${artist_title%|*}"
-    local title="${artist_title#*|}"
-    
-    # Create minimal JSON structure
-    cat << EOF
-{
-  "name": "$title",
-  "artists": [{"name": "$artist"}],
-  "album": {"name": "Unknown Album"},
-  "duration_ms": 0,
-  "explicit": false,
-  "external_urls": {},
-  "genres": [],
-  "popularity": 0,
-  "preview_url": null,
-  "track_number": 1,
-  "disc_number": 1,
-  "lyrics": null,
-  "copyright_text": null,
-  "isrc": null,
-  "release_date": "1900-01-01",
-  "images": []
-}
-EOF
     return 1
-}
-
-# Function to parse artist and title from filename (fallback)
-parse_artist_title_fallback() {
-    local filename="$1"
-    local artist=""
-    local title=""
-    
-    # Try different patterns
-    if [[ "$filename" =~ ^(.+)\ -\ (.+)$ ]]; then
-        # "Artist - Title" format
-        artist="${BASH_REMATCH[1]}"
-        title="${BASH_REMATCH[2]}"
-    elif [[ "$filename" =~ ^(.+)\ (.+)$ ]]; then
-        # "Title Artist" format - last word as artist
-        words=($filename)
-        artist="${words[-1]}"
-        title="${words[@]:0:${#words[@]}-1}"
-        title="${title// / }"
-    else
-        # Fallback: use filename as title
-        artist="Unknown Artist"
-        title="$filename"
-    fi
-    
-    echo "$artist|$title"
-}
-
-# Function to clean filename for search
-clean_filename() {
-    local filename="$1"
-    # Remove file extension
-    filename="${filename%.*}"
-    # Replace underscores and hyphens with spaces
-    filename="${filename//_/ }"
-    filename="${filename//-/ }"
-    # Remove common video quality indicators
-    filename=$(echo "$filename" | sed -E 's/\b(720p|1080p|4k|hd|HD|mp4|MP4)\b//g')
-    # Clean up extra spaces
-    filename=$(echo "$filename" | sed 's/[[:space:]]\+/ /g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-    echo "$filename"
 }
 
 # Function to download cover art from spotdl metadata or fallback sources
@@ -289,37 +221,38 @@ main() {
         
         local filename=$(basename "$file")
         local base="${filename%.*}"
-        local clean_title=$(clean_filename "$filename")
         
         print_status "Processing: $filename"
         
-        # Get metadata from spotdl
-        local metadata=$(get_spotdl_metadata "$base" "$clean_title")
+        # Get metadata from spotdl - pass filename without extension directly
+        local metadata=$(get_spotdl_metadata "$base" "$base")
         local metadata_success=$?
         
         if [[ $metadata_success -eq 0 ]]; then
             ((metadata_retrieved++))
         fi
         
-        # Extract info from metadata using jq or fallback
+        # Extract info from metadata using jq - only if spotdl succeeded
         local artist=""
         local title=""
         local genre=""
-        local duration_ms=0
         
-        if command_exists jq && [[ -n "$metadata" ]]; then
-            artist=$(echo "$metadata" | jq -r '.artists[0].name // "Unknown Artist"' 2>/dev/null)
-            title=$(echo "$metadata" | jq -r '.name // "Unknown Title"' 2>/dev/null)
-            genre=$(echo "$metadata" | jq -r '.genres[0] // ""' 2>/dev/null)
-            duration_ms=$(echo "$metadata" | jq -r '.duration_ms // 0' 2>/dev/null)
+        if [[ $metadata_success -eq 0 ]] && command_exists jq && echo "$metadata" | jq . >/dev/null 2>&1; then
+            artist=$(echo "$metadata" | jq -r '.artists[0].name // empty' 2>/dev/null)
+            title=$(echo "$metadata" | jq -r '.name // empty' 2>/dev/null)
+            genre=$(echo "$metadata" | jq -r '.genres[0] // empty' 2>/dev/null)
+            
+            print_success "→ Artist: '$artist', Title: '$title'$([ -n "$genre" ] && echo ", Genre: '$genre'")"
         else
-            # Fallback parsing
-            local artist_title=$(parse_artist_title_fallback "$base")
-            artist="${artist_title%|*}"
-            title="${artist_title#*|}"
+            print_warning "→ Skipping $filename - no spotdl metadata available"
+            continue
         fi
         
-        print_success "→ Artist: '$artist', Title: '$title'$([ -n "$genre" ] && echo ", Genre: '$genre'")"
+        # Validate that we have artist and title from spotdl
+        if [[ -z "$artist" || -z "$title" || "$artist" == "null" || "$title" == "null" ]]; then
+            print_warning "→ Skipping $filename - incomplete metadata from spotdl"
+            continue
+        fi
         
         # Store full metadata
         if [[ "$first_metadata" == true ]]; then
@@ -330,7 +263,7 @@ main() {
         echo "  \"$base\": $metadata" >> "$temp_metadata"
         
         # Try to download cover art
-        if download_cover "$file" "$base" "$metadata" "$clean_title"; then
+        if download_cover "$file" "$base" "$metadata" "$base"; then
             ((cover_downloaded++))
         fi
         
@@ -367,12 +300,8 @@ main() {
             echo "    \"cover_filename\": \"${cover_filename//\"/\\\"}\"," >> "$OUTPUT_JSON"
         fi
         
-        if [[ "$video_duration" != "0" ]]; then
+        if [[ "$video_duration" != "0" && -n "$video_duration" ]]; then
             echo "    \"duration_seconds\": $video_duration," >> "$OUTPUT_JSON"
-        fi
-        
-        if [[ "$duration_ms" != "0" ]]; then
-            echo "    \"duration_ms\": $duration_ms," >> "$OUTPUT_JSON"
         fi
         
         # Remove trailing comma from last field

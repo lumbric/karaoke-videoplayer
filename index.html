@@ -545,13 +545,44 @@
         const rawVideos = await res.json();
         
         // Transform to include computed file paths and display title
-        allVideos = rawVideos.map(video => ({
-          ...video,
-          file: `videos/${video.filename}.mp4`,
-          cover: `covers/${video.filename}.jpg`,
-          displayTitle: `${video.artist} - ${video.title}`,
-          searchText: `${video.artist} ${video.title}`.toLowerCase()
-        }));
+        allVideos = rawVideos.map(video => {
+          // Handle both old format (title field) and new format (artist + title fields)
+          let displayTitle, artist, title;
+          
+          if (video.artist && video.title) {
+            // New format with separate artist and title
+            artist = video.artist;
+            title = video.title;
+            displayTitle = `${artist} - ${title}`;
+          } else if (video.title) {
+            // Old format with combined title
+            displayTitle = video.title;
+            // Try to parse artist and title from combined title
+            if (video.title.includes(' - ')) {
+              const parts = video.title.split(' - ');
+              artist = parts[0];
+              title = parts.slice(1).join(' - ');
+            } else {
+              artist = "Unknown Artist";
+              title = video.title;
+            }
+          } else {
+            // Fallback
+            displayTitle = video.filename || "Unknown Song";
+            artist = "Unknown Artist";
+            title = displayTitle;
+          }
+          
+          return {
+            ...video,
+            file: video.file || `videos/${video.filename}.mp4`,
+            cover: video.cover || `covers/${video.filename}.jpg`,
+            displayTitle: displayTitle,
+            artist: artist,
+            title: title,
+            searchText: `${artist} ${title}`.toLowerCase()
+          };
+        });
         
         showRandomVideos();
       } catch (error) {
