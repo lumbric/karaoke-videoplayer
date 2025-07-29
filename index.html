@@ -212,7 +212,7 @@
     #closeBtn {
       position: absolute;
       top: 20px;
-      left: 20px;
+      right: 20px;
       padding: 12px 16px;
       font-size: 1.2em;
       display: none;
@@ -435,7 +435,7 @@
   <div class="video-grid" id="videoList"></div>
   <div id="playerContainer">
     <video id="videoPlayer" autoplay disablepictureinpicture></video>
-    <button id="closeBtn" onclick="closePlayer()">← Zurück</button>
+    <button id="closeBtn" onclick="closePlayer()">✕</button>
     <div class="video-overlay" id="videoOverlay">
       <button class="video-control-btn" id="playPauseBtn" onclick="togglePlayPause()">⏸ Pause</button>
       <button class="video-control-btn" onclick="restartVideo()">↻ Restart</button>
