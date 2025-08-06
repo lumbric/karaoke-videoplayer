@@ -28,10 +28,7 @@ EXTRA_METADATA_JSON = "extra_metadata.json"
 VIDEO_EXTENSIONS = [".mp4", ".avi", ".mkv", ".mov", ".webm", ".flv", ".m4v"]
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(levelname)s: %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -47,10 +44,10 @@ def check_internet_connection() -> bool:
 
 def save_json_files(videos_data, extra_metadata_data):
     """Save current videos and extra metadata to JSON files."""
-    with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
+    with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(videos_data, f, indent=2, ensure_ascii=False)
 
-    with open(EXTRA_METADATA_JSON, 'w', encoding='utf-8') as f:
+    with open(EXTRA_METADATA_JSON, "w", encoding="utf-8") as f:
         json.dump(extra_metadata_data, f, indent=2, ensure_ascii=False)
 
 
@@ -60,14 +57,16 @@ def load_existing_data() -> Tuple[List[Dict], Dict]:
     existing_extra_metadata = {}
 
     if os.path.exists(OUTPUT_JSON):
-        with open(OUTPUT_JSON, 'r', encoding='utf-8') as f:
+        with open(OUTPUT_JSON, "r", encoding="utf-8") as f:
             existing_videos = json.load(f)
         logger.info(f"✓ Loaded {len(existing_videos)} existing video entries")
 
     if os.path.exists(EXTRA_METADATA_JSON):
-        with open(EXTRA_METADATA_JSON, 'r', encoding='utf-8') as f:
+        with open(EXTRA_METADATA_JSON, "r", encoding="utf-8") as f:
             existing_extra_metadata = json.load(f)
-        logger.info(f"✓ Loaded extra metadata for {len(existing_extra_metadata)} videos")
+        logger.info(
+            f"✓ Loaded extra metadata for {len(existing_extra_metadata)} videos"
+        )
 
     return existing_videos, existing_extra_metadata
 
@@ -89,7 +88,7 @@ def get_video_files() -> List[Path]:
 
 
 def get_existing_cover(base_name: str) -> Optional[str]:
-    return  Path(COVERS_DIR) / f"{base_name}.jpg"
+    return Path(COVERS_DIR) / f"{base_name}.jpg"
 
 
 def download_cover(base_name: str, search_query: str) -> Optional[str]:
@@ -105,12 +104,23 @@ def download_cover(base_name: str, search_query: str) -> Optional[str]:
     Path(COVERS_DIR).mkdir(exist_ok=True)
 
     # Download cover using spotdl
-    subprocess.run([
-        "spotdl", "save", search_query,
-        "--save-file", "/dev/null",  # We don't need the metadata file
-        "--output", f"{COVERS_DIR}/{base_name}",
-        "--format", "jpg"
-    ], capture_output=True, text=True, timeout=150, check=True)
+    subprocess.run(
+        [
+            "spotdl",
+            "save",
+            search_query,
+            "--save-file",
+            "/dev/null",  # We don't need the metadata file
+            "--output",
+            f"{COVERS_DIR}/{base_name}",
+            "--format",
+            "jpg",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=150,
+        check=True,
+    )
 
     # Check if cover was downloaded
     new_cover = get_existing_cover(base_name)
@@ -127,18 +137,24 @@ def get_spotdl_metadata(search_query: str) -> Optional[Dict]:
     logger.info(f"Getting metadata for: {search_query}")
 
     try:
-        with tempfile.NamedTemporaryFile(mode='w+', suffix='.spotdl', delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w+", suffix=".spotdl", delete=False
+        ) as temp_file:
             temp_path = temp_file.name
 
         # Use spotdl to get metadata
-        result = subprocess.run([
-            "spotdl", "save", search_query,
-            "--save-file", temp_path
-        ], capture_output=False, text=True, timeout=150)
+        result = subprocess.run(
+            ["spotdl", "save", search_query, "--save-file", temp_path],
+            capture_output=False,
+            text=True,
+            timeout=150,
+        )
 
         # Log explicit error output
         if result.returncode != 0:
-            logger.warning(f"✗ spotdl failed for metadata '{search_query}' (exit code {result.returncode})")
+            logger.warning(
+                f"✗ spotdl failed for metadata '{search_query}' (exit code {result.returncode})"
+            )
             if result.stdout.strip():
                 logger.warning(f"  STDOUT: {result.stdout.strip()}")
             if result.stderr.strip():
@@ -150,7 +166,7 @@ def get_spotdl_metadata(search_query: str) -> Optional[Dict]:
             return None
 
         if result.returncode == 0 and os.path.exists(temp_path):
-            with open(temp_path, 'r', encoding='utf-8') as f:
+            with open(temp_path, "r", encoding="utf-8") as f:
                 metadata = json.load(f)
 
             if len(metadata) != 1:
@@ -182,12 +198,20 @@ def get_spotdl_metadata(search_query: str) -> Optional[Dict]:
 def get_video_duration(video_path: Path) -> Optional[float]:
     """Get video duration using ffprobe."""
     try:
-        result = subprocess.run([
-            "ffprobe", "-v", "quiet",
-            "-show_entries", "format=duration",
-            "-of", "default=noprint_wrappers=1:nokey=1",
-            str(video_path)
-        ], capture_output=True, text=True)
+        result = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "quiet",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                str(video_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
 
         if result.returncode == 0 and result.stdout.strip():
             return float(result.stdout.strip())
@@ -197,7 +221,9 @@ def get_video_duration(video_path: Path) -> Optional[float]:
     return None
 
 
-def needs_update(video_entry: Dict, no_internet: bool = False) -> Tuple[bool, List[str]]:
+def needs_update(
+    video_entry: Dict, no_internet: bool = False
+) -> Tuple[bool, List[str]]:
     """Check if a video entry needs metadata or cover updates."""
     reasons = []
 
@@ -216,7 +242,9 @@ def needs_update(video_entry: Dict, no_internet: bool = False) -> Tuple[bool, Li
     return len(reasons) > 0, reasons
 
 
-def update_video_entry(video_entry: Dict, video_path: Path) -> Tuple[Optional[Dict], Optional[Dict]]:
+def update_video_entry(
+    video_entry: Dict, video_path: Path
+) -> Tuple[Optional[Dict], Optional[Dict]]:
     """Update a single video entry with missing metadata/cover."""
     base_name = video_entry["filename"]
     logger.info(f"Updating: {base_name}")
@@ -229,7 +257,10 @@ def update_video_entry(video_entry: Dict, video_path: Path) -> Tuple[Optional[Di
             # Extract song information
             artist, title, genre = extract_song_info(extra_metadata)
 
-            logger.info(f"→ Artist: '{artist or 'N/A'}', Title: '{title or 'N/A'}'" + (f", Genre: '{genre}'" if genre else ""))
+            logger.info(
+                f"→ Artist: '{artist or 'N/A'}', Title: '{title or 'N/A'}'"
+                + (f", Genre: '{genre}'" if genre else "")
+            )
 
             # Update video entry with new metadata
             if artist:
@@ -243,8 +274,7 @@ def update_video_entry(video_entry: Dict, video_path: Path) -> Tuple[Optional[Di
 
             # Update processed timestamp
             video_entry["processed_at"] = subprocess.run(
-                ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
-                capture_output=True, text=True
+                ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"], capture_output=True, text=True
             ).stdout.strip()
 
     # Download cover if missing
@@ -256,7 +286,9 @@ def update_video_entry(video_entry: Dict, video_path: Path) -> Tuple[Optional[Di
     return video_entry, extra_metadata
 
 
-def extract_song_info(metadata: Dict) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+def extract_song_info(
+    metadata: Dict,
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """Extract artist, title, and genre from spotdl metadata."""
     artist = artist_name = metadata.get("artist", None)
     title = metadata.get("name", None)
@@ -279,7 +311,10 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
     # Extract song information
     artist, title, genre = extract_song_info(extra_metadata)
 
-    logger.info(f"→ Artist: '{artist or 'N/A'}', Title: '{title or 'N/A'}'" + (f", Genre: '{genre}'" if genre else ""))
+    logger.info(
+        f"→ Artist: '{artist or 'N/A'}', Title: '{title or 'N/A'}'"
+        + (f", Genre: '{genre}'" if genre else "")
+    )
 
     # Download cover
     cover_filename = download_cover(base_name, base_name)
@@ -288,9 +323,7 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
     duration = get_video_duration(video_path)
 
     # Build video entry for videos.json
-    video_entry = {
-        "filename": base_name
-    }
+    video_entry = {"filename": base_name}
 
     # Add optional fields only if they have valid values
     if artist:
@@ -313,14 +346,13 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
         video_entry["duration_seconds"] = round(duration, 2)
 
     video_entry["processed_at"] = subprocess.run(
-        ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
-        capture_output=True, text=True
+        ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"], capture_output=True, text=True
     ).stdout.strip()
 
     return {
         "video_entry": video_entry,
         "extra_metadata": extra_metadata,
-        "base_name": base_name
+        "base_name": base_name,
     }
 
 
@@ -333,9 +365,7 @@ def process_video_file_offline(video_path: Path) -> Dict:
     duration = get_video_duration(video_path)
 
     # Build minimal video entry for videos.json
-    video_entry = {
-        "filename": base_name
-    }
+    video_entry = {"filename": base_name}
 
     # Add optional fields
     if video_path.name != f"{base_name}.mp4":
@@ -345,20 +375,24 @@ def process_video_file_offline(video_path: Path) -> Dict:
         video_entry["duration_seconds"] = round(duration, 2)
 
     video_entry["processed_at"] = subprocess.run(
-        ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
-        capture_output=True, text=True
+        ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"], capture_output=True, text=True
     ).stdout.strip()
 
-    return {
-        "video_entry": video_entry,
-        "base_name": base_name
-    }
+    return {"video_entry": video_entry, "base_name": base_name}
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Update song metadata and covers using spotdl")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    parser.add_argument("--no-internet", action="store_true", help="Skip network operations - only add filename and duration of videos")
+    parser = argparse.ArgumentParser(
+        description="Update song metadata and covers using spotdl"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose output"
+    )
+    parser.add_argument(
+        "--no-internet",
+        action="store_true",
+        help="Skip network operations - only add filename and duration of videos",
+    )
     args = parser.parse_args()
 
     if args.verbose:
@@ -370,8 +404,10 @@ def main():
         has_internet = check_internet_connection()
         if not has_internet:
             logger.warning("⚠️  No internet connection detected!")
-            logger.warning("💡 Consider using '--no-internet' flag to add videos with filename and
-                           "duration only")
+            logger.warning(
+                "💡 Consider using '--no-internet' flag to add videos with filename and "
+                "duration only"
+            )
             return 1
     else:
         logger.info("Running in offline mode - skipping network operations")
@@ -393,7 +429,9 @@ def main():
     existing_videos_map = {entry["filename"]: entry for entry in videos_data}
 
     if len(existing_videos_map) < len(videos_data):
-        raise ValueError("some videos have the same base name but different ending, this is not supported")
+        raise ValueError(
+            "some videos have the same base name but different ending, this is not supported"
+        )
 
     # Process each video file
     processed_count = 0
@@ -413,7 +451,9 @@ def main():
 
                 if needs_updating:
                     logger.info(f"Updating {base_name}: {', '.join(reasons)}")
-                    updated_entry, new_extra_metadata = update_video_entry(video_entry, video_path)
+                    updated_entry, new_extra_metadata = update_video_entry(
+                        video_entry, video_path
+                    )
 
                     if updated_entry:
                         # Update the entry in our data
