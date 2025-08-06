@@ -42,8 +42,10 @@ def check_internet_connection() -> bool:
         return False
 
 
-def save_json_files(videos_data, extra_metadata_data):
+def save_json_files(videos_map, extra_metadata_data):
     """Save current videos and extra metadata to JSON files."""
+
+    videos_data = list(videos_map.values())
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(videos_data, f, indent=2, ensure_ascii=False)
 
@@ -413,7 +415,7 @@ def main():
         logger.info("Running in offline mode - skipping network operations")
 
     # Load existing data
-    videos_data, extra_metadata_data = load_existing_data()
+    videos_list, extra_metadata_data = load_existing_data()
 
     # Get video files from filesystem
     video_files = get_video_files()
@@ -426,9 +428,9 @@ def main():
         Path(COVERS_DIR).mkdir(exist_ok=True)
 
     # Build a map of existing video entries by filename
-    existing_videos_map = {entry["filename"]: entry for entry in videos_data}
+    videos_map = {entry["filename"]: entry for entry in videos_list}
 
-    if len(existing_videos_map) < len(videos_data):
+    if len(videos_map) < len(videos_list):
         raise ValueError(
             "some videos have the same base name but different ending, this is not supported"
         )
@@ -443,8 +445,8 @@ def main():
             base_name = video_path.stem
 
             # Check if video entry already exists
-            if base_name in existing_videos_map:
-                video_entry = existing_videos_map[base_name]
+            if base_name in videos_map:
+                video_entry = videos_map[base_name]
 
                 # Check if update is needed (skip updates in offline mode)
                 needs_updating, reasons = needs_update(video_entry, args.no_internet)
@@ -457,7 +459,7 @@ def main():
 
                     if updated_entry:
                         # Update the entry in our data
-                        existing_videos_map[base_name] = updated_entry
+                        videos_map[base_name] = updated_entry
                         if new_extra_metadata:
                             extra_metadata_data[base_name] = new_extra_metadata
                         updated_count += 1
@@ -471,27 +473,25 @@ def main():
                     # Process without network operations
                     result = process_video_file_offline(video_path)
                     if result:
-                        existing_videos_map[base_name] = result["video_entry"]
+                        videos_map[base_name] = result["video_entry"]
                         processed_count += 1
                 else:
                     # Process with full metadata and cover download
                     result = process_video_file(video_path)
                     if result:
-                        existing_videos_map[base_name] = result["video_entry"]
+                        videos_map[base_name] = result["video_entry"]
                         extra_metadata_data[base_name] = result["extra_metadata"]
                         processed_count += 1
 
             # Save after every new video for resume capability
-            videos_data = list(existing_videos_map.values())
-            save_json_files(videos_data, extra_metadata_data)
+            save_json_files(videos_map, extra_metadata_data)
 
             # Count covers that exist (only if not in offline mode)
             if not args.no_internet and get_existing_cover(base_name):
                 cover_downloaded_count += 1
 
     finally:
-        videos_data = list(existing_videos_map.values())
-        save_json_files(videos_data, extra_metadata_data)
+        save_json_files(videos_map, extra_metadata_data)
 
     logger.info(f"Videos processed: {processed_count} new, {updated_count} updated")
     logger.info(f"Covers available: {cover_downloaded_count}")
