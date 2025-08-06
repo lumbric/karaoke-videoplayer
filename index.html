@@ -547,13 +547,20 @@
         // Transform to include computed file paths and display title
         allVideos = rawVideos.map(video => {
           // Handle both old format (title field) and new format (artist + title fields)
-          let displayTitle, artist, title;
+          let displayTitle, artist, title, searchText;
           
           if (video.artist && video.title) {
             // New format with separate artist and title
             artist = video.artist;
             title = video.title;
             displayTitle = `${artist} - ${title}`;
+            searchText = `${artist} ${title}`.toLowerCase();
+          } else if (video.artist || video.title) {
+            // Partial new format - only one field available
+            artist = video.artist || "";
+            title = video.title || "";
+            displayTitle = video.artist ? `${video.artist} - ${video.title || ""}` : video.title;
+            searchText = `${artist} ${title}`.toLowerCase();
           } else if (video.title) {
             // Old format with combined title
             displayTitle = video.title;
@@ -562,15 +569,19 @@
               const parts = video.title.split(' - ');
               artist = parts[0];
               title = parts.slice(1).join(' - ');
+              searchText = `${artist} ${title}`.toLowerCase();
             } else {
-              artist = "Unknown Artist";
+              artist = "";
               title = video.title;
+              searchText = video.title.toLowerCase();
             }
           } else {
-            // Fallback
-            displayTitle = video.filename || "Unknown Song";
-            artist = "Unknown Artist";
-            title = displayTitle;
+            // Fallback - use filename without extension
+            const filename = video.filename || video.file?.split('/').pop()?.replace(/\.[^/.]+$/, "") || "Unknown Song";
+            displayTitle = filename;
+            artist = "";
+            title = filename;
+            searchText = filename.toLowerCase();
           }
           
           return {
@@ -580,7 +591,7 @@
             displayTitle: displayTitle,
             artist: artist,
             title: title,
-            searchText: `${artist} ${title}`.toLowerCase()
+            searchText: searchText
           };
         });
         
@@ -630,10 +641,25 @@
         return;
       }
 
-      // Filter videos based on search query (search in artist and title)
-      const filteredVideos = allVideos.filter(v =>
-        v.searchText.includes(query.toLowerCase())
-      );
+      const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
+
+      // Filter videos based on search query (search in filename, artist, and title)
+      const filteredVideos = allVideos.filter(v => {
+        // Create an array of searchable fields
+        const searchFields = [
+          v.filename || "",
+          v.artist || "",
+          v.title || "",
+          v.searchText || ""
+        ];
+        
+        // Check if any search term matches any of the fields
+        return searchTerms.some(term => 
+          searchFields.some(field => 
+            field.toLowerCase().includes(term)
+          )
+        );
+      });
 
       if (filteredVideos.length === 0) {
         renderCards([]);
