@@ -22,7 +22,7 @@
       overflow-x: hidden;
       line-height: 1.4;
       position: relative;
-      padding-top: 220px; /* Space for fixed header */
+      padding-top: 320px; /* Space for fixed header */
     }
 
     h1 {
@@ -345,11 +345,20 @@
         background: rgba(51, 46, 93, 0.85);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         z-index: 100;
         padding: 1em 0 0.5em 0;
         box-sizing: border-box;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 14px 30px #332e5d;
+    }
+
+    .header-box:before{
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
     }
 
     .header-content {
