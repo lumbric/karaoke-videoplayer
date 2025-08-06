@@ -699,7 +699,7 @@
         ];
         
         // Check if any search term matches any of the fields
-        return searchTerms.some(term => 
+        return searchTerms.every(term => 
           searchFields.some(field => 
             field.toLowerCase().includes(term)
           )
