@@ -10,6 +10,7 @@ available).
 
 import os
 import sys
+import time
 import json
 import socket
 import imghdr
@@ -39,8 +40,6 @@ def log_exception(type_, value, traceback):
 
 
 def setup_logging(fname=LOG_FILE):
-    setup_done = True
-
     sys.excepthook = log_exception
 
     NO_COLOR = "\33[m"
@@ -92,7 +91,6 @@ def check_internet_connection() -> bool:
 
 def save_json_files(video_data, extra_metadata):
     """Save current videos and extra metadata to JSON files."""
-
     videos_data = list(video_data.values())
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(videos_data, f, indent=2, ensure_ascii=False)
@@ -122,10 +120,6 @@ def load_existing_data() -> Tuple[List[Dict], Dict]:
 def get_video_files() -> List[Path]:
     """Get all video files from the videos directory."""
     videos_path = Path(VIDEOS_DIR)
-    if not videos_path.exists():
-        logging.error(f"Videos directory '{VIDEOS_DIR}' not found!")
-        return []
-
     video_files = []
     for ext in VIDEO_EXTENSIONS:
         video_files.extend(videos_path.glob(f"*{ext}"))
@@ -139,8 +133,8 @@ def download_cover(base_name: str, cover_url: str) -> Optional[str]:
     """Download cover art from the given URL if it does not already exist."""
     full_path = Path(COVERS_DIR) / f"{base_name}.jpg"
     if os.path.exists(full_path):
-        logging.warning(f"Skipping download of cover {base_name} - already exists.")
-        return str(full_path)
+        logging.info(f"Skipping download of cover {base_name} - already exists.")
+        return str(full_path), False
 
     # Create covers directory if it doesn't exist
     Path(COVERS_DIR).mkdir(exist_ok=True)
@@ -165,7 +159,7 @@ def download_cover(base_name: str, cover_url: str) -> Optional[str]:
 
     logging.info(f"✓ Downloaded cover: {full_path}")
 
-    return str(full_path)
+    return str(full_path), True
 
 
 def get_spotdl_metadata(search_query: str) -> Optional[Dict]:
@@ -258,8 +252,15 @@ def process_video_file(
     Note: This will edit the parameter video_entry!
 
     """
+    t0 = time.time()
 
     video_entry = {k: v for k, v in video_entry.items()} if video_entry else {}
+
+    result = {
+        "cover_downloaded": False,
+        "metadata_downloaded": False,
+        "video_entry": video_entry,
+    }
 
     # Build video entry for videos.json
     if "filename" not in video_entry:
@@ -271,7 +272,7 @@ def process_video_file(
         video_entry["duration_seconds"] = round(duration, 2)
 
     if no_internet:
-        return {"video_entry": video_entry}
+        return result
 
     logging.debug(f"Processing: {video_path.name}...")
 
@@ -281,17 +282,20 @@ def process_video_file(
 
     if not extra_metadata_entry:
         logging.warning(f"Skipping {video_path.name} - no metadata available")
-        return {"video_entry": video_entry}
+        return result
+
+    result["metadata_downloaded"] = True
 
     # Extract song information
     artist = extra_metadata_entry.get("artist", None)
     title = extra_metadata_entry.get("name", None)
     genre = extra_metadata_entry["genres"]
 
-    logging.info(f"→ Artist: '{artist}', Title: '{title}', Genre: '{genre}'")
+    logging.info(f"Artist: '{artist}', Title: '{title}', Genre: '{genre}'")
 
     # Download cover
-    cover_filename = download_cover(base_name, extra_metadata_entry["cover_url"])
+    cover_filename, cover_downloaded = download_cover(base_name, extra_metadata_entry["cover_url"])
+    result["cover_downloaded"] = cover_downloaded
 
     # Add optional fields only if they have valid values
     if artist:
@@ -314,10 +318,11 @@ def process_video_file(
         ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"], capture_output=True, text=True
     ).stdout.strip()
 
-    return {
-        "video_entry": video_entry,
-        "extra_metadata_entry": extra_metadata_entry,
-    }
+    logging.info(f"Total processing duration: {time.time() - t0}")
+
+    result["extra_metadata_entry"] = extra_metadata_entry
+
+    return result
 
 
 def main():
@@ -374,12 +379,12 @@ def main():
 
     # Process each video file
     processed_count = 0
-    updated_count = 0
+    metadata_downloaded_count = 0
     cover_downloaded_count = 0
 
     try:
         for video_path in video_files:
-            logging.debug(f"Processing: {video_path.name}")
+            logging.info(f"\n\n# # # Processing: {video_path.name} # # #")
 
             base_name = video_path.stem
 
@@ -391,9 +396,14 @@ def main():
                 args.no_internet,
             )
 
+            cover_downloaded_count += result["cover_downloaded"]
+            metadata_downloaded_count += result["metadata_downloaded"]
+
             video_data[base_name] = result["video_entry"]
             if "extra_metadata_entry" in result:
                 extra_metadata[base_name] = result["extra_metadata_entry"]
+
+            processed_count += 1
 
             # Save after every new video for resume capability
             save_json_files(video_data, extra_metadata)
@@ -401,10 +411,11 @@ def main():
     finally:
         save_json_files(video_data, extra_metadata)
 
-    # logging.info(f"Videos processed: {processed_count} new, {updated_count} updated")
-    # logging.info(f"Covers available: {cover_downloaded_count}")
+        logging.info(f"Videos processed: {processed_count}")
+        logging.info(f"Number of songs where metadata was retrieved: {metadata_downloaded_count}")
+        logging.info(f"Covers downloaded: {cover_downloaded_count}")
 
-    logging.info(f"JSON files saved: {OUTPUT_JSON}, {EXTRA_METADATA_JSON}")
+        logging.info(f"JSON files saved: {OUTPUT_JSON}, {EXTRA_METADATA_JSON}")
 
     return 0
 
