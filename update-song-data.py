@@ -21,7 +21,7 @@ import logging
 VIDEOS_DIR = "videos"
 COVERS_DIR = "covers"
 OUTPUT_JSON = "videos.json"
-METADATA_JSON = "metadata.json"
+EXTRA_METADATA_JSON = "extra_metadata.json"
 
 # FIXME this is probably not necessary
 VIDEO_EXTENSIONS = [".mp4", ".avi", ".mkv", ".mov", ".webm", ".flv", ".m4v"]
@@ -35,31 +35,31 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def save_json_files(videos_data, metadata_data):
-    """Save current videos and metadata to JSON files."""
+def save_json_files(videos_data, extra_metadata_data):
+    """Save current videos and extra metadata to JSON files."""
     with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
         json.dump(videos_data, f, indent=2, ensure_ascii=False)
 
-    with open(METADATA_JSON, 'w', encoding='utf-8') as f:
-        json.dump(metadata_data, f, indent=2, ensure_ascii=False)
+    with open(EXTRA_METADATA_JSON, 'w', encoding='utf-8') as f:
+        json.dump(extra_metadata_data, f, indent=2, ensure_ascii=False)
 
 
 def load_existing_data() -> Tuple[List[Dict], Dict]:
-    """Load existing videos.json and metadata.json files."""
+    """Load existing videos.json and extra_metadata.json files."""
     existing_videos = []
-    existing_metadata = {}
+    existing_extra_metadata = {}
 
     if os.path.exists(OUTPUT_JSON):
         with open(OUTPUT_JSON, 'r', encoding='utf-8') as f:
             existing_videos = json.load(f)
         logger.info(f"✓ Loaded {len(existing_videos)} existing video entries")
 
-    if os.path.exists(METADATA_JSON):
-        with open(METADATA_JSON, 'r', encoding='utf-8') as f:
-            existing_metadata = json.load(f)
-        logger.info(f"✓ Loaded metadata for {len(existing_metadata)} videos")
+    if os.path.exists(EXTRA_METADATA_JSON):
+        with open(EXTRA_METADATA_JSON, 'r', encoding='utf-8') as f:
+            existing_extra_metadata = json.load(f)
+        logger.info(f"✓ Loaded extra metadata for {len(existing_extra_metadata)} videos")
 
-    return existing_videos, existing_metadata
+    return existing_videos, existing_extra_metadata
 
 
 def get_video_files() -> List[Path]:
@@ -192,17 +192,16 @@ def get_video_duration(video_path: Path) -> Optional[float]:
     return None
 
 
-def needs_update(video_entry: Dict, metadata_exists: bool) -> Tuple[bool, List[str]]:
+def needs_update(video_entry: Dict) -> Tuple[bool, List[str]]:
     """Check if a video entry needs metadata or cover updates."""
     reasons = []
 
-    # Check if metadata is missing (no artist or title)
-    if not metadata_exists or (not video_entry.get("artist") and not video_entry.get("title")):
+    # Check if metadata is missing (no artist or title in videos.json)
+    if not video_entry.get("artist") or not video_entry.get("title"):
         reasons.append("missing metadata")
 
     # Check if cover is missing
-    base_name = video_entry["filename"]
-    if not get_existing_cover(base_name):
+    if not get_existing_cover(video_entry["filename"]):
         reasons.append("missing cover")
 
     return len(reasons) > 0, reasons
@@ -214,12 +213,12 @@ def update_video_entry(video_entry: Dict, video_path: Path) -> Tuple[Optional[Di
     logger.info(f"Updating: {base_name}")
 
     # Get metadata from spotdl if not available or incomplete
-    metadata = None
+    extra_metadata = None
     if not video_entry.get("artist") and not video_entry.get("title"):
-        metadata = get_spotdl_metadata(base_name)
-        if metadata:
+        extra_metadata = get_spotdl_metadata(base_name)
+        if extra_metadata:
             # Extract song information
-            artist, title, genre = extract_song_info(metadata)
+            artist, title, genre = extract_song_info(extra_metadata)
 
             logger.info(f"→ Artist: '{artist or 'N/A'}', Title: '{title or 'N/A'}'" + (f", Genre: '{genre}'" if genre else ""))
 
@@ -245,7 +244,7 @@ def update_video_entry(video_entry: Dict, video_path: Path) -> Tuple[Optional[Di
         if cover_filename and cover_filename != f"{base_name}.jpg":
             video_entry["cover_filename"] = cover_filename
 
-    return video_entry, metadata
+    return video_entry, extra_metadata
 
 
 def extract_song_info(metadata: Dict) -> Tuple[Optional[str], Optional[str], Optional[str]]:
@@ -281,13 +280,13 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
     logger.info(f"Processing: {video_path.name}")
 
     # Get metadata from spotdl
-    metadata = get_spotdl_metadata(base_name)
-    if not metadata:
+    extra_metadata = get_spotdl_metadata(base_name)
+    if not extra_metadata:
         logger.warning(f"Skipping {video_path.name} - no metadata available")
         return None
 
     # Extract song information
-    artist, title, genre = extract_song_info(metadata)
+    artist, title, genre = extract_song_info(extra_metadata)
 
     logger.info(f"→ Artist: '{artist or 'N/A'}', Title: '{title or 'N/A'}'" + (f", Genre: '{genre}'" if genre else ""))
 
@@ -329,7 +328,7 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
 
     return {
         "video_entry": video_entry,
-        "metadata": metadata,
+        "extra_metadata": extra_metadata,
         "base_name": base_name
     }
 
@@ -343,7 +342,7 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     # Load existing data
-    videos_data, metadata_data = load_existing_data()
+    videos_data, extra_metadata_data = load_existing_data()
 
     # Get video files from filesystem
     video_files = get_video_files()
@@ -372,20 +371,19 @@ def main():
             # Check if video entry already exists
             if base_name in existing_videos_map:
                 video_entry = existing_videos_map[base_name]
-                metadata_exists = base_name in metadata_data
 
-                # Check if update is needed
-                needs_updating, reasons = needs_update(video_entry, metadata_exists)
+                # Check if update is needed (only based on videos.json data and cover existence)
+                needs_updating, reasons = needs_update(video_entry)
 
                 if needs_updating:
                     logger.info(f"Updating {base_name}: {', '.join(reasons)}")
-                    updated_entry, new_metadata = update_video_entry(video_entry, video_path)
+                    updated_entry, new_extra_metadata = update_video_entry(video_entry, video_path)
 
                     if updated_entry:
                         # Update the entry in our data
                         existing_videos_map[base_name] = updated_entry
-                        if new_metadata:
-                            metadata_data[base_name] = new_metadata
+                        if new_extra_metadata:
+                            extra_metadata_data[base_name] = new_extra_metadata
                         updated_count += 1
                 else:
                     logger.info(f"✓ {base_name} is up to date")
@@ -395,12 +393,12 @@ def main():
                 result = process_video_file(video_path)
                 if result:
                     existing_videos_map[base_name] = result["video_entry"]
-                    metadata_data[base_name] = result["metadata"]
+                    extra_metadata_data[base_name] = result["extra_metadata"]
                     processed_count += 1
 
             # Save after every new video for resume capability
             videos_data = list(existing_videos_map.values())
-            save_json_files(videos_data, metadata_data)
+            save_json_files(videos_data, extra_metadata_data)
 
             # Count covers that exist
             if get_existing_cover(base_name):
@@ -408,11 +406,11 @@ def main():
 
     finally:
         videos_data = list(existing_videos_map.values())
-        save_json_files(videos_data, metadata_data)
+        save_json_files(videos_data, extra_metadata_data)
 
     logger.info(f"Videos processed: {processed_count} new, {updated_count} updated")
     logger.info(f"Covers available: {cover_downloaded_count}")
-    logger.info(f"JSON files saved: {OUTPUT_JSON}, {METADATA_JSON}")
+    logger.info(f"JSON files saved: {OUTPUT_JSON}, {EXTRA_METADATA_JSON}")
 
     return 0
 
