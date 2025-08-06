@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-Download Song Data Script
+Update Song Data
 
-Uses spotdl to retrieve accurate metadata and cover art for karaoke videos.
+This script generates or updates the videos.json file according to the files in the videos folder
+and downloads cover images and metadata using spotdl for the song (if a network connection is
+available).
 
 """
 
