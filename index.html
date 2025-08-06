@@ -22,6 +22,7 @@
       overflow-x: hidden;
       line-height: 1.4;
       position: relative;
+      padding-top: 220px; /* Space for fixed header */
     }
 
     h1 {
@@ -47,7 +48,7 @@
     */
 
     #search {
-      margin: 1.5em auto 2em auto;
+      margin: 1.5em auto 1em auto;
       display: block;
       padding: 1em 1.5em;
       width: min(600px, 80%);
@@ -336,13 +337,26 @@
     .cosmic-decoration:nth-child(4) { bottom: 25%; right: 15%; }
 
     .header-box {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background: #332e5d;
+        z-index: 100;
+        padding: 1em 0 0.5em 0;
+        box-sizing: border-box;
+    }
+
+    .header-content {
         position: relative;
-        width:1000px;
-        margin:auto;
+        width: 1000px;
+        max-width: 100%;
+        margin: auto;
     }
 
     .singing-chicken {
-        position: fixed;
+        position: absolute;
         left: 20px;
         top: 10px;
         width: 400px;
@@ -352,9 +366,8 @@
 
     @media (max-width: 2000px) {
         .singing-chicken {
-          position: absolute;
           left: -90px;
-          top:-10px;
+          top: -10px;
           width: 220px;
         }
     }
@@ -363,9 +376,17 @@
         .singing-chicken {
             display: none;
         }
+        
+        body {
+            padding-top: 180px; /* Reduced padding when chicken is hidden */
+        }
     }
 
     @media (max-width: 768px) {
+      body {
+        padding-top: 160px; /* Adjusted for mobile */
+      }
+      
       .video-grid {
         padding: 20px 20px;
         gap: 20px;
@@ -404,6 +425,10 @@
     }
 
     @media (max-width: 480px) {
+      body {
+        padding-top: 140px; /* Further reduced for small screens */
+      }
+      
       .video-grid {
         padding: 15px 15px;
         gap: 15px;
@@ -437,10 +462,12 @@
   <div class="cosmic-decoration" style="bottom: 25%; right: 15%;">♬</div>
 
   <div class="header-box">
-    <h1>Karaoke ab Hof</h1>
-    <img src="static/singing-chicken.png" class="singing-chicken">
+    <div class="header-content">
+      <h1>Karaoke ab Hof</h1>
+      <img src="static/singing-chicken.png" class="singing-chicken">
+    </div>
+    <input type="text" id="search" placeholder="Lied suchen...">
   </div>
-  <input type="text" id="search" placeholder="Lied suchen...">
   <div class="video-grid" id="videoList"></div>
   <div id="playerContainer">
     <video id="videoPlayer" autoplay disablepictureinpicture></video>
