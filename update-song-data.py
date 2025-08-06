@@ -171,18 +171,18 @@ def extract_song_info(metadata: Dict) -> Tuple[Optional[str], Optional[str], Opt
         artist_name = metadata.get("artist", "").strip()
         if artist_name and artist_name != "Unknown Artist":
             artist = artist_name
-    
+
     # Extract title
     title = None
     title_name = metadata.get("name", "").strip()
     if title_name and title_name != "Unknown Title":
         title = title_name
-    
+
     # Extract genre
     genre = None
     if "genres" in metadata and metadata["genres"]:
         genre = metadata["genres"][0]
-    
+
     return artist, title, genre
 
 
@@ -212,14 +212,14 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
     video_entry = {
         "filename": base_name
     }
-    
+
     # Add optional fields only if they have valid values
     if artist:
         video_entry["artist"] = artist
-    
+
     if title:
         video_entry["title"] = title
-    
+
     if genre:
         video_entry["genre"] = genre
 
@@ -235,7 +235,7 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
 
     video_entry["processed_at"] = subprocess.run(
         ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
-        capture_output=True, text=True
+        capture_output=True, text=True, check=True
     ).stdout.strip()
 
     return {
@@ -256,12 +256,8 @@ def main():
 
     logger.info("Starting Download Song Data Script (Python)...")
 
-    # Get video files
     video_files = get_video_files()
-    if not video_files:
-        return 1
 
-    # Create covers directory
     Path(COVERS_DIR).mkdir(exist_ok=True)
 
     # Process videos
