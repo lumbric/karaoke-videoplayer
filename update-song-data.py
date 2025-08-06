@@ -13,6 +13,7 @@ import json
 import subprocess
 import tempfile
 import argparse
+import socket
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import logging
@@ -32,6 +33,16 @@ logging.basicConfig(
     format='%(levelname)s: %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+def check_internet_connection() -> bool:
+    """Check if internet connection is available."""
+    try:
+        # Try to connect to a reliable DNS server
+        socket.create_connection(("8.8.8.8", 53), timeout=5)
+        return True
+    except (socket.timeout, socket.error):
+        return False
 
 
 def save_json_files(videos_data, extra_metadata_data):
@@ -186,9 +197,13 @@ def get_video_duration(video_path: Path) -> Optional[float]:
     return None
 
 
-def needs_update(video_entry: Dict) -> Tuple[bool, List[str]]:
+def needs_update(video_entry: Dict, no_internet: bool = False) -> Tuple[bool, List[str]]:
     """Check if a video entry needs metadata or cover updates."""
     reasons = []
+
+    if no_internet:
+        # In offline mode, we only care if the entry exists
+        return False, []
 
     # Check if metadata is missing (no artist or title in videos.json)
     if not video_entry.get("artist") or not video_entry.get("title"):
@@ -309,13 +324,70 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
     }
 
 
+def process_video_file_offline(video_path: Path) -> Dict:
+    """Process a single video file without internet - just filename and duration."""
+    base_name = video_path.stem
+    logger.info(f"Processing offline: {video_path.name}")
+
+    # Get video duration
+    duration = get_video_duration(video_path)
+
+    # Build minimal video entry for videos.json
+    video_entry = {
+        "filename": base_name
+    }
+
+    # Add optional fields
+    if video_path.name != f"{base_name}.mp4":
+        video_entry["video_filename"] = video_path.name
+
+    if duration:
+        video_entry["duration_seconds"] = round(duration, 2)
+
+    video_entry["processed_at"] = subprocess.run(
+        ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
+        capture_output=True, text=True
+    ).stdout.strip()
+
+    return {
+        "video_entry": video_entry,
+        "base_name": base_name
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description="Update song metadata and covers using spotdl")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument("--no-internet", action="store_true", help="Skip network operations - only add filename and duration")
     args = parser.parse_args()
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    # Check internet connectivity unless explicitly running in offline mode
+    has_internet = True
+    if not args.no_internet:
+        has_internet = check_internet_connection()
+        if not has_internet:
+            logger.warning("⚠️  No internet connection detected!")
+            logger.warning("💡 Consider using '--no-internet' flag to add videos with filename and duration only")
+            logger.warning("   You can run the script again later with internet to add metadata and covers")
+            
+            # Ask user if they want to continue without internet
+            try:
+                response = input("Continue without internet? [y/N]: ").strip().lower()
+                if response not in ['y', 'yes']:
+                    logger.info("Exiting. Run with '--no-internet' flag to skip this prompt.")
+                    return 1
+                else:
+                    args.no_internet = True
+                    logger.info("Continuing in offline mode...")
+            except KeyboardInterrupt:
+                logger.info("\nExiting.")
+                return 1
+
+    if args.no_internet:
+        logger.info("Running in offline mode - skipping network operations")
 
     # Load existing data
     videos_data, extra_metadata_data = load_existing_data()
@@ -327,7 +399,8 @@ def main():
         return 1
 
     # Create covers directory
-    Path(COVERS_DIR).mkdir(exist_ok=True)
+    if not args.no_internet:
+        Path(COVERS_DIR).mkdir(exist_ok=True)
 
     # Build a map of existing video entries by filename
     existing_videos_map = {entry["filename"]: entry for entry in videos_data}
@@ -348,8 +421,8 @@ def main():
             if base_name in existing_videos_map:
                 video_entry = existing_videos_map[base_name]
 
-                # Check if update is needed (only based on videos.json data and cover existence)
-                needs_updating, reasons = needs_update(video_entry)
+                # Check if update is needed (skip updates in offline mode)
+                needs_updating, reasons = needs_update(video_entry, args.no_internet)
 
                 if needs_updating:
                     logger.info(f"Updating {base_name}: {', '.join(reasons)}")
@@ -364,20 +437,29 @@ def main():
                 else:
                     logger.debug(f"✓ {base_name} is up to date")
             else:
-                # New video file - process it completely
+                # New video file - process it
                 logger.info(f"New video found: {base_name}")
-                result = process_video_file(video_path)
-                if result:
-                    existing_videos_map[base_name] = result["video_entry"]
-                    extra_metadata_data[base_name] = result["extra_metadata"]
-                    processed_count += 1
+                
+                if args.no_internet:
+                    # Process without network operations
+                    result = process_video_file_offline(video_path)
+                    if result:
+                        existing_videos_map[base_name] = result["video_entry"]
+                        processed_count += 1
+                else:
+                    # Process with full metadata and cover download
+                    result = process_video_file(video_path)
+                    if result:
+                        existing_videos_map[base_name] = result["video_entry"]
+                        extra_metadata_data[base_name] = result["extra_metadata"]
+                        processed_count += 1
 
             # Save after every new video for resume capability
             videos_data = list(existing_videos_map.values())
             save_json_files(videos_data, extra_metadata_data)
 
-            # Count covers that exist
-            if get_existing_cover(base_name):
+            # Count covers that exist (only if not in offline mode)
+            if not args.no_internet and get_existing_cover(base_name):
                 cover_downloaded_count += 1
 
     finally:
