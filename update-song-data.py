@@ -13,6 +13,8 @@ import json
 import subprocess
 import tempfile
 import argparse
+import signal
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import logging
@@ -33,6 +35,58 @@ logging.basicConfig(
     format='%(levelname)s: %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Global variables for signal handling
+videos_data = []
+metadata_data = {}
+
+
+def signal_handler(sig, frame):
+    """Handle Ctrl+C gracefully by saving current progress."""
+    logger.info("\n✗ Interrupted by user - saving current progress...")
+    save_json_files()
+    logger.info("Progress saved. You can resume by running the script again.")
+    sys.exit(0)
+
+
+def save_json_files():
+    """Save current videos and metadata to JSON files."""
+    try:
+        with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
+            json.dump(videos_data, f, indent=2, ensure_ascii=False)
+        
+        with open(METADATA_JSON, 'w', encoding='utf-8') as f:
+            json.dump(metadata_data, f, indent=2, ensure_ascii=False)
+        
+        logger.info(f"✓ Saved progress to {OUTPUT_JSON} and {METADATA_JSON}")
+    except Exception as e:
+        logger.error(f"✗ Error saving JSON files: {e}")
+
+
+def load_existing_data() -> Tuple[List[Dict], Dict]:
+    """Load existing videos.json and metadata.json files."""
+    existing_videos = []
+    existing_metadata = {}
+    
+    # Load existing videos.json
+    if os.path.exists(OUTPUT_JSON):
+        try:
+            with open(OUTPUT_JSON, 'r', encoding='utf-8') as f:
+                existing_videos = json.load(f)
+            logger.info(f"✓ Loaded {len(existing_videos)} existing video entries")
+        except Exception as e:
+            logger.warning(f"Could not load existing {OUTPUT_JSON}: {e}")
+    
+    # Load existing metadata.json
+    if os.path.exists(METADATA_JSON):
+        try:
+            with open(METADATA_JSON, 'r', encoding='utf-8') as f:
+                existing_metadata = json.load(f)
+            logger.info(f"✓ Loaded metadata for {len(existing_metadata)} videos")
+        except Exception as e:
+            logger.warning(f"Could not load existing {METADATA_JSON}: {e}")
+    
+    return existing_videos, existing_metadata
 
 
 def get_video_files() -> List[Path]:
@@ -80,6 +134,15 @@ def download_cover(base_name: str, search_query: str) -> Optional[str]:
             "--format", "jpg"
         ], capture_output=True, text=True, timeout=100)
 
+        # Log explicit error output
+        if result.returncode != 0:
+            logger.warning(f"✗ spotdl failed for cover '{search_query}' (exit code {result.returncode})")
+            if result.stdout.strip():
+                logger.warning(f"  STDOUT: {result.stdout.strip()}")
+            if result.stderr.strip():
+                logger.warning(f"  STDERR: {result.stderr.strip()}")
+            return None
+
         # Check if cover was downloaded
         new_cover = get_existing_cover(base_name)
         if new_cover:
@@ -109,7 +172,20 @@ def get_spotdl_metadata(search_query: str) -> Optional[Dict]:
         result = subprocess.run([
             "spotdl", "save", search_query,
             "--save-file", temp_path
-        ], capture_output=True, text=True, timeout=30, check=True)
+        ], capture_output=True, text=True, timeout=30)
+
+        # Log explicit error output
+        if result.returncode != 0:
+            logger.warning(f"✗ spotdl failed for metadata '{search_query}' (exit code {result.returncode})")
+            if result.stdout.strip():
+                logger.warning(f"  STDOUT: {result.stdout.strip()}")
+            if result.stderr.strip():
+                logger.warning(f"  STDERR: {result.stderr.strip()}")
+            
+            # Clean up temp file if it exists
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+            return None
 
         if result.returncode == 0 and os.path.exists(temp_path):
             with open(temp_path, 'r', encoding='utf-8') as f:
@@ -159,6 +235,62 @@ def get_video_duration(video_path: Path) -> Optional[float]:
     return None
 
 
+def needs_update(video_entry: Dict, metadata_exists: bool) -> Tuple[bool, List[str]]:
+    """Check if a video entry needs metadata or cover updates."""
+    reasons = []
+    
+    # Check if metadata is missing (no artist or title)
+    if not metadata_exists or (not video_entry.get("artist") and not video_entry.get("title")):
+        reasons.append("missing metadata")
+    
+    # Check if cover is missing
+    base_name = video_entry["filename"]
+    if not get_existing_cover(base_name):
+        reasons.append("missing cover")
+    
+    return len(reasons) > 0, reasons
+
+
+def update_video_entry(video_entry: Dict, video_path: Path) -> Tuple[Optional[Dict], Optional[Dict]]:
+    """Update a single video entry with missing metadata/cover."""
+    base_name = video_entry["filename"]
+    logger.info(f"Updating: {base_name}")
+
+    # Get metadata from spotdl if not available or incomplete
+    metadata = None
+    if not video_entry.get("artist") and not video_entry.get("title"):
+        metadata = get_spotdl_metadata(base_name)
+        if metadata:
+            # Extract song information
+            artist, title, genre = extract_song_info(metadata)
+            
+            logger.info(f"→ Artist: '{artist or 'N/A'}', Title: '{title or 'N/A'}'" + (f", Genre: '{genre}'" if genre else ""))
+            
+            # Update video entry with new metadata
+            if artist:
+                video_entry["artist"] = artist
+            
+            if title:
+                video_entry["title"] = title
+            
+            if genre:
+                video_entry["genre"] = genre
+                
+            # Update processed timestamp
+            video_entry["processed_at"] = subprocess.run(
+                ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
+                capture_output=True, text=True
+            ).stdout.strip()
+
+    # Download cover if missing
+    if not get_existing_cover(base_name):
+        cover_filename = download_cover(base_name, base_name)
+        if cover_filename and cover_filename != f"{base_name}.jpg":
+            video_entry["cover_filename"] = cover_filename
+
+    return video_entry, metadata
+
+
 def extract_song_info(metadata: Dict) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """Extract artist, title, and genre from spotdl metadata."""
     # Extract artist
@@ -171,18 +303,18 @@ def extract_song_info(metadata: Dict) -> Tuple[Optional[str], Optional[str], Opt
         artist_name = metadata.get("artist", "").strip()
         if artist_name and artist_name != "Unknown Artist":
             artist = artist_name
-
+    
     # Extract title
     title = None
     title_name = metadata.get("name", "").strip()
     if title_name and title_name != "Unknown Title":
         title = title_name
-
+    
     # Extract genre
     genre = None
     if "genres" in metadata and metadata["genres"]:
         genre = metadata["genres"][0]
-
+    
     return artist, title, genre
 
 
@@ -212,14 +344,14 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
     video_entry = {
         "filename": base_name
     }
-
+    
     # Add optional fields only if they have valid values
     if artist:
         video_entry["artist"] = artist
-
+    
     if title:
         video_entry["title"] = title
-
+    
     if genre:
         video_entry["genre"] = genre
 
@@ -235,7 +367,7 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
 
     video_entry["processed_at"] = subprocess.run(
         ["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"],
-        capture_output=True, text=True, check=True
+        capture_output=True, text=True
     ).stdout.strip()
 
     return {
@@ -247,50 +379,97 @@ def process_video_file(video_path: Path) -> Optional[Dict]:
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description="Download song metadata and covers using spotdl")
+    global videos_data, metadata_data
+    
+    parser = argparse.ArgumentParser(description="Update song metadata and covers using spotdl")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     args = parser.parse_args()
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    logger.info("Starting Download Song Data Script (Python)...")
+    # Set up signal handler for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)
 
+    logger.info("Starting Update Song Data Script...")
+
+    # Load existing data
+    videos_data, metadata_data = load_existing_data()
+
+    # Get video files from filesystem
     video_files = get_video_files()
+    if not video_files:
+        return 1
 
+    # Create covers directory
     Path(COVERS_DIR).mkdir(exist_ok=True)
 
-    # Process videos
-    videos_data = []
-    metadata_data = {}
+    # Build a map of existing video entries by filename
+    existing_videos_map = {entry["filename"]: entry for entry in videos_data}
+    
+    # Process each video file
     processed_count = 0
+    updated_count = 0
     cover_downloaded_count = 0
 
     try:
         for video_path in video_files:
-            result = process_video_file(video_path)
-            if result:
-                videos_data.append(result["video_entry"])
-                metadata_data[result["base_name"]] = result["metadata"]
-                processed_count += 1
+            base_name = video_path.stem
+            
+            # Check if video entry already exists
+            if base_name in existing_videos_map:
+                video_entry = existing_videos_map[base_name]
+                metadata_exists = base_name in metadata_data
+                
+                # Check if update is needed
+                needs_updating, reasons = needs_update(video_entry, metadata_exists)
+                
+                if needs_updating:
+                    logger.info(f"Updating {base_name}: {', '.join(reasons)}")
+                    updated_entry, new_metadata = update_video_entry(video_entry, video_path)
+                    
+                    if updated_entry:
+                        # Update the entry in our data
+                        existing_videos_map[base_name] = updated_entry
+                        if new_metadata:
+                            metadata_data[base_name] = new_metadata
+                        updated_count += 1
+                        
+                        # Save after every update for resume capability
+                        videos_data = list(existing_videos_map.values())
+                        save_json_files()
+                else:
+                    logger.info(f"✓ {base_name} is up to date")
+            else:
+                # New video file - process it completely
+                logger.info(f"New video found: {base_name}")
+                result = process_video_file(video_path)
+                if result:
+                    existing_videos_map[base_name] = result["video_entry"]
+                    metadata_data[base_name] = result["metadata"]
+                    processed_count += 1
+                    
+                    # Save after every new video for resume capability
+                    videos_data = list(existing_videos_map.values())
+                    save_json_files()
 
-                if get_existing_cover(result["base_name"]):
-                    cover_downloaded_count += 1
-    finally:
-        with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
-            json.dump(videos_data, f, indent=2, ensure_ascii=False)
+            # Count covers that exist
+            if get_existing_cover(base_name):
+                cover_downloaded_count += 1
 
-        with open(METADATA_JSON, 'w', encoding='utf-8') as f:
-            json.dump(metadata_data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        save_json_files()
+        return 1
 
-        logger.info("✓ Finished processing!")
-        logger.info(f"Videos processed: {processed_count}/{len(video_files)}")
-        logger.info(f"Covers available: {cover_downloaded_count}")
-        logger.info(f"JSON files created: {OUTPUT_JSON}, {METADATA_JSON}")
+    # Final save
+    videos_data = list(existing_videos_map.values())
+    save_json_files()
 
-        if processed_count == 0:
-            logger.warning("No videos were successfully processed!")
-            return 1
+    logger.info("✓ Finished processing!")
+    logger.info(f"Videos processed: {processed_count} new, {updated_count} updated")
+    logger.info(f"Covers available: {cover_downloaded_count}")
+    logger.info(f"JSON files saved: {OUTPUT_JSON}, {METADATA_JSON}")
 
     return 0
 
