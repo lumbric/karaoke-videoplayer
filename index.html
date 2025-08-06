@@ -3,11 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Karaoke ab Hof 🎤</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="static/chart.js"></script>
   <style>
+    @font-face {
+      font-family: 'RocknRoll One';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url(static/RocknRollOne.ttf) format('truetype');
+    }
+
     body {
       margin: 0;
       font-family: 'RocknRoll One', sans-serif;
@@ -433,7 +438,7 @@
 
   <div class="header-box">
     <h1>Karaoke ab Hof</h1>
-    <img src="images/singing-chicken.png" class="singing-chicken">
+    <img src="static/singing-chicken.png" class="singing-chicken">
   </div>
   <input type="text" id="search" placeholder="Lied suchen...">
   <div class="video-grid" id="videoList"></div>
