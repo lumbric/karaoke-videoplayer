@@ -63,7 +63,7 @@ def load_existing_data() -> Tuple[List[Dict], Dict]:
         with open(OUTPUT_JSON, 'r', encoding='utf-8') as f:
             existing_videos = json.load(f)
         logger.info(f"✓ Loaded {len(existing_videos)} existing video entries")
-_name
+
     if os.path.exists(EXTRA_METADATA_JSON):
         with open(EXTRA_METADATA_JSON, 'r', encoding='utf-8') as f:
             existing_extra_metadata = json.load(f)
@@ -358,7 +358,7 @@ def process_video_file_offline(video_path: Path) -> Dict:
 def main():
     parser = argparse.ArgumentParser(description="Update song metadata and covers using spotdl")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    parser.add_argument("--no-internet", action="store_true", help="Skip network operations - only add filename and duration")
+    parser.add_argument("--no-internet", action="store_true", help="Skip network operations - only add filename and duration of videos")
     args = parser.parse_args()
 
     if args.verbose:
@@ -370,23 +370,10 @@ def main():
         has_internet = check_internet_connection()
         if not has_internet:
             logger.warning("⚠️  No internet connection detected!")
-            logger.warning("💡 Consider using '--no-internet' flag to add videos with filename and duration only")
-            logger.warning("   You can run the script again later with internet to add metadata and covers")
-            
-            # Ask user if they want to continue without internet
-            try:
-                response = input("Continue without internet? [y/N]: ").strip().lower()
-                if response not in ['y', 'yes']:
-                    logger.info("Exiting. Run with '--no-internet' flag to skip this prompt.")
-                    return 1
-                else:
-                    args.no_internet = True
-                    logger.info("Continuing in offline mode...")
-            except KeyboardInterrupt:
-                logger.info("\nExiting.")
-                return 1
-
-    if args.no_internet:
+            logger.warning("💡 Consider using '--no-internet' flag to add videos with filename and
+                           "duration only")
+            return 1
+    else:
         logger.info("Running in offline mode - skipping network operations")
 
     # Load existing data
@@ -406,7 +393,7 @@ def main():
     existing_videos_map = {entry["filename"]: entry for entry in videos_data}
 
     if len(existing_videos_map) < len(videos_data):
-        raise ValueError()
+        raise ValueError("some videos have the same base name but different ending, this is not supported")
 
     # Process each video file
     processed_count = 0
@@ -439,7 +426,7 @@ def main():
             else:
                 # New video file - process it
                 logger.info(f"New video found: {base_name}")
-                
+
                 if args.no_internet:
                     # Process without network operations
                     result = process_video_file_offline(video_path)
