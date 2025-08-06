@@ -25,7 +25,6 @@ EXTRA_METADATA_JSON = "extra_metadata.json"
 
 # FIXME this is probably not necessary
 VIDEO_EXTENSIONS = [".mp4", ".avi", ".mkv", ".mov", ".webm", ".flv", ".m4v"]
-COVER_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"]
 
 
 logging.basicConfig(
@@ -53,7 +52,7 @@ def load_existing_data() -> Tuple[List[Dict], Dict]:
         with open(OUTPUT_JSON, 'r', encoding='utf-8') as f:
             existing_videos = json.load(f)
         logger.info(f"✓ Loaded {len(existing_videos)} existing video entries")
-
+_name
     if os.path.exists(EXTRA_METADATA_JSON):
         with open(EXTRA_METADATA_JSON, 'r', encoding='utf-8') as f:
             existing_extra_metadata = json.load(f)
@@ -79,12 +78,7 @@ def get_video_files() -> List[Path]:
 
 
 def get_existing_cover(base_name: str) -> Optional[str]:
-    """Check if cover already exists with any supported extension."""
-    for ext in COVER_EXTENSIONS:
-        cover_file = Path(COVERS_DIR) / f"{base_name}{ext}"
-        if cover_file.exists():
-            return cover_file.name
-    return None
+    return  Path(COVERS_DIR) / f"{base_name}.jpg"
 
 
 def download_cover(base_name: str, search_query: str) -> Optional[str]:
@@ -100,12 +94,12 @@ def download_cover(base_name: str, search_query: str) -> Optional[str]:
     Path(COVERS_DIR).mkdir(exist_ok=True)
 
     # Download cover using spotdl
-    result = subprocess.run([
+    subprocess.run([
         "spotdl", "save", search_query,
         "--save-file", "/dev/null",  # We don't need the metadata file
         "--output", f"{COVERS_DIR}/{base_name}",
         "--format", "jpg"
-    ], capture_output=True, text=True, timeout=100, check=True)
+    ], capture_output=True, text=True, timeout=150, check=True)
 
     # Check if cover was downloaded
     new_cover = get_existing_cover(base_name)
@@ -129,7 +123,7 @@ def get_spotdl_metadata(search_query: str) -> Optional[Dict]:
         result = subprocess.run([
             "spotdl", "save", search_query,
             "--save-file", temp_path
-        ], capture_output=False, text=True, timeout=30)
+        ], capture_output=False, text=True, timeout=150)
 
         # Log explicit error output
         if result.returncode != 0:
@@ -249,35 +243,17 @@ def update_video_entry(video_entry: Dict, video_path: Path) -> Tuple[Optional[Di
 
 def extract_song_info(metadata: Dict) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """Extract artist, title, and genre from spotdl metadata."""
-    # Extract artist
-    artist = None
-    if "artists" in metadata and metadata["artists"]:
-        artist_name = metadata["artists"][0].get("name", "").strip()
-        if artist_name and artist_name != "Unknown Artist":
-            artist = artist_name
-    elif "artist" in metadata:
-        artist_name = metadata.get("artist", "").strip()
-        if artist_name and artist_name != "Unknown Artist":
-            artist = artist_name
+    artist = artist_name = metadata.get("artist", None)
+    title = metadata.get("name", None)
+    genres = metadata["genres"]
 
-    # Extract title
-    title = None
-    title_name = metadata.get("name", "").strip()
-    if title_name and title_name != "Unknown Title":
-        title = title_name
-
-    # Extract genre
-    genre = None
-    if "genres" in metadata and metadata["genres"]:
-        genre = metadata["genres"][0]
-
-    return artist, title, genre
+    return artist, title, genres
 
 
 def process_video_file(video_path: Path) -> Optional[Dict]:
     """Process a single video file."""
     base_name = video_path.stem
-    logger.info(f"Processing: {video_path.name}")
+    logger.debug(f"Processing: {video_path.name}")
 
     # Get metadata from spotdl
     extra_metadata = get_spotdl_metadata(base_name)
@@ -386,7 +362,7 @@ def main():
                             extra_metadata_data[base_name] = new_extra_metadata
                         updated_count += 1
                 else:
-                    logger.info(f"✓ {base_name} is up to date")
+                    logger.debug(f"✓ {base_name} is up to date")
             else:
                 # New video file - process it completely
                 logger.info(f"New video found: {base_name}")
