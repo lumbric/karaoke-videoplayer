@@ -311,7 +311,9 @@ def process_video_file(
     if video_path.name != f"{base_name}.mp4":
         video_entry["video_filename"] = video_path.name
 
-    if cover_filename and cover_filename != f"{base_name}.jpg":
+    video_entry["has_cover"] = True
+
+    if cover_filename and cover_filename != f"{COVERS_DIR}/{base_name}.jpg":
         video_entry["cover_filename"] = cover_filename
 
     video_entry["processed_at"] = subprocess.run(
