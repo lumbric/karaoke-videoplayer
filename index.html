@@ -345,7 +345,7 @@
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         z-index: 100;
-        padding: 1em 0 2em 0;
+        padding: 1em 0 1em 0;
         box-sizing: border-box;
         box-shadow: 0 14px 30px #332e5d;
     }
@@ -359,36 +359,37 @@
 
     .singing-chicken {
         position: absolute;
-        left: 20px;
-        top: 10px;
-        width: 400px;
+        left: -90px;
+        top: -10px;
+        width: 220px;
     }
 
     /* Responsive Design */
 
     @media (max-width: 2000px) {
-        .singing-chicken {
-          left: -90px;
-          top: -10px;
-          width: 220px;
-        }
     }
 
     @media (max-width: 1275px) {
         .singing-chicken {
             display: none;
         }
-        
+        .header-box {
+          padding-bottom: 0em;
+        }
         body {
-            padding-top: 180px; /* Reduced padding when chicken is hidden */
+            padding-top: 295px; /* Reduced padding when chicken is hidden */
         }
     }
 
     @media (max-width: 768px) {
       body {
-        padding-top: 160px; /* Adjusted for mobile */
+        padding-top: 295px; /* Adjusted for mobile */
       }
-      
+
+      .header-box {
+          padding-bottom: 0em;
+      }
+
       .video-grid {
         padding: 20px 20px;
         gap: 20px;
