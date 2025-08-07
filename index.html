@@ -661,7 +661,7 @@
         cover = v.has_cover ? v.cover : "static/cover_fallback.svg";
         const div = document.createElement("div");
         div.className = "card";
-        div.innerHTML = `<img src="${cover}"><div class="title">${v.displayTitle}</div>`;
+        div.innerHTML = `<img src="${cover}" onerror="this.src='static/cover_fallback.svg'"><div class="title">${v.displayTitle}</div>`;
         div.onclick = () => playVideo(v);
         container.appendChild(div);
       });

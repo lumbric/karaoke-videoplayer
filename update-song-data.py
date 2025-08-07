@@ -97,6 +97,7 @@ def save_json_files(video_data, extra_metadata):
 
     with open(EXTRA_METADATA_JSON, "w", encoding="utf-8") as f:
         json.dump(extra_metadata, f, indent=2, ensure_ascii=False)
+    logging.info("Json files saved to disk...")
 
 
 def load_existing_data() -> Tuple[List[Dict], Dict]:
@@ -294,6 +295,10 @@ def process_video_file(
     logging.info(f"Artist: '{artist}', Title: '{title}', Genre: '{genre}'")
 
     # Download cover
+    if "cover_url" not in extra_metadata_entry or extra_metadata_entry["cover_url"] is None:
+        logging.warning(f"Skipping Cover download for {video_path.name} - no cover available")
+        return result
+
     cover_filename, cover_downloaded = download_cover(base_name, extra_metadata_entry["cover_url"])
     result["cover_downloaded"] = cover_downloaded
 
@@ -384,6 +389,8 @@ def main():
     metadata_downloaded_count = 0
     cover_downloaded_count = 0
 
+    last_save = time.time()
+
     try:
         for video_path in video_files:
             logging.info(f"\n\n# # # Processing: {video_path.name} # # #")
@@ -407,8 +414,10 @@ def main():
 
             processed_count += 1
 
-            # Save after every new video for resume capability
-            save_json_files(video_data, extra_metadata)
+            # save json files every 60s for resume capability
+            if time.time() - last_save > 60:
+                save_json_files(video_data, extra_metadata)
+                last_save = time.time()
 
     finally:
         save_json_files(video_data, extra_metadata)
