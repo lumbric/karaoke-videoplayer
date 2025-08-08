@@ -183,7 +183,7 @@ def get_spotdl_metadata(search_query: str) -> Optional[Dict]:
             # Log explicit error output
             if result.returncode != 0:
                 logging.warning(
-                    f"✗ spotdl failed for metadata '{search_query}' (exit code {result.returncode})"
+                    f"spotdl failed for metadata '{search_query}' (exit code {result.returncode})"
                 )
                 if result.stdout.strip():
                     logging.warning(f"  STDOUT: {result.stdout.strip()}")
@@ -354,7 +354,7 @@ def main():
         if not has_internet:
             logging.warning("⚠️  No internet connection detected!")
             logging.warning(
-                "💡 Consider using '--no-internet' flag to add videos with filename and "
+                "Consider using '--no-internet' flag to add videos with filename and "
                 "duration only"
             )
             return 1
@@ -393,7 +393,8 @@ def main():
 
     try:
         for video_path in video_files:
-            logging.info(f"\n\n# # # Processing: {video_path.name} # # #")
+            print("\n")
+            logging.info(f"Processing: {video_path.name}...")
 
             base_name = video_path.stem
 
