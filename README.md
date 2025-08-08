@@ -1,5 +1,7 @@
 # Karaoke ab Hof 🎤
 
+[![License: WTFPL](https://img.shields.io/badge/License-WTFPL-brightgreen.svg)](http://www.wtfpl.net/about/)
+
 A local web-based karaoke video player application originally built for the festival ["Kultur ab Hof"](https://kulturabhof.at/).
 
 ![Screenshot](screenshot.png)
