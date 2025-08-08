@@ -621,8 +621,8 @@
           
           return {
             ...video,
-            file: video.file || `videos/${video.filename}.mp4`,
-            cover: video.cover || `covers/${video.filename}.jpg`,
+            file: video.video_filename || `videos/${video.filename}.mp4`,
+            cover: video.cover_filename || `covers/${video.filename}.jpg`,
             displayTitle: displayTitle,
             artist: artist,
             title: title,
