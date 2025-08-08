@@ -382,7 +382,17 @@ def main():
             "some videos have the same base name but different ending, this is not supported"
         )
 
-    # TODO check if all videos in video_data exist otherwise error!
+    missing_video_files = [
+        video
+        for video, data in video_data.items()
+        if not os.path.exists(f"{VIDEOS_DIR}/{video}.mp4")
+    ]
+    if missing_video_files:
+        raise RuntimeError(
+            "Missing video files, please remove from videos.json: "
+            + ", ".join(missing_video_files)
+        )
+    logging.info("Found all {len(video_data)} video files listed in the videos.json.")
 
     # Process each video file
     processed_count = 0
