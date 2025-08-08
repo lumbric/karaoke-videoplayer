@@ -6,19 +6,19 @@ A local web-based karaoke video player application originally built for the fest
 
 ## What it is
 
-- A Web application to browse a local collection of karaoke video songs and play them.
-- Search-as-you-type for song title or artist name.
-- Play videos in a full-window experience (ideal for kiosk mode).
-- Built‑in statistics: what was played, how often, completion vs. aborts, plus simple charts.
-- Optimized for large screens; responsive layout also works on smaller screens.
+- A web application to browse and play a local collection of karaoke videos
+- Fast search-as-you-type filtering by artist name or song title
+- Full-window video player experience (ideal for kiosk mode)
+- Built-in statistics: play counts, completion rates, and interactive charts
+- Responsive design optimized for large screens but works on smaller devices too
 
 **Why offline?** This app was designed for the "Kultur ab Hof" festival where internet connectivity is limited or unavailable. Instead of relying on YouTube or streaming services, it uses a local collection of karaoke videos that work completely offline.
 
 ## How to Use
 
-1. Collect songs / video files (you can use https://github.com/yt-dlp/yt-dlp).
-2. Generate JSON metadata and download cover art.
-3. Start a browser via a local web server (recommended) or allow local file access in your browser.
+1. Collect karaoke video files (you can use [yt-dlp](https://github.com/yt-dlp/yt-dlp) to download from YouTube)
+2. Generate JSON metadata and download cover art using the script `update-song-data.py`
+3. Start a local web server and open the app in your browser
 
 ```bash
 # 1. Clone the repository
@@ -32,43 +32,83 @@ mkdir videos
 
 # To download videos you can do so using yt-dlp
 # pip install yt-dlp
-# for f in $(cat song-list); do yt-dlp --format mp4 $f; done  # one youtube link per line in the file "song-list"
+# for url in $(cat song-urls.txt); do yt-dlp --format mp4 "$url"; done
 
 # 3. Generate metadata and covers (requires ffprobe and spotdl; see notes below)
 ./update-song-data.py  
-# If you're fully offline, you can still add files & durations:
+# For offline mode (only filename + duration):
 # ./update-song-data.py --no-internet
 
 # 4. Start a web server of your choice
 # This step can be omitted if you enable direct file access in your browser (see below).
 python3 -m http.server 8000
 
-# 5. Open browser
-# Navigate to http://localhost:8000
+# 5. Open your browser and navigate to:
+# http://localhost:8000
 ```
 
-You can use the included script to start a web server and open the browser in kiosk mode:
+### Quick start with kiosk mode
+
+Use the included script to automatically start a web server and open the browser in kiosk mode:
 
 ```bash
 chmod +x start.sh
 ./start.sh
 ```
 
-Note: Users can still exit kiosk mode (e.g., Alt+F4, Alt+Tab).
+**Note:** Users can still exit kiosk mode using keyboard shortcuts (Alt+F4, Alt+Tab).
 
 
 ### Use a web server or allow local file access
 
-Modern browsers block direct file access for security reasons (CORS policy). When you open an HTML file directly (`file://` protocol), the browser may block loading local videos and JSON files.
+Modern browsers block direct file access for security reasons (CORS policy). When you open an HTML file directly using the `file://` protocol, the browser may block loading local videos and JSON files.
 
-There are two ways to avoid these restrictions:
+**Two ways to run the app:**
 
-- Run a local web server (`http://` protocol), e.g. `python3 -m http.server 8000` or lighttpd/nginx.
-- Allow local file access in your browser by trusting the local files:
-    - Chromium/Chrome: launch with `--allow-file-access-from-files` and open `index.html` via `file://`.
-    - Firefox: set `about:config` → `security.fileuri.strict_origin_policy` to `false`.
+1. **Local web server (recommended):**
+   ```bash
+   python3 -m http.server 8000
+   # Then visit: http://localhost:8000
+   ```
 
-Using a web server is recommended because it scopes access to a specific folder and avoids CORS issues.
+2. **Direct file access (requires browser configuration):**
+   - **Chromium/Chrome:** Launch with `--allow-file-access-from-files` flag
+   - **Firefox:** Set `about:config` → `security.fileuri.strict_origin_policy` = `false`
+
+The web server approach is recommended as it's safer and avoids CORS complications.
+
+
+## How it works
+
+The app is a single HTML file (`index.html`) that loads a JSON file (`videos.json`) containing your song library. Each entry provides metadata for search (artist/title), duration (for statistics), and cover art information.
+
+Statistics are stored locally in your browser's localStorage and reflect activity on the current device/browser only. Use the "Export Data" button on the stats page to download a JSON backup of your viewing history.
+
+## The update script
+
+**update-song-data.py** is a Python helper script that:
+
+- Scans the `videos/` folder for video files and writes `videos.json` and `extra_metadata.json`
+- Retrieves rich metadata (artist, title, genres) and downloads cover art via `spotdl` when internet is available
+- Extracts video duration using `ffprobe` (part of ffmpeg)
+- Can resume operation if interrupted (progress is saved regularly to disk)
+
+### Requirements for full functionality:
+- **Python 3.8+** with the `requests` package (`pip install requests`)
+- **ffmpeg/ffprobe** installed and available on PATH
+- **spotdl CLI** installed (`pip install spotdl` or `pipx install spotdl`)
+
+### Usage:
+```bash
+# Full mode (with internet): fetch metadata and covers
+./update-song-data.py
+
+# Offline mode: only add filenames and durations
+./update-song-data.py --no-internet
+
+# Verbose output for debugging
+./update-song-data.py -v
+```
 
 
 ## How it works
@@ -79,14 +119,18 @@ Statistics are stored locally in your browser (localStorage) and reflect activit
 
 ## Scripts
 
-update-song-data.py
+**update-song-data.py:**
 
 - Scans `videos/` for video files, writes `videos.json` and `extra_metadata.json`.
 - Retrieves metadata (artist, title, genres) and cover art via `spotdl` when internet is available.
 - Extracts video duration via `ffprobe` (part of ffmpeg).
 
+You can always abort the script and resume operation as JSON files are reguarly dumped to the disk and re-loaded when the script is started again.
+
+If you do not have internet access, you can use the script to simply add the file names to the videos.json file without querying for cover art and artist/song title.
+
 Requirements to use all features:
-- Python 3.8+ with `requests` (`pip install requests`)
+- Python 3.8+ with `requests` (`pip install requests`), note that 
 - ffmpeg/ffprobe installed and on PATH
 - spotdl CLI installed (`pipx install spotdl` or `pip install spotdl`)
 
@@ -108,13 +152,13 @@ karaoke-videoplayer/
 
 **videos.json (required):**
 
-List of your songs. Only `filename` and `duration_seconds` are required by the app. If no `artist/title` are given, the filename (without extension) will be shown.
+List of your songs. Only `filename` and `duration_seconds` are required by the app. If no `artist`/`title` are provided, the filename (without extension) will be displayed.
 
-By default, the app derives paths as:
-  - video file: `videos/{filename}.mp4`
-  - cover image: `covers/{filename}.jpg`
+By default, the app assumes these paths:
+  - Video file: `videos/{filename}.mp4`
+  - Cover image: `covers/{filename}.jpg`
 
-To override paths (e.g., different extensions or custom names), set the optional fields:
+To override default paths (e.g., different file extensions), use these optional fields:
   - `file`: full/relative path to the video file
   - `cover`: full/relative path to the cover image
 
@@ -139,22 +183,20 @@ Example:
     "duration_seconds": 186.5,
     "artist": "Ameritz - Karaoke",
     "title": "Basket Case (In the Style of Green Day) [Karaoke Version]",
-  "file": "videos/Green Day - Basket Case (karaoke).mp4",
-  "cover": "covers/Green Day - Basket Case (karaoke).jpg",
     "has_cover": true,
     "processed_at": "2025-08-08T10:36:55Z"
   }
 ]
-  ```
+```
 
 **extra_metadata.json (optional):**
-Produced by `update-song-data.py` with extended info (what spotdl provides). Kept to re-generate `videos.json` or to look up details (e.g., lyrics). Not used by the web app, only by the update script. You can remove songs from `videos.json` without deleting their metadata here.
+Generated by `update-song-data.py` containing extended metadata from spotdl (cover URLs, lyrics, etc.). Used only by the update script for re-generating `videos.json`. Not directly used by the web app.
 
-**Video files (MP4):**
-Karaoke video files in `videos/`. One song per file. Ideally named `Artist - Title.mp4` — the base name is used to search for cover art and metadata.
+**Video files:**
+Karaoke video files stored in `videos/`. Ideally named `Artist - Title.mp4` since the filename is used for metadata searches.
 
-**cover art:**
-JPEGs in `covers/`. Covers are downloaded/generated by `update-song-data.py` when internet is available; otherwise the app shows a default cover.
+**Cover art:**
+JPEG images in `covers/`. Downloaded automatically by `update-song-data.py` when internet is available. The app shows a default cover icon when no cover image exists.
 
 
 ### Controls
@@ -167,7 +209,6 @@ JPEGs in `covers/`. Covers are downloaded/generated by `update-song-data.py` whe
   - ↻ Restart button to replay from beginning
 - **Statistics**: Click the chart button to view song popularity and usage stats
 
-### Keyboard Shortcuts
-- **ESC**: Clear search (when no video is playing) or exit fullscreen
-- **Ctrl+K / Cmd+K**: Clear search
-- **Ctrl+K / Cmd+K**: Clear search
+### Keyboard shortcuts:
+- **ESC**: Exit fullscreen video, close stats page, or clear search (when idle)
+- **Space**: Pause/play video (when video is active)
