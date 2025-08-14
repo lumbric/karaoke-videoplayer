@@ -214,3 +214,28 @@ JPEG images in `covers/`. Downloaded automatically by `update-song-data.py` when
 ### Keyboard shortcuts:
 - **ESC**: Exit fullscreen video, close stats page, or clear search (when idle)
 - **Space**: Pause/play video (when video is active)
+
+
+## Desktop Setup 2025
+
+At ["Kultur ab Hof"](https://kulturabhof.at/) we used a simple 4GB desktop computer
+
+The setup:
+- A sudo user "kah", password can be found on a paper inside the machine
+- A non-privileged user "singer" which is set to auto login and has no password. 
+    - After login of user *singer*, Firefox starts the karaoke player in kiosk mode.
+    - Several keyboard shortcuts like ALT + F4, ALT + TAB are disabled in the Ubuntu settings.
+    - It is not impossible to escape, but users cannot break a lot (only delete the statistics and user settings).
+- Use CTRL+ALT+F3 (or F4), login with user *kah* and run `sudo -u singer killall firefox`, then switch back to user *singer* to change settings or clear the statistics.
+
+*/home* is a separate partion. The machine runs on Ubuntu with 24.04.3 LTS.
+
+Many manual modifications were made:
+- disable screensaver 
+- disable sysem sounds
+- Firefox
+    - allow direct file access
+    - disable devtools
+- allow empty passwords by addng `nullok` in /etc/pam.d/common-password to the line: `password	[success=2 default=ignore]	pam_unix.so obscure use_authtok try_first_pass yescrypt nullok`
+- Disable the Windows key: gsettings set org.gnome.mutter overlay-key 
+- ...
