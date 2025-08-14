@@ -574,6 +574,15 @@
       MAX_DISPLAY_COUNT: 160       // Maximum number of videos to display (both start page and search results)
     };
 
+    const searchInput = document.getElementById('search');
+    document.addEventListener('keydown', (e) => {
+      const isTypingKey = e.key.length === 1 || e.key === 'Backspace';
+    
+      if (document.activeElement !== searchInput && isTypingKey) {
+        searchInput.focus();
+      }
+    });
+
     async function loadVideos() {
       try {
         const res = await fetch("videos.json");
