@@ -469,6 +469,9 @@
       <h1>Karaoke ab Hof</h1>
       <img src="static/singing-chicken.png" class="singing-chicken">
     </div>
+    <select id="genreFilter" style="margin: 1em auto; display: block; padding: 0.7em 1.5em; font-size: 1.1em; border-radius: 25px; background: white; color: #4E4E4E; width: min(300px, 80%); text-align: center;">
+      <option value="">Alle Genres</option>
+    </select>
     <input type="text" id="search" placeholder="Lied suchen...">
   </div>
   <div class="video-grid" id="videoList"></div>
@@ -593,28 +596,21 @@
       try {
         const res = await fetch("videos.json");
         const rawVideos = await res.json();
-        
         // Transform to include computed file paths and display title
         allVideos = rawVideos.map(video => {
-          // Handle both old format (title field) and new format (artist + title fields)
           let displayTitle, artist, title, searchText;
-          
           if (video.artist && video.title) {
-            // New format with separate artist and title
             artist = video.artist;
             title = video.title;
             displayTitle = `${artist} - ${title}`;
             searchText = `${artist} ${title}`.toLowerCase();
           } else if (video.artist || video.title) {
-            // Partial new format - only one field available
             artist = video.artist || "";
             title = video.title || "";
             displayTitle = video.artist ? `${video.artist} - ${video.title || ""}` : video.title;
             searchText = `${artist} ${title}`.toLowerCase();
           } else if (video.title) {
-            // Old format with combined title
             displayTitle = video.title;
-            // Try to parse artist and title from combined title
             if (video.title.includes(' - ')) {
               const parts = video.title.split(' - ');
               artist = parts[0];
@@ -626,14 +622,12 @@
               searchText = video.title.toLowerCase();
             }
           } else {
-            // Fallback - use filename without extension
             const filename = video.filename || video.file?.split('/').pop()?.replace(/\.[^/.]+$/, "") || "Unknown Song";
             displayTitle = filename;
             artist = "";
             title = filename;
             searchText = filename.toLowerCase();
           }
-          
           return {
             ...video,
             file: video.video_filename || `videos/${video.filename}.mp4`,
@@ -641,10 +635,19 @@
             displayTitle: displayTitle,
             artist: artist,
             title: title,
-            searchText: searchText
+            searchText: searchText,
+            genre: video.genre || "Unbekannt"
           };
         });
-        
+        // Populate genre filter
+        const genreSet = new Set(allVideos.map(v => v.genre).filter(Boolean));
+        const genreFilter = document.getElementById("genreFilter");
+        genreSet.forEach(genre => {
+          const opt = document.createElement("option");
+          opt.value = genre;
+          opt.textContent = genre;
+          genreFilter.appendChild(opt);
+        });
         showRandomVideos();
       } catch (error) {
         console.error("Error loading videos:", error);
@@ -691,7 +694,8 @@
 
 
     function handleSearch(query, reset = true) {
-      if (!query || query.length === 0) {
+      const selectedGenre = document.getElementById("genreFilter").value;
+      if ((!query || query.length === 0) && !selectedGenre) {
         showRandomVideos(true);
         return;
       }
@@ -700,6 +704,8 @@
       if (reset) currentOffset = 0;
       const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
       currentVideos = allVideos.filter(v => {
+        // Genre filter
+        if (selectedGenre && v.genre !== selectedGenre) return false;
         const searchFields = [
           v.filename || "",
           v.artist || "",
@@ -819,6 +825,10 @@
     // Enhanced search with intelligent filtering
     document.getElementById("search").addEventListener("input", e => {
       const query = e.target.value.trim();
+      handleSearch(query, true);
+    });
+    document.getElementById("genreFilter").addEventListener("change", () => {
+      const query = document.getElementById("search").value.trim();
       handleSearch(query, true);
     });
 
