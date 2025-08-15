@@ -469,10 +469,17 @@
       <h1>Karaoke ab Hof</h1>
       <img src="static/singing-chicken.png" class="singing-chicken">
     </div>
-    <select id="genreFilter" style="margin: 1em auto; display: block; padding: 0.7em 1.5em; font-size: 1.1em; border-radius: 25px; background: white; color: #4E4E4E; width: min(300px, 80%); text-align: center;">
-      <option value="">Alle Genres</option>
-    </select>
-    <input type="text" id="search" placeholder="Lied suchen...">
+    <div style="width: min(600px, 80%); margin: 0 auto; position: relative;">
+      <button id="filterBtn" style="position: absolute; left: -45px; top: 50%; transform: translateY(-50%); background: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; box-shadow: 0 2px 8px #0002; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        <span style="font-size: 1.3em; color: #cd6391;">&#128269;</span>
+      </button>
+      <div id="genreMenu" style="display: none; position: absolute; left: 0; top: 45px; background: #fff; color: #4E4E4E; border-radius: 12px; box-shadow: 0 2px 12px #0003; min-width: 180px; z-index: 10;">
+        <div style="padding: 10px 18px; cursor: pointer; border-bottom: 1px solid #eee;" data-genre="">Alle Genres</div>
+        <!-- genre options will be injected here -->
+      </div>
+      <input type="text" id="search" placeholder="Lied suchen..." style="width: 100%;">
+      <button id="clearSearchBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.3em; color: #a791b5; cursor: pointer; display: none;">&#10006;</button>
+    </div>
   </div>
   <div class="video-grid" id="videoList"></div>
   <div id="playerContainer">
@@ -639,14 +646,26 @@
             genre: video.genre || "Unbekannt"
           };
         });
-        // Populate genre filter
-        const genreSet = new Set(allVideos.map(v => v.genre).filter(Boolean));
-        const genreFilter = document.getElementById("genreFilter");
+        // Populate genre filter (support array of genres)
+        const genreSet = new Set();
+        allVideos.forEach(v => {
+          if (Array.isArray(v.genre)) {
+            v.genre.forEach(g => genreSet.add(g));
+          } else if (v.genre) {
+            genreSet.add(v.genre);
+          }
+        });
+        const genreMenu = document.getElementById("genreMenu");
+        // Remove old genre options except 'Alle Genres'
+        genreMenu.querySelectorAll('[data-genre]:not([data-genre=""])').forEach(e => e.remove());
         genreSet.forEach(genre => {
-          const opt = document.createElement("option");
-          opt.value = genre;
-          opt.textContent = genre;
-          genreFilter.appendChild(opt);
+          const div = document.createElement("div");
+          div.style.padding = "10px 18px";
+          div.style.cursor = "pointer";
+          div.style.borderBottom = "1px solid #eee";
+          div.textContent = genre;
+          div.setAttribute("data-genre", genre);
+          genreMenu.appendChild(div);
         });
         showRandomVideos();
       } catch (error) {
@@ -693,8 +712,8 @@
 
 
 
+    let selectedGenre = "";
     function handleSearch(query, reset = true) {
-      const selectedGenre = document.getElementById("genreFilter").value;
       if ((!query || query.length === 0) && !selectedGenre) {
         showRandomVideos(true);
         return;
@@ -704,8 +723,14 @@
       if (reset) currentOffset = 0;
       const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
       currentVideos = allVideos.filter(v => {
-        // Genre filter
-        if (selectedGenre && v.genre !== selectedGenre) return false;
+        // Genre filter (support array of genres)
+        if (selectedGenre) {
+          if (Array.isArray(v.genre)) {
+            if (!v.genre.includes(selectedGenre)) return false;
+          } else if (v.genre !== selectedGenre) {
+            return false;
+          }
+        }
         const searchFields = [
           v.filename || "",
           v.artist || "",
@@ -823,13 +848,42 @@
     }
 
     // Enhanced search with intelligent filtering
-    document.getElementById("search").addEventListener("input", e => {
+    const searchEl = document.getElementById("search");
+    const clearBtn = document.getElementById("clearSearchBtn");
+    searchEl.addEventListener("input", e => {
       const query = e.target.value.trim();
       handleSearch(query, true);
+      clearBtn.style.display = query.length > 0 ? "block" : "none";
     });
-    document.getElementById("genreFilter").addEventListener("change", () => {
-      const query = document.getElementById("search").value.trim();
-      handleSearch(query, true);
+    clearBtn.addEventListener("click", () => {
+      searchEl.value = "";
+      clearBtn.style.display = "none";
+      handleSearch("", true);
+    });
+    // Filter button and genre menu logic
+    const filterBtn = document.getElementById("filterBtn");
+    const genreMenu = document.getElementById("genreMenu");
+    filterBtn.addEventListener("click", () => {
+      genreMenu.style.display = genreMenu.style.display === "block" ? "none" : "block";
+    });
+    document.addEventListener("click", (e) => {
+      if (!filterBtn.contains(e.target) && !genreMenu.contains(e.target)) {
+        genreMenu.style.display = "none";
+      }
+    });
+    genreMenu.addEventListener("click", (e) => {
+      const genre = e.target.getAttribute("data-genre");
+      if (genre !== null) {
+        selectedGenre = genre;
+        genreMenu.style.display = "none";
+        const query = document.getElementById("search").value.trim();
+        handleSearch(query, true);
+        // Highlight selected genre
+        genreMenu.querySelectorAll('[data-genre]').forEach(el => {
+          el.style.background = el.getAttribute("data-genre") === genre ? "#cd6391" : "#fff";
+          el.style.color = el.getAttribute("data-genre") === genre ? "#fff" : "#4E4E4E";
+        });
+      }
     });
 
     // Infinite scroll for autoloading more songs
