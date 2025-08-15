@@ -571,8 +571,14 @@
 
     // Configuration for video display and search
     const CONFIG = {
+      BATCH_SIZE: 40,              // Number of videos to load per batch
       MAX_DISPLAY_COUNT: 160       // Maximum number of videos to display (both start page and search results)
     };
+
+    let currentVideos = [];
+    let currentMode = "random"; // or "search"
+    let currentSearchQuery = "";
+    let currentOffset = 0;
 
     const searchInput = document.getElementById('search');
     document.addEventListener('keydown', (e) => {
@@ -645,9 +651,14 @@
       }
     }
 
-    function showRandomVideos() {
-      const sample = shuffle([...allVideos]).slice(0, CONFIG.MAX_DISPLAY_COUNT);
-      renderCards(sample);
+    function showRandomVideos(reset = true) {
+      currentMode = "random";
+      if (reset) {
+        currentOffset = 0;
+        currentVideos = shuffle([...allVideos]);
+      }
+      const nextBatch = currentVideos.slice(0, currentOffset + CONFIG.BATCH_SIZE);
+      renderCards(nextBatch);
     }
 
     function shuffle(arr) {
@@ -679,41 +690,34 @@
 
 
 
-    function handleSearch(query) {
+    function handleSearch(query, reset = true) {
       if (!query || query.length === 0) {
-        // Show random videos when search is empty
-        showRandomVideos();
+        showRandomVideos(true);
         return;
       }
-
+      currentMode = "search";
+      currentSearchQuery = query;
+      if (reset) currentOffset = 0;
       const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 0);
-
-      // Filter videos based on search query (search in filename, artist, and title)
-      const filteredVideos = allVideos.filter(v => {
-        // Create an array of searchable fields
+      currentVideos = allVideos.filter(v => {
         const searchFields = [
           v.filename || "",
           v.artist || "",
           v.title || "",
           v.searchText || ""
         ];
-        
-        // Check if any search term matches any of the fields
-        return searchTerms.every(term => 
-          searchFields.some(field => 
+        return searchTerms.every(term =>
+          searchFields.some(field =>
             field.toLowerCase().includes(term)
           )
         );
       });
-
-      if (filteredVideos.length === 0) {
+      if (currentVideos.length === 0) {
         renderCards([]);
         return;
       }
-
-      // Limit results to same number as start page
-      const limitedResults = filteredVideos.slice(0, CONFIG.MAX_DISPLAY_COUNT);
-      renderCards(limitedResults);
+      const nextBatch = currentVideos.slice(0, currentOffset + CONFIG.BATCH_SIZE);
+      renderCards(nextBatch);
     }
 
     // Global session tracking variables
@@ -815,7 +819,23 @@
     // Enhanced search with intelligent filtering
     document.getElementById("search").addEventListener("input", e => {
       const query = e.target.value.trim();
-      handleSearch(query);
+      handleSearch(query, true);
+    });
+
+    // Infinite scroll for autoloading more songs
+    document.getElementById("videoList").addEventListener("scroll", function() {
+      const container = this;
+      if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50) {
+        // Near bottom
+        if (currentOffset + CONFIG.BATCH_SIZE < currentVideos.length) {
+          currentOffset += CONFIG.BATCH_SIZE;
+          if (currentMode === "random") {
+            showRandomVideos(false);
+          } else {
+            handleSearch(currentSearchQuery, false);
+          }
+        }
+      }
     });
 
     // Mouse movement handling for video player
