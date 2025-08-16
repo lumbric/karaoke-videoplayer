@@ -908,6 +908,7 @@
     clearBtn.addEventListener("click", () => {
       searchEl.value = "";
       // clearBtn.style.display = "none";
+      resetGenreFilter();
       handleSearch("", true);
     });
     // Filter button and genre menu logic
@@ -946,7 +947,7 @@
       }
     });
 
-    selectedGenrePill.addEventListener("click", () => {
+    function resetGenreFilter() {
       selectedGenre = "";
       selectedGenrePill.style.display = "none";
       genreMenu.querySelectorAll('[data-genre]').forEach(el => {
@@ -954,7 +955,8 @@
         el.style.color = el.getAttribute("data-genre") === "" ? "#fff" : "#4E4E4E";
       });
       handleSearch(document.getElementById("search").value.trim(), true);
-    });
+    }
+    selectedGenrePill.addEventListener("click", resetGenreFilter);
 
     // Infinite scroll for autoloading more songs
     document.getElementById("videoList").addEventListener("scroll", function() {
