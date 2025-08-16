@@ -678,9 +678,21 @@
       if (reset) {
         currentOffset = 0;
         currentVideos = shuffle([...allVideos]);
+        renderCards(currentVideos.slice(0, CONFIG.BATCH_SIZE));
+      } else {
+        // Append new batch
+        const container = document.getElementById("videoList");
+        const alreadyLoaded = container.children.length;
+        const nextBatch = currentVideos.slice(alreadyLoaded, alreadyLoaded + CONFIG.BATCH_SIZE);
+        nextBatch.forEach(v => {
+          cover = v.has_cover ? v.cover : "static/cover_fallback.svg";
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `<img src="${cover}" onerror="this.src='static/cover_fallback.svg'"><div class="title">${v.displayTitle}</div>`;
+          div.onclick = () => playVideo(v);
+          container.appendChild(div);
+        });
       }
-      const nextBatch = currentVideos.slice(0, currentOffset + CONFIG.BATCH_SIZE);
-      renderCards(nextBatch);
     }
 
     function shuffle(arr) {
@@ -747,8 +759,22 @@
         renderCards([]);
         return;
       }
-      const nextBatch = currentVideos.slice(0, currentOffset + CONFIG.BATCH_SIZE);
-      renderCards(nextBatch);
+      if (reset) {
+        renderCards(currentVideos.slice(0, CONFIG.BATCH_SIZE));
+      } else {
+        // Append new batch
+        const container = document.getElementById("videoList");
+        const alreadyLoaded = container.children.length;
+        const nextBatch = currentVideos.slice(alreadyLoaded, alreadyLoaded + CONFIG.BATCH_SIZE);
+        nextBatch.forEach(v => {
+          cover = v.has_cover ? v.cover : "static/cover_fallback.svg";
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `<img src="${cover}" onerror="this.src='static/cover_fallback.svg'"><div class="title">${v.displayTitle}</div>`;
+          div.onclick = () => playVideo(v);
+          container.appendChild(div);
+        });
+      }
     }
 
     // Global session tracking variables
