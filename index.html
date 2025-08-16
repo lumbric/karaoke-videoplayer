@@ -471,11 +471,12 @@
     </div>
     <div style="width: min(600px, 80%); margin: 0 auto; position: relative;">
       <div style="position: relative; width: 100%;">
-        <input type="text" id="search" placeholder="Lied suchen..." style="width: 100%; padding-right: 40px;">
-        <button id="filterBtn" style="position: absolute; right: -50px; top: 50%; transform: translateY(-50%); background: none; border: none; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; z-index:10;">
+        <input type="text" id="search" placeholder="Lied suchen..." style="width: 100%; padding-right: 120px;">
+        <span id="selectedGenrePill" style="display:none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #cd6391; color: #fff; border-radius: 12px; padding: 4px 16px; font-size: 1em; cursor: pointer; z-index: 20; box-shadow: 0 2px 8px #0002; white-space: nowrap;"></span>
+        <button id="filterBtn" style="position: absolute; right: 90px; top: 50%; transform: translateY(-50%); background: none; border: none; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; z-index:10;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5h16M7 12h10M10 19h4" stroke="#a791b5" stroke-width="2.5" stroke-linecap="round"/></svg>
         </button>
-        <button id="clearSearchBtn" style="z-index: 100; position: absolute; right: -28px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.4em; color: #a791b5; cursor: pointer; display: block;">&#10005;</button>
+        <button id="clearSearchBtn" style="z-index: 100; position: absolute; right: 54px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.4em; color: #a791b5; cursor: pointer; display: block;">&#10005;</button>
         <div id="genreMenu" style="display: none; position: absolute; right: -69px; top: 43px; background: #fff; color: #4E4E4E; border-radius: 12px; box-shadow: 0 2px 12px #0003; min-width: 180px; z-index: 10; max-height: 260px; overflow-y: auto;">
         <div style="padding: 10px 18px; cursor: pointer; border-bottom: 1px solid #eee;" data-genre="">Alle Genres</div>
         <!-- genre options will be injected here -->
@@ -726,7 +727,8 @@
 
 
 
-    let selectedGenre = "";
+  let selectedGenre = "";
+  const selectedGenrePill = document.getElementById("selectedGenrePill");
     function handleSearch(query, reset = true) {
       if ((!query || query.length === 0) && !selectedGenre) {
         showRandomVideos(true);
@@ -911,7 +913,24 @@
           el.style.background = el.getAttribute("data-genre") === genre ? "#cd6391" : "#fff";
           el.style.color = el.getAttribute("data-genre") === genre ? "#fff" : "#4E4E4E";
         });
+        // Show pill if not empty
+        if (genre && genre !== "") {
+          selectedGenrePill.textContent = genre;
+          selectedGenrePill.style.display = "inline-block";
+        } else {
+          selectedGenrePill.style.display = "none";
+        }
       }
+    });
+
+    selectedGenrePill.addEventListener("click", () => {
+      selectedGenre = "";
+      selectedGenrePill.style.display = "none";
+      genreMenu.querySelectorAll('[data-genre]').forEach(el => {
+        el.style.background = el.getAttribute("data-genre") === "" ? "#cd6391" : "#fff";
+        el.style.color = el.getAttribute("data-genre") === "" ? "#fff" : "#4E4E4E";
+      });
+      handleSearch(document.getElementById("search").value.trim(), true);
     });
 
     // Infinite scroll for autoloading more songs
