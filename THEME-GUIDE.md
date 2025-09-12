@@ -6,8 +6,9 @@ To change the theme, edit the `THEME_NAME` in `theme-config.js`:
 
 ```javascript
 const THEME_CONFIG = {
-  // Change this line to switch themes:
+  // Change these lines to customize your app:
   THEME_NAME: 'karaoke-ab-hof',  // Available: 'karaoke-ab-hof', 'dark-theme', 'neon-theme'
+  TITLE: 'Your Custom Title',    // The title displayed in the header and browser tab
   // ... rest of config
 };
 ```
@@ -58,13 +59,37 @@ static/[theme-name]/
 4. **Update configuration:**
    ```javascript
    THEME_NAME: 'my-custom-theme',
+   TITLE: 'My Custom Karaoke App',
    ```
+
+## Example Configurations
+
+```javascript
+// For a party venue
+const THEME_CONFIG = {
+  THEME_NAME: 'karaoke-ab-hof',
+  TITLE: 'Party Palace Karaoke',
+};
+
+// For a corporate event
+const THEME_CONFIG = {
+  THEME_NAME: 'dark-theme',
+  TITLE: 'Corporate Karaoke Night',
+};
+
+// For a retro-themed bar
+const THEME_CONFIG = {
+  THEME_NAME: 'neon-theme',
+  TITLE: 'Neon Nights Karaoke',
+};
+```
 
 ## Configuration Options
 
 The `THEME_CONFIG` object provides:
 
 - `THEME_NAME`: The folder name of the active theme
+- `TITLE`: The application title displayed in header and browser tab
 - `CSS_PATH`: Automatically calculated CSS file path
 - `LOGO_PATH`: Path to the theme logo image
 - `COVER_FALLBACK_PATH`: Path to the fallback cover image

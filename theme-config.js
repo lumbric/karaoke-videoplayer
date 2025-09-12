@@ -6,6 +6,9 @@ const THEME_CONFIG = {
   // Set the theme folder name here
   THEME_NAME: 'karaoke-ab-hof',
   
+  // Theme title displayed in the header
+  TITLE: 'Karaoke ab Hof',
+  
   // Theme paths (automatically calculated based on THEME_NAME)
   get CSS_PATH() {
     return `static/${this.THEME_NAME}/theme.css`;
