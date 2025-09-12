@@ -377,7 +377,88 @@ button:hover {
     width: 220px;
 }
 
+/* Song Request Styling */
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #cd6391;
+    font-size: 1.2em;
+}
 
+.request-button {
+    background: linear-gradient(135deg, #cd6391, #ff1493);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    font-size: 1.1em;
+    font-family: 'RocknRoll One', sans-serif;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
+}
+
+.request-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 20, 147, 0.4);
+    background: linear-gradient(135deg, #ff1493, #cd6391);
+}
+
+.request-button:active {
+    transform: translateY(0);
+}
+
+.request-message-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.request-message {
+    background: linear-gradient(135deg, #332e5d, #4a4370);
+    color: white;
+    padding: 30px 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 2px solid #cd6391;
+}
+
+.request-message h3 {
+    color: #cd6391;
+    margin-top: 0;
+    font-size: 1.5em;
+}
+
+.request-message p {
+    margin: 15px 0 25px 0;
+    line-height: 1.5;
+}
+
+.close-button {
+    background: #cd6391;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'RocknRoll One', sans-serif;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-button:hover {
+    background: #ff1493;
+    transform: translateY(-1px);
+}
 
 /* Responsive Design */
 

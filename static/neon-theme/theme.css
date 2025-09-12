@@ -400,7 +400,95 @@ button:hover {
     filter: brightness(1.2) saturate(1.5) hue-rotate(90deg);
 }
 
+/* Song Request Styling */
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #00ff88;
+    font-size: 1.2em;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
 
+.request-button {
+    background: linear-gradient(135deg, #ff0080, #00ffff);
+    color: #000;
+    border: none;
+    padding: 15px 25px;
+    font-size: 1.1em;
+    font-family: 'RocknRoll One', sans-serif;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(255, 0, 128, 0.4), 0 0 20px rgba(0, 255, 255, 0.3);
+    font-weight: bold;
+}
+
+.request-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 0, 128, 0.6), 0 0 30px rgba(0, 255, 255, 0.5);
+    background: linear-gradient(135deg, #00ffff, #ff0080);
+}
+
+.request-button:active {
+    transform: translateY(0);
+}
+
+.request-message-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.request-message {
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+    color: #00ff88;
+    padding: 30px 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 255, 136, 0.3);
+    border: 2px solid #00ffff;
+}
+
+.request-message h3 {
+    color: #00ffff;
+    margin-top: 0;
+    font-size: 1.5em;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+}
+
+.request-message p {
+    margin: 15px 0 25px 0;
+    line-height: 1.5;
+    text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+}
+
+.close-button {
+    background: #ff0080;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'RocknRoll One', sans-serif;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
+}
+
+.close-button:hover {
+    background: #00ffff;
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+}
 
 /* Responsive Design */
 

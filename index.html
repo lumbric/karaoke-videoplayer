@@ -262,7 +262,17 @@
       container.innerHTML = "";
 
       if (videos.length === 0) {
-        container.innerHTML = '<div style="text-align: center; color: #ccc; padding: 2em;">Keine Videos gefunden</div>';
+        const searchQuery = document.getElementById('search').value.trim();
+        container.innerHTML = `
+          <div class="no-results">
+            <div class="no-results-message">Keine Videos gefunden</div>
+            ${searchQuery ? `
+              <button class="request-button" onclick="requestSong('${searchQuery.replace(/'/g, "\\'")}')">
+                🎵 "${searchQuery}" für die nächste Party vorschlagen
+              </button>
+            ` : ''}
+          </div>
+        `;
         return;
       }
 
@@ -1083,6 +1093,66 @@
           <div class="time">${new Date(log.timestamp).toLocaleString('de-DE')} • ${log.playPercentage}%</div>
         </div>
       `).join('');
+    }
+
+    // Song request functionality
+    function requestSong(searchQuery) {
+      // Get existing requests from localStorage
+      let songRequests = JSON.parse(localStorage.getItem('songRequests') || '[]');
+      
+      // Add new request with timestamp
+      const newRequest = {
+        query: searchQuery,
+        timestamp: Date.now(),
+        date: new Date().toLocaleString('de-DE')
+      };
+      
+      // Check if song was already requested
+      const alreadyRequested = songRequests.some(req => 
+        req.query.toLowerCase() === searchQuery.toLowerCase()
+      );
+      
+      if (!alreadyRequested) {
+        songRequests.push(newRequest);
+        localStorage.setItem('songRequests', JSON.stringify(songRequests));
+      }
+      
+      // Show success message
+      showRequestMessage(searchQuery, alreadyRequested);
+    }
+
+    function showRequestMessage(songTitle, alreadyRequested) {
+      // Create message overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'request-message-overlay';
+      overlay.innerHTML = `
+        <div class="request-message-popup">
+          <div class="request-message-icon">🎉</div>
+          <div class="request-message-title">
+            ${alreadyRequested ? 'Bereits vorgeschlagen!' : 'Vorschlag eingegangen!'}
+          </div>
+          <div class="request-message-text">
+            "${songTitle}" ${alreadyRequested ? 'wurde bereits vorgeschlagen und' : ''} wird bei der nächsten Party verfügbar sein!
+          </div>
+          <button class="request-message-close" onclick="closeRequestMessage()">Verstanden</button>
+        </div>
+      `;
+      
+      document.body.appendChild(overlay);
+      
+      // Auto-close after 5 seconds
+      setTimeout(() => {
+        if (document.body.contains(overlay)) {
+          closeRequestMessage();
+        }
+      }, 5000);
+    }
+
+    function closeRequestMessage() {
+      const overlay = document.querySelector('.request-message-overlay');
+      if (overlay) {
+        overlay.remove();
+      }
     }
 
     // Initialize theme based on configuration
