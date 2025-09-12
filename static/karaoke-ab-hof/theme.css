@@ -1,0 +1,475 @@
+/* Default Theme - Original Karaoke ab Hof Style */
+
+@font-face {
+  font-family: 'RocknRoll One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../RocknRollOne.ttf) format('truetype');
+}
+
+body {
+  margin: 0;
+  font-family: 'RocknRoll One', sans-serif;
+  background: #332e5d;
+  color: white;
+  overflow-x: hidden;
+  line-height: 1.4;
+  position: relative;
+  padding-top: 320px; /* Space for fixed header */
+}
+
+h1 {
+  text-align: center;
+  margin: 1em 0 0.5em 0;
+  font-size: 4em;
+  color: #cd6391;
+  font-weight: bolder;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 2px;
+}
+
+/*
+h1::before,
+h1::after {
+  content: '✨';
+  font-size: 0.6em;
+  color: #ff1493;
+  margin: 0 20px;
+  text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.3);
+}
+*/
+
+#search {
+  margin: 1.5em auto 1em auto;
+  display: block;
+  padding: 1em 1.5em;
+  width: min(600px, 80%);
+  font-size: 1.2em;
+  font-family: 'RocknRoll One', sans-serif;
+  border: 0px;
+  border-radius: 25px;
+  background: white;
+  color: #4E4E4E;
+  text-align: center;
+  transition: all 0.1s ease;
+  outline: none;
+  position: relative;
+  z-index: 1;
+}
+#search:focus {
+  transform: scale(1.06);
+}
+#search::placeholder {
+  text-align: center;
+  color: #a791b5;
+}
+.search-info {
+  display: none;
+}
+
+#selectedGenrePill {
+  display:none;
+  position: absolute;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 20;
+  white-space: nowrap;
+  right: 18px;
+  top: 50%;
+  color: #a791b5;
+  border-radius: 12px;
+  padding: 8px;
+  font-size: 1em;
+  white-space: nowrap;
+  background: none;
+  border: 1px solid rgb(205, 99, 145);
+  font-size: 0.9em;
+}
+
+.video-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  padding: 20px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.card {
+  background: #cd6391;
+  border: 0px;
+  border-radius: 15px;
+  padding: 15px;
+  width: 250px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.card:hover {
+  transform: scale(1.08) translateY(0px);
+}
+
+.card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 15px;
+  border: 0px;
+}
+
+.title {
+  margin-top: 1em;
+  font-weight: bold;
+  font-size: 1.1em;
+  text-align: center;
+  color: white;
+}
+
+#playerContainer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: none;
+}
+
+#playerContainer.show-cursor {
+  cursor: default;
+}
+
+video {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    background: #000;
+}
+
+/* Hide video controls to prevent fast-forwarding */
+video::-webkit-media-controls-timeline {
+  display: none !important;
+}
+
+video::-moz-range-progress {
+  display: none !important;
+}
+
+video::-moz-range-track {
+  display: none !important;
+}
+
+/* Hide picture-in-picture button */
+video::-webkit-media-controls-picture-in-picture-button {
+  display: none !important;
+}
+
+video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+}
+
+/* Alternative: Completely hide all controls and add custom ones */
+.video-overlay {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 1002;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-overlay.visible {
+  opacity: 1;
+}
+
+.video-control-btn {
+  background: rgba(68, 70, 127, 0.9);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'RocknRoll One', sans-serif;
+  font-size: 0.9em;
+  backdrop-filter: blur(10px);
+
+  /* not the nicest solution, but the button should have a fixed size independent of its content */
+  height: 49px;
+  width: 120px;
+}
+
+.video-control-btn:hover {
+  background: rgba(205, 99, 145, 0.9);
+}
+
+button {
+  background: #44467f;
+  color: white;
+  font-family: 'RocknRoll One', sans-serif;
+  padding: 15px 20px;
+  border: 0px;
+  color: white;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+    background: #cd6391;
+}
+
+#closeBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  font-size: 1.2em;
+  display: none;
+  z-index: 1001;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#closeBtn.visible {
+  opacity: 1;
+}
+
+#statsButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+#statsPage {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  z-index: 2000;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.stat-card {
+  background: linear-gradient(145deg, #cd6391 0%, #b8578a 100%);
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(205, 99, 145, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 1em;
+  color: white;
+  opacity: 0.9;
+}
+
+.stat-number {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.chart-container {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.chart-container h3 {
+  margin: 0 0 15px 0;
+  color: #cd6391;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.favorite-item, .activity-item {
+  background: rgba(205, 99, 145, 0.2);
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #cd6391;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.favorite-item .song-title, .activity-item .song-title {
+  font-weight: bold;
+  color: white;
+}
+
+.favorite-item .completion, .activity-item .time {
+  color: #cd6391;
+  font-size: 0.9em;
+}
+
+#closeStats {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Static cosmic/party decorative elements (no animations) */
+.cosmic-decoration {
+  position: fixed;
+  font-size: 2em;
+  opacity: 0.15;
+  z-index: 0;
+  pointer-events: none;
+  color: #ff69b4;
+}
+
+.cosmic-decoration:nth-child(1) { top: 10%; left: 5%; }
+.cosmic-decoration:nth-child(2) { top: 20%; right: 8%; }
+.cosmic-decoration:nth-child(3) { bottom: 15%; left: 10%; }
+.cosmic-decoration:nth-child(4) { bottom: 25%; right: 15%; }
+
+.header-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: rgba(51, 46, 93, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 100;
+    padding: 1em 0 1em 0;
+    box-sizing: border-box;
+    box-shadow: 0 14px 30px #332e5d;
+}
+
+.header-content {
+    position: relative;
+    width: 1000px;
+    max-width: 100%;
+    margin: auto;
+}
+
+.logo {
+    position: absolute;
+    left: -90px;
+    top: -10px;
+    width: 220px;
+}
+
+
+
+/* Responsive Design */
+
+@media (max-width: 2000px) {
+}
+
+@media (max-width: 1275px) {
+        .logo {
+            display: none;
+        }
+    .header-box {
+      padding-bottom: 0em;
+    }
+    body {
+        padding-top: 295px; /* Reduced padding when logo is hidden */
+    }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-top: 295px; /* Adjusted for mobile */
+  }
+
+  .header-box {
+      padding-bottom: 0em;
+  }
+
+  .video-grid {
+    padding: 20px 20px;
+    gap: 20px;
+    justify-content: center;
+  }
+  .card {
+    width: 200px;
+  }
+  .card img {
+    height: 200px;
+  }
+  h1 {
+    font-size: 2.2em;
+  }
+  h1::before,
+  h1::after {
+    font-size: 0.5em;
+    margin: 0 15px;
+  }
+  #search {
+    width: 90%;
+    font-size: 1.1em;
+    padding: 0.8em 1.2em;
+  }
+
+  .cosmic-decoration {
+    display: none;
+  }
+
+  /* Statistics responsive */
+  #statsPage div[style*="grid-template-columns: 1fr 1fr"] {
+    display: block !important;
+  }
+  .chart-container {
+    margin-bottom: 20px;
+  }
+
+
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-top: 140px; /* Further reduced for small screens */
+  }
+
+  .video-grid {
+    padding: 15px 15px;
+    gap: 15px;
+  }
+  .card {
+    width: 160px;
+  }
+  .card img {
+    height: 160px;
+  }
+  h1 {
+    font-size: 1.8em;
+  }
+  h1::before,
+  h1::after {
+    font-size: 0.4em;
+    margin: 0 10px;
+  }
+  #search {
+    font-size: 1em;
+    padding: 0.7em 1em;
+  }
+}
