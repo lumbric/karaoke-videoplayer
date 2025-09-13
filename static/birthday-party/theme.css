@@ -622,7 +622,103 @@ h1::after {
     font-weight: bold;
 }
 
+/* Song Request Form Styling */
+.request-form-popup {
+    background: linear-gradient(135deg, #fff, #fef9e7);
+    color: #2c3e50;
+    padding: 30px 40px;
+    border-radius: 25px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    border: 4px solid #f39c12;
+    position: relative;
+    overflow: hidden;
+    transform: rotate(-1deg);
+}
 
+.request-form-popup::before {
+    content: '🎵🎉🎂';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.8em;
+    animation: celebration 2s ease-in-out infinite;
+}
+
+.request-form-header h3 {
+    color: #e74c3c;
+    margin-top: 20px;
+    font-size: 1.5em;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(231, 76, 60, 0.3);
+    transform: rotate(1deg);
+}
+
+.request-form-header p {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 0.95em;
+    text-shadow: 1px 1px 2px rgba(231, 76, 60, 0.2);
+}
+
+.form-input, .form-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 3px solid #f39c12;
+    border-radius: 20px;
+    background: linear-gradient(45deg, #fff, #fff3cd);
+    color: #2c3e50;
+    font-family: 'Comic Neue', 'RocknRoll One', sans-serif;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #e74c3c;
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+    transform: scale(1.02) rotate(0.5deg);
+    background: linear-gradient(45deg, #fff3cd, #fff);
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+    color: #e67e22;
+    font-style: italic;
+}
+
+.form-textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.form-buttons .btn {
+    flex: 1;
+    max-width: 150px;
+}
 
 /* Responsive Design */
 

@@ -1097,19 +1097,80 @@
 
     // Song request functionality
     function requestSong(searchQuery) {
+      // Show request form popup
+      showRequestForm(searchQuery);
+    }
+
+    function showRequestForm(searchQuery) {
+      // Create form overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'request-message-overlay';
+      overlay.innerHTML = `
+        <div class="request-form-popup">
+          <div class="request-form-header">
+            <h3>🎵 Song vorschlagen</h3>
+            <p>Bitte gib die Details des gewünschten Songs an:</p>
+          </div>
+          <form id="songRequestForm" onsubmit="submitSongRequest(event)">
+            <div class="form-group">
+              <label for="songTitle">Songtitel:</label>
+              <input type="text" id="songTitle" name="songTitle" value="${searchQuery}" required 
+                     placeholder="z.B. Bohemian Rhapsody" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="artistName">Künstler/Band:</label>
+              <input type="text" id="artistName" name="artistName" required 
+                     placeholder="z.B. Queen" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="additionalInfo">Zusätzliche Informationen (optional):</label>
+              <textarea id="additionalInfo" name="additionalInfo" 
+                        placeholder="z.B. spezielle Version, Jahr, etc." class="form-textarea"></textarea>
+            </div>
+            <div class="form-buttons">
+              <button type="button" class="btn btn-secondary" onclick="closeRequestForm()">Abbrechen</button>
+              <button type="submit" class="btn btn-primary">Vorschlagen</button>
+            </div>
+          </form>
+        </div>
+      `;
+      
+      document.body.appendChild(overlay);
+      
+      // Focus on artist field if song title is pre-filled
+      setTimeout(() => {
+        if (searchQuery && searchQuery.trim()) {
+          document.getElementById('artistName').focus();
+        } else {
+          document.getElementById('songTitle').focus();
+        }
+      }, 100);
+    }
+
+    function submitSongRequest(event) {
+      event.preventDefault();
+      
+      const formData = new FormData(event.target);
+      const songTitle = formData.get('songTitle').trim();
+      const artistName = formData.get('artistName').trim();
+      const additionalInfo = formData.get('additionalInfo').trim();
+      
       // Get existing requests from localStorage
       let songRequests = JSON.parse(localStorage.getItem('songRequests') || '[]');
       
-      // Add new request with timestamp
+      // Create detailed request object
       const newRequest = {
-        query: searchQuery,
+        title: songTitle,
+        artist: artistName,
+        additionalInfo: additionalInfo,
         timestamp: Date.now(),
         date: new Date().toLocaleString('de-DE')
       };
       
-      // Check if song was already requested
+      // Check if song was already requested (by title and artist)
       const alreadyRequested = songRequests.some(req => 
-        req.query.toLowerCase() === searchQuery.toLowerCase()
+        req.title?.toLowerCase() === songTitle.toLowerCase() && 
+        req.artist?.toLowerCase() === artistName.toLowerCase()
       );
       
       if (!alreadyRequested) {
@@ -1117,11 +1178,19 @@
         localStorage.setItem('songRequests', JSON.stringify(songRequests));
       }
       
-      // Show success message
-      showRequestMessage(searchQuery, alreadyRequested);
+      // Close form and show success message
+      closeRequestForm();
+      showRequestMessage(songTitle, artistName, alreadyRequested);
     }
 
-    function showRequestMessage(songTitle, alreadyRequested) {
+    function closeRequestForm() {
+      const overlay = document.querySelector('.request-message-overlay');
+      if (overlay) {
+        overlay.remove();
+      }
+    }
+
+    function showRequestMessage(songTitle, artistName, alreadyRequested) {
       // Create message overlay
       const overlay = document.createElement('div');
       overlay.className = 'request-message-overlay';
@@ -1129,10 +1198,11 @@
         <div class="request-message-popup">
           <div class="request-message-icon">🎉</div>
           <div class="request-message-title">
-            ${alreadyRequested ? 'Bereits vorgeschlagen!' : 'Vorschlag eingegangen!'}
+            ${alreadyRequested ? 'Bereits vorgeschlagen!' : 'Danke für deinen Vorschlag!'}
           </div>
           <div class="request-message-text">
-            "${songTitle}" ${alreadyRequested ? 'wurde bereits vorgeschlagen und' : ''} wird bei der nächsten Party verfügbar sein!
+            "${songTitle}" von ${artistName} ${alreadyRequested ? 'wurde bereits vorgeschlagen.' : ''} 
+            Wir werden versuchen den Song bis zum nächsten Mal hinzuzufügen.
           </div>
           <button class="btn btn-secondary" onclick="closeRequestMessage()">Verstanden</button>
         </div>
@@ -1140,12 +1210,12 @@
       
       document.body.appendChild(overlay);
       
-      // Auto-close after 5 seconds
+      // Auto-close after 6 seconds (longer due to longer text)
       setTimeout(() => {
         if (document.body.contains(overlay)) {
           closeRequestMessage();
         }
-      }, 5000);
+      }, 6000);
     }
 
     function closeRequestMessage() {
