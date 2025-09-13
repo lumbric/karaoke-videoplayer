@@ -132,6 +132,7 @@
     let allVideos = [];
     let playedLog = JSON.parse(localStorage.getItem("playedLog") || "[]");
     let chartInstance = null;
+    let isFormOpen = false; // Flag to track if song request form is open
 
     // Configuration for video display and search
     const CONFIG = {
@@ -442,6 +443,10 @@
     const searchEl = document.getElementById("search");
     const clearBtn = document.getElementById("clearSearchBtn");
     searchEl.addEventListener("input", e => {
+      // Don't process search if song request form is open
+      if (isFormOpen) {
+        return;
+      }
       const query = e.target.value.trim();
       handleSearch(query, true);
       // clearBtn.style.display = query.length > 0 ? "block" : "none";
@@ -1102,6 +1107,9 @@
     }
 
     function showRequestForm(searchQuery) {
+      // Set flag to disable search-as-you-type
+      isFormOpen = true;
+      
       // Create form overlay
       const overlay = document.createElement('div');
       overlay.className = 'request-message-overlay';
@@ -1184,6 +1192,9 @@
     }
 
     function closeRequestForm() {
+      // Re-enable search-as-you-type
+      isFormOpen = false;
+      
       const overlay = document.querySelector('.request-message-overlay');
       if (overlay) {
         overlay.remove();
