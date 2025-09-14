@@ -6,6 +6,10 @@ A local web-based karaoke video player application originally built for the fest
 
 ![Screenshot](screenshot.png)
 
+![Screenshot Statistics](screenshot_stats01.png)
+
+![Screenshot Statistics (another one)](screenshot_stats02.png)
+
 
 > **⚠️ AI-Generated Code Warning**
 > This project was created as toy project using AI assistance (GitHub Copilot). While functional, the code is not thoroughly reviewed by a human. However, it seems to work good enough and for the purpose the risk is quite low.
