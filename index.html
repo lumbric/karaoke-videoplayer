@@ -1220,16 +1220,28 @@
       const overlay = document.createElement('div');
       overlay.className = 'request-message-overlay';
       overlay.innerHTML = `
-        <div class="request-message-popup">
-          <div class="request-message-icon">🎉</div>
-          <div class="request-message-title">
-            ${alreadyRequested ? 'Bereits vorgeschlagen!' : 'Danke für deinen Vorschlag!'}
+        <div class="request-success-popup">
+          <div class="success-header">
+            <div class="success-icon">${alreadyRequested ? '✨' : '🎉'}</div>
+            <h3 class="success-title">
+              ${alreadyRequested ? 'Bereits vorgeschlagen!' : 'Danke für deinen Vorschlag!'}
+            </h3>
           </div>
-          <div class="request-message-text">
-            "${songTitle}" von ${artistName} ${alreadyRequested ? 'wurde bereits vorgeschlagen.' : ''} 
-            Wir werden versuchen den Song bis zum nächsten Mal hinzuzufügen.
+          <div class="success-content">
+            <div class="song-info">
+              <div class="song-title">"${songTitle}"</div>
+              <div class="song-artist">von ${artistName}</div>
+            </div>
+            <div class="success-message">
+              ${alreadyRequested ? 
+                'Dieser Song wurde bereits vorgeschlagen und steht auf unserer Liste.' : 
+                'Wir werden versuchen den Song bis zum nächsten Mal hinzuzufügen.'
+              }
+            </div>
           </div>
-          <button class="btn btn-secondary" onclick="closeRequestMessage()">Verstanden</button>
+          <div class="success-actions">
+            <button class="btn btn-primary" onclick="closeRequestMessage()">Perfekt!</button>
+          </div>
         </div>
       `;
       

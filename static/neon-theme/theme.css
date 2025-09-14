@@ -503,28 +503,106 @@ button:hover {
     z-index: 1000;
 }
 
-.request-message {
+/* Success Message Styling */
+.request-success-popup {
     background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
     color: #00ff88;
-    padding: 30px 40px;
-    border-radius: 20px;
-    text-align: center;
-    max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 255, 136, 0.3);
-    border: 2px solid #00ffff;
+    padding: 0;
+    border-radius: 25px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 50px rgba(0, 255, 136, 0.4);
+    border: 3px solid #00ffff;
+    overflow: hidden;
+    animation: successSlideIn 0.4s ease-out;
 }
 
-.request-message h3 {
+@keyframes successSlideIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-30px) scale(0.9); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+.success-header {
+    background: linear-gradient(135deg, #00ffff, #00ff88);
+    padding: 25px 30px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.success-icon {
+    font-size: 3em;
+    margin-bottom: 10px;
+    display: block;
+    animation: successBounce 0.6s ease-out 0.2s both;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes successBounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.success-title {
+    font-size: 1.4em;
+    margin: 0;
+    font-weight: bold;
+    color: #000;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.success-content {
+    padding: 30px;
+    text-align: center;
+}
+
+.song-info {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
+}
+
+.song-title {
+    font-size: 1.3em;
+    font-weight: bold;
     color: #00ffff;
-    margin-top: 0;
-    font-size: 1.5em;
+    margin-bottom: 8px;
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
 }
 
-.request-message p {
-    margin: 15px 0 25px 0;
-    line-height: 1.5;
+.song-artist {
+    font-size: 1.1em;
+    color: #cccccc;
+    font-style: italic;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.success-message {
+    font-size: 1em;
+    line-height: 1.6;
+    color: #cccccc;
+    margin-bottom: 25px;
     text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+}
+
+.success-actions {
+    padding: 0 30px 30px 30px;
+    text-align: center;
+}
+
+.success-actions .btn {
+    min-width: 120px;
+    font-weight: bold;
 }
 
 /* Song Request Form Styling */
