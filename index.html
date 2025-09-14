@@ -1247,12 +1247,12 @@
       
       document.body.appendChild(overlay);
       
-      // Auto-close after 6 seconds (longer due to longer text)
+      // Auto-close after 15 seconds
       setTimeout(() => {
         if (document.body.contains(overlay)) {
           closeRequestMessage();
         }
-      }, 6000);
+      }, 15000);
     }
 
     function closeRequestMessage() {
