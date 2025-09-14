@@ -96,7 +96,7 @@ button, .btn {
   padding: 15px 20px;
   border: 0px;
   border-radius: 15px;
-  cursor: pointer;
+  cursor: pointer !important;
   font-size: 0.9em;
   transition: all 0.3s ease;
 }
@@ -168,7 +168,7 @@ button:hover, .btn:hover {
   border-radius: 15px;
   padding: 15px;
   width: 250px;
-  cursor: pointer;
+  cursor: pointer !important;
   transition: all 0.1s ease;
   position: relative;
   z-index: 1;
