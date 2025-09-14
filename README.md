@@ -2,6 +2,9 @@
 
 [![License: WTFPL](https://img.shields.io/badge/License-WTFPL-brightgreen.svg)](http://www.wtfpl.net/about/)
 
+> **⚠️ AI-Generated Code Warning**  
+> This project was created as toy project using AI assistance (GitHub Copilot). While functional, the code is not thoroughly reviewed by a human. However, it seems to work good enough and for the purpose the risk is quite low.
+
 A local web-based karaoke video player application originally built for the festival ["Kultur ab Hof"](https://kulturabhof.at/).
 
 ![Screenshot](screenshot.png)
