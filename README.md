@@ -37,9 +37,9 @@ mkdir videos
 # for url in $(cat song-urls.txt); do yt-dlp --format mp4 "$url"; done
 
 # 3. Generate metadata and covers (requires ffprobe and spotdl; see notes below)
-./update-song-data.py  
+script/update-song-data.py  
 # For offline mode (only filename + duration):
-# ./update-song-data.py --no-internet
+# script/update-song-data.py --no-internet
 
 # 4. Start a web server of your choice
 # This step can be omitted if you enable direct file access in your browser (see below).
@@ -54,8 +54,8 @@ python3 -m http.server 8000
 Use the included script to automatically start a web server and open the browser in kiosk mode:
 
 ```bash
-chmod +x start.sh
-./start.sh
+chmod +x scripts/start.sh
+scripts/start.sh
 ```
 
 **Note:** Users can still exit kiosk mode using keyboard shortcuts (Alt+F4, Alt+Tab).
@@ -103,13 +103,13 @@ Statistics are stored locally in your browser's localStorage and reflect activit
 ### Usage:
 ```bash
 # Full mode (with internet): fetch metadata and covers
-./update-song-data.py
+script/update-song-data.py
 
 # Offline mode: only add filenames and durations
-./update-song-data.py --no-internet
+script/update-song-data.py --no-internet
 
 # Verbose output for debugging
-./update-song-data.py -v
+script/update-song-data.py -v
 ```
 
 
@@ -140,14 +140,16 @@ Requirements to use all features:
 
 ```
 karaoke-videoplayer/
-├── videos/                 # Your MP4 karaoke videos
-├── covers/                 # Cover images (auto-downloaded by the script)
-├── static/                 # App assets (font, fallback cover, chart.js)
-├── index.html              # The application
-├── start.sh                # Starts a local server + browser in kiosk mode
-├── update-song-data.py     # Generates/updates videos.json, fetches covers/metadata
-├── extra_metadata.json     # Extra info from spotdl (not used by the web app)
-└── videos.json             # Video metadata (auto-generated)
+├── videos/                     # Your MP4 karaoke videos
+├── covers/                     # Cover images (auto-downloaded by the script)
+├── scripts
+│   ├── rename-video-files.sh   # clean file names after downloading them from Youtube
+│   ├── start.sh                # Starts a local server + browser in kiosk mode
+│   └── update-song-data.py     # Generates/updates videos.json, fetches covers/metadata
+├── static/                     # App assets (font, fallback cover, chart.js)
+├── index.html                  # The application
+├── extra_metadata.json         # Extra info from spotdl (not used by the web app)
+└── videos.json                 # Video metadata (auto-generated)
 ```
 
 ### Files

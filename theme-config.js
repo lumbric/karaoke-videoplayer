@@ -4,10 +4,10 @@
 
 const THEME_CONFIG = {
   // Set the theme folder name here
-  THEME_NAME: 'karaoke-ab-hof',
+  THEME_NAME: 'birthday-party',
   
   // Theme title displayed in the header
-  TITLE: 'Karaoke ab Hof',
+  TITLE: 'Birthday Karaoke',
   
   // Theme paths (automatically calculated based on THEME_NAME)
   get CSS_PATH() {
