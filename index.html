@@ -274,7 +274,8 @@
             <div class="no-results-message">Keine Videos gefunden</div>
             ${searchQuery ? `
               <button class="btn btn-primary btn-large" onclick="requestSong('${searchQuery.replace(/'/g, "\\'")}')">
-                "${searchQuery}" für die Song-Kollektion vorschlagen
+                "${searchQuery}" <br>
+                für die Song-Kollektion vorschlagen
               </button>
             ` : ''}
           </div>
