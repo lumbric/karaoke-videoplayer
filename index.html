@@ -147,6 +147,11 @@
 
     const searchInput = document.getElementById('search');
     document.addEventListener('keydown', (e) => {
+      // Don't auto-focus search if form is open
+      if (isFormOpen) {
+        return;
+      }
+      
       const isTypingKey = e.key.length === 1 || e.key === 'Backspace';
     
       if (document.activeElement !== searchInput && isTypingKey) {
@@ -587,13 +592,22 @@
 
     // Keyboard shortcuts
     document.addEventListener("keydown", e => {
+      // Don't process keyboard shortcuts if form is open (except Escape to close)
+      if (isFormOpen && e.key !== "Escape") {
+        return;
+      }
+      
       const playerContainer = document.getElementById("playerContainer");
       const statsPage = document.getElementById("statsPage");
       const searchField = document.getElementById("search");
 
       if (e.key === "Escape") {
+        // If song request form is open, close it first
+        if (isFormOpen) {
+          closeRequestForm();
+        }
         // If video is playing, close it
-        if (playerContainer.style.display === "flex") {
+        else if (playerContainer.style.display === "flex") {
           closePlayer();
         }
         // If stats page is open, close it
