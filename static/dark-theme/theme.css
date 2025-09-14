@@ -458,6 +458,10 @@ button:hover {
     font-size: 1.2em;
 }
 
+.no-results-message {
+    margin-bottom: 30px;
+}
+
 
 
 .request-message-overlay {

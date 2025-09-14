@@ -591,6 +591,10 @@ video::-webkit-media-controls-fullscreen-button {
     text-shadow: 2px 2px 4px rgba(231, 76, 60, 0.3);
 }
 
+.no-results-message {
+    margin-bottom: 30px;
+}
+
 
 
 .request-message-overlay {
