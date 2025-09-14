@@ -95,6 +95,11 @@ h1::after {
   display: none;
 }
 
+#clearSearchBtn {
+  margin-top: 5px;
+  right:-34px!important;
+}
+
 #selectedGenrePill {
   display:none;
   position: absolute;
@@ -102,11 +107,12 @@ h1::after {
   cursor: pointer;
   z-index: 20;
   white-space: nowrap;
-  right: 18px;
+  right: 10px;
   top: 50%;
   color: #e74c3c;
   border-radius: 15px;
   padding: 8px 12px;
+  margin-top: 5px;
   font-size: 1em;
   background: linear-gradient(45deg, #f39c12, #e67e22);
   border: 2px solid #e74c3c;
@@ -134,7 +140,6 @@ h1::after {
   padding: 12px 24px;
   font-size: 1.1em;
   box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-  transform: rotate(-2deg);
 }
 
 .btn-primary:hover {
@@ -198,6 +203,14 @@ h1::after {
   transform: rotate(5deg) scale(1.1);
   box-shadow: 0 6px 20px rgba(243, 156, 18, 0.6);
 }
+
+#filterBtn {
+  position: absolute;
+  right: -176px;
+  top: 35px;
+  height:50px;
+}
+
 
 .video-grid {
   display: flex;
