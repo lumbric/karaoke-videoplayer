@@ -100,6 +100,11 @@ h1::after {
   right:-34px!important;
 }
 
+#genreMenu {
+    right:-310px!important;
+    top:95px!important;
+}
+
 #selectedGenrePill {
   display:none;
   position: absolute;
