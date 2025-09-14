@@ -1,18 +1,18 @@
-/* Dark Theme - Sleek Dark Style */
+/* Default Theme - Original Karaoke ab Hof Style */
 
 @font-face {
   font-family: 'RocknRoll One';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../static/RocknRollOne.ttf) format('truetype');
+  src: url(../RocknRollOne.ttf) format('truetype');
 }
 
 body {
   margin: 0;
   font-family: 'RocknRoll One', sans-serif;
-  background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #21262d 100%);
-  color: #c9d1d9;
+  background: #332e5d;
+  color: white;
   overflow-x: hidden;
   line-height: 1.4;
   position: relative;
@@ -23,13 +23,23 @@ h1 {
   text-align: center;
   margin: 1em 0 0.5em 0;
   font-size: 4em;
-  color: #58a6ff;
+  color: #cd6391;
   font-weight: bolder;
   position: relative;
   z-index: 1;
   letter-spacing: 2px;
-  text-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
 }
+
+/*
+h1::before,
+h1::after {
+  content: '✨';
+  font-size: 0.6em;
+  color: #ff1493;
+  margin: 0 20px;
+  text-shadow: 2px 2px 4px rgba(46, 37, 92, 0.3);
+}
+*/
 
 #search {
   margin: 1.5em auto 1em auto;
@@ -38,10 +48,10 @@ h1 {
   width: min(600px, 80%);
   font-size: 1.2em;
   font-family: 'RocknRoll One', sans-serif;
-  border: 1px solid #30363d;
+  border: 0px;
   border-radius: 25px;
-  background: #21262d;
-  color: #c9d1d9;
+  background: white;
+  color: #4E4E4E;
   text-align: center;
   transition: all 0.1s ease;
   outline: none;
@@ -50,12 +60,10 @@ h1 {
 }
 #search:focus {
   transform: scale(1.06);
-  border-color: #58a6ff;
-  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
 }
 #search::placeholder {
   text-align: center;
-  color: #7d8590;
+  color: #a791b5;
 }
 .search-info {
   display: none;
@@ -70,90 +78,79 @@ h1 {
   white-space: nowrap;
   right: 18px;
   top: 50%;
-  color: #7d8590;
+  color: #a791b5;
   border-radius: 12px;
   padding: 8px;
   font-size: 1em;
   white-space: nowrap;
   background: none;
-  border: 1px solid #58a6ff;
+  border: 1px solid rgb(205, 99, 145);
   font-size: 0.9em;
 }
 
-/* Button System */
-.btn {
-  border: none;
+/* Button System - Original Karaoke ab Hof Style */
+button, .btn {
+  background: #44467f;
+  color: white;
   font-family: 'RocknRoll One', sans-serif;
-  border-radius: 20px;
+  padding: 15px 20px;
+  border: 0px;
+  border-radius: 15px;
   cursor: pointer !important;
+  font-size: 0.9em;
   transition: all 0.3s ease;
-  position: relative;
-  z-index: 1;
-  outline: none;
+}
+
+button:hover, .btn:hover {
+  background: #cd6391;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #238636, #58a6ff);
-  color: #f0f6fc;
-  padding: 10px 20px;
-  font-size: 1em;
-  box-shadow: 0 2px 10px rgba(88, 166, 255, 0.3);
+  background: #44467f;
+  color: white;
+  padding: 15px 20px;
+  font-size: 0.9em;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #58a6ff, #238636);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(88, 166, 255, 0.4);
+  background: #cd6391;
 }
 
 .btn-secondary {
-  background: #238636;
-  color: #f0f6fc;
-  padding: 10px 20px;
+  background: #44467f;
+  color: white;
+  padding: 15px 20px;
   font-size: 0.9em;
-  border-radius: 15px;
 }
 
 .btn-secondary:hover {
-  background: #58a6ff;
-  transform: translateY(-1px);
+  background: #cd6391;
 }
 
 .btn-large {
-  padding: 15px 25px;
-  font-size: 1.1em;
-  border-radius: 25px;
-  margin-top: 20px;
-  box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
+  background: #44467f;
+  color: white;
+  padding: 15px 20px;
+  font-size: 0.9em;
 }
 
 .btn-large:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(88, 166, 255, 0.4);
-}
-
-.btn-large:active {
-  transform: translateY(0);
+  background: #cd6391;
 }
 
 .btn-close {
-  background: rgba(0, 0, 0, 0.6);
-  color: #f0f6fc;
-  border: 1px solid rgba(88, 166, 255, 0.3);
+  background: #44467f;
+  color: white;
   padding: 12px 16px;
   font-size: 1.2em;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 15px;
 }
 
 .btn-close:hover {
-  background: rgba(88, 166, 255, 0.2);
-  border-color: rgba(88, 166, 255, 0.5);
+  background: #cd6391;
 }
+
+
 
 .video-grid {
   display: flex;
@@ -166,8 +163,8 @@ h1 {
 }
 
 .card {
-  background: linear-gradient(145deg, #30363d 0%, #21262d 100%);
-  border: 1px solid #484f58;
+  background: #cd6391;
+  border: 0px;
   border-radius: 15px;
   padding: 15px;
   width: 250px;
@@ -175,13 +172,10 @@ h1 {
   transition: all 0.1s ease;
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .card:hover {
   transform: scale(1.08) translateY(0px);
-  border-color: #58a6ff;
-  box-shadow: 0 8px 25px rgba(88, 166, 255, 0.2);
 }
 
 .card img {
@@ -197,7 +191,7 @@ h1 {
   font-weight: bold;
   font-size: 1.1em;
   text-align: center;
-  color: #c9d1d9;
+  color: white;
 }
 
 #playerContainer {
@@ -265,9 +259,9 @@ video::-webkit-media-controls-fullscreen-button {
 }
 
 .video-control-btn {
-  background: rgba(33, 38, 45, 0.9);
-  color: #c9d1d9;
-  border: 1px solid #30363d;
+  background: rgba(68, 70, 127, 0.9);
+  color: white;
+  border: none;
   padding: 10px 15px;
   border-radius: 10px;
   cursor: pointer;
@@ -281,27 +275,24 @@ video::-webkit-media-controls-fullscreen-button {
 }
 
 .video-control-btn:hover {
-  background: rgba(88, 166, 255, 0.2);
-  border-color: #58a6ff;
+  background: rgba(205, 99, 145, 0.9);
 }
 
 button {
-  background: linear-gradient(145deg, #238636 0%, #1f7f30 100%);
+  background: #44467f;
   color: white;
   font-family: 'RocknRoll One', sans-serif;
   padding: 15px 20px;
-  border: 1px solid #2ea043;
+  border: 0px;
   color: white;
   border-radius: 15px;
   cursor: pointer;
   font-size: 0.9em;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(35, 134, 54, 0.3);
 }
 
 button:hover {
-    background: linear-gradient(145deg, #2ea043 0%, #238636 100%);
-    box-shadow: 0 4px 15px rgba(35, 134, 54, 0.5);
+    background: #cd6391;
 }
 
 #closeBtn {
@@ -332,7 +323,7 @@ button:hover {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #21262d 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   z-index: 2000;
   padding: 20px;
   box-sizing: border-box;
@@ -340,49 +331,49 @@ button:hover {
 }
 
 .stat-card {
-  background: linear-gradient(145deg, #30363d 0%, #21262d 100%);
+  background: linear-gradient(145deg, #cd6391 0%, #b8578a 100%);
   padding: 20px;
   border-radius: 15px;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  border: 1px solid #484f58;
+  box-shadow: 0 8px 32px rgba(205, 99, 145, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stat-card h3 {
   margin: 0 0 10px 0;
   font-size: 1em;
-  color: #c9d1d9;
+  color: white;
   opacity: 0.9;
 }
 
 .stat-number {
   font-size: 1.8em;
   font-weight: bold;
-  color: #58a6ff;
-  text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .chart-container {
-  background: rgba(33, 38, 45, 0.6);
+  background: rgba(255, 255, 255, 0.05);
   padding: 20px;
   border-radius: 15px;
-  border: 1px solid #30363d;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
 }
 
 .chart-container h3 {
   margin: 0 0 15px 0;
-  color: #58a6ff;
+  color: #cd6391;
   font-size: 1.2em;
   text-align: center;
 }
 
 .favorite-item, .activity-item {
-  background: rgba(88, 166, 255, 0.1);
+  background: rgba(205, 99, 145, 0.2);
   margin: 8px 0;
   padding: 12px;
   border-radius: 8px;
-  border-left: 4px solid #58a6ff;
+  border-left: 4px solid #cd6391;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -390,11 +381,11 @@ button:hover {
 
 .favorite-item .song-title, .activity-item .song-title {
   font-weight: bold;
-  color: #c9d1d9;
+  color: white;
 }
 
 .favorite-item .completion, .activity-item .time {
-  color: #58a6ff;
+  color: #cd6391;
   font-size: 0.9em;
 }
 
@@ -408,10 +399,10 @@ button:hover {
 .cosmic-decoration {
   position: fixed;
   font-size: 2em;
-  opacity: 0.1;
+  opacity: 0.15;
   z-index: 0;
   pointer-events: none;
-  color: #58a6ff;
+  color: #ff69b4;
 }
 
 .cosmic-decoration:nth-child(1) { top: 10%; left: 5%; }
@@ -425,14 +416,13 @@ button:hover {
     left: 0;
     right: 0;
     width: 100%;
-    background: rgba(13, 17, 23, 0.9);
+    background: rgba(51, 46, 93, 0.88);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     z-index: 100;
     padding: 1em 0 1em 0;
     box-sizing: border-box;
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
-    border-bottom: 1px solid #30363d;
+    box-shadow: 0 14px 30px #332e5d;
 }
 
 .header-content {
@@ -447,20 +437,19 @@ button:hover {
     left: -90px;
     top: -10px;
     width: 220px;
-    filter: brightness(0.8) hue-rotate(200deg);
 }
 
 /* Song Request Styling */
 .no-results {
     text-align: center;
     padding: 40px 20px;
-    color: #58a6ff;
+    color: #cd6391;
     font-size: 1.2em;
 }
 
 .no-results-message {
     margin-bottom: 70px;
-    margin-bottom: 40px;
+    margin-top: 40px;
 }
 
 
@@ -471,7 +460,7 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -480,14 +469,14 @@ button:hover {
 
 /* Success Message Styling */
 .request-success-popup {
-    background: linear-gradient(135deg, #0d1117, #21262d);
-    color: #f0f6fc;
+    background: #332e5d;
+    color: white;
     padding: 0;
     border-radius: 25px;
     max-width: 450px;
     width: 90%;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
-    border: 3px solid #58a6ff;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    border: 2px solid #cd6391;
     overflow: hidden;
     animation: successSlideIn 0.4s ease-out;
 }
@@ -504,7 +493,7 @@ button:hover {
 }
 
 .success-header {
-    background: linear-gradient(135deg, #58a6ff, #1f6feb);
+    background: #cd6391;
     padding: 25px 30px;
     text-align: center;
     position: relative;
@@ -538,28 +527,28 @@ button:hover {
 .song-info {
     margin-bottom: 25px;
     padding: 20px;
-    background: rgba(88, 166, 255, 0.1);
+    background: rgba(205, 99, 145, 0.1);
     border-radius: 15px;
-    border: 1px solid rgba(88, 166, 255, 0.3);
+    border: 1px solid rgba(205, 99, 145, 0.3);
 }
 
 .song-title {
     font-size: 1.3em;
     font-weight: bold;
-    color: #58a6ff;
+    color: #cd6391;
     margin-bottom: 8px;
 }
 
 .song-artist {
     font-size: 1.1em;
-    color: #c9d1d9;
+    color: #e6e6e6;
     font-style: italic;
 }
 
 .success-message {
     font-size: 1em;
     line-height: 1.6;
-    color: #c9d1d9;
+    color: #e6e6e6;
     margin-bottom: 25px;
 }
 
@@ -575,18 +564,18 @@ button:hover {
 
 /* Song Request Form Styling */
 .request-form-popup {
-    background: linear-gradient(135deg, #0d1117, #21262d);
-    color: #f0f6fc;
+    background: linear-gradient(135deg, #332e5d, #4a4370);
+    color: white;
     padding: 30px 40px;
     border-radius: 20px;
     max-width: 500px;
     width: 90%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-    border: 2px solid #58a6ff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 2px solid #cd6391;
 }
 
 .request-form-header h3 {
-    color: #58a6ff;
+    color: #cd6391;
     margin-top: 0;
     font-size: 1.5em;
     text-align: center;
@@ -595,7 +584,7 @@ button:hover {
 .request-form-header p {
     text-align: center;
     margin-bottom: 25px;
-    color: #c9d1d9;
+    color: #e6e6e6;
 }
 
 .form-group {
@@ -605,7 +594,7 @@ button:hover {
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    color: #58a6ff;
+    color: #cd6391;
     font-weight: bold;
     font-size: 0.95em;
 }
@@ -613,10 +602,10 @@ button:hover {
 .form-input, .form-textarea {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #58a6ff;
+    border: 2px solid #cd6391;
     border-radius: 15px;
-    background: rgba(240, 246, 252, 0.95);
-    color: #24292f;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
     font-family: 'RocknRoll One', sans-serif;
     font-size: 1em;
     box-sizing: border-box;
@@ -625,13 +614,13 @@ button:hover {
 
 .form-input:focus, .form-textarea:focus {
     outline: none;
-    border-color: #238636;
-    box-shadow: 0 0 10px rgba(35, 134, 54, 0.3);
+    border-color: #ff1493;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.3);
     transform: scale(1.02);
 }
 
 .form-input::placeholder, .form-textarea::placeholder {
-    color: #656d76;
+    color: #888;
     font-style: italic;
 }
 
