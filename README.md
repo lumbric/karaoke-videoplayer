@@ -45,7 +45,7 @@ mkdir videos
 # for url in $(cat song-urls.txt); do yt-dlp --format mp4 "$url"; done
 
 # 3. Generate metadata and covers (requires ffprobe and spotdl; see notes below)
-script/update-song-data.py  
+script/update-song-data.py
 # For offline mode (only filename + duration):
 # script/update-song-data.py --no-internet
 
@@ -56,6 +56,21 @@ python3 -m http.server 8000
 # 5. Open your browser and navigate to:
 # http://localhost:8000
 ```
+
+### Themes / different layouts
+
+How to Switch Themes:
+
+To change the theme, edit `THEME_NAME` in `theme-config.js`:
+
+````
+const THEME_CONFIG = {
+  // Change these lines to customize your app:
+  THEME_NAME: 'karaoke-ab-hof',  // Available: 'karaoke-ab-hof', 'dark-theme', 'neon-theme'
+  TITLE: 'Your Custom Title',    // The title displayed in the header and browser tab
+  // ... rest of config
+};
+````
 
 ### Quick start with kiosk mode
 
