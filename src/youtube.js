@@ -1,0 +1,114 @@
+let player;
+let show_yt_video = false;
+
+const apiKey = "snip";
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('youtubePlayer', {
+    height: '360',
+    width: '640',
+    videoId: '', // Initial video
+    playerVars: {
+      controls: 0,
+      disablekb: 0,
+      enablejsapi: 1,
+      playsinline: 1,
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange,
+    },
+  });
+  initYouTube();
+}
+
+function initYouTube() {
+  const youtubeBtn = document.getElementById('youtubeBtn');
+  youtubeBtn.addEventListener('click', searchYouTube);
+}
+
+function onPlayerReady(event) {
+  console.log('YouTube Player ready');
+}
+
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.ENDED) {
+    console.log('YouTube video ended');
+  }
+}
+
+function loadVideo(videoId) {
+  // Load the selected video
+  console.log('Loading video ID:', player);
+  player.loadVideoById(videoId);
+
+  //const youtubePlayer = document.getElementById('youtubePlayer');
+  youtubePlayer.className = "fullscreen";
+  
+  const playerContainer = document.getElementById('playerContainer');
+  playerContainer.style.display = 'block';
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      const playerContainer = document.getElementById('playerContainer');
+      if (playerContainer.style.display === 'block') {
+        playerContainer.style.display = 'none';
+        player.stopVideo(); // Stop the video playback
+      }
+    }
+  });
+}
+
+function searchYouTube() {
+  const query = document.getElementById('search').value.trim();
+
+  if (!query) {
+    alert('Please enter a search term.');
+    return;
+  }
+
+  fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent('karaoke ' + query)}&type=video&maxResults=10&key=${apiKey}`)
+    .then((response) => response.json())
+    .then(async (data) => {
+      const ids = data.items.map((item) => item.id.videoId).join(',');
+
+      // Check embeddability of videos
+      const statusRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=status&id=${ids}&key=${apiKey}`
+      );
+      const statusData = await statusRes.json();
+
+      const embeddableMap = {};
+      statusData.items.forEach((video) => {
+        embeddableMap[video.id] = video.status.embeddable;
+      });
+
+      const container = document.getElementById('videoList');
+      container.innerHTML = ''; // Clear the current video list
+
+      data.items.forEach((item) => {
+        const videoId = item.id.videoId;
+
+        // Skip non-embeddable videos
+        if (!embeddableMap[videoId]) return;
+
+        const thumb = item.snippet.thumbnails.medium.url;
+        const title = item.snippet.title;
+
+        const div = document.createElement('div');
+        div.className = 'card'; // Use the same class for consistent styling
+        div.innerHTML = `
+          <img src="${thumb}" alt="${title}">
+          <div class="title">${title}</div>
+        `;
+        div.onclick = () => {
+          show_yt_video = true;
+          loadVideo(videoId);
+        };
+        container.appendChild(div);
+      });
+    })
+    .catch((error) => {
+      console.error('Error fetching YouTube data:', error);
+    });
+}

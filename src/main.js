@@ -1022,11 +1022,9 @@ function initEventListeners() {
     }
     const query = e.target.value.trim();
     handleSearch(query, true);
-    // clearBtn.style.display = query.length > 0 ? "block" : "none";
   });
   clearBtn.addEventListener("click", () => {
     searchEl.value = "";
-    // clearBtn.style.display = "none";
     resetGenreFilter();
     handleSearch("", true);
   });
