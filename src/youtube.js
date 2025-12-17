@@ -1,7 +1,7 @@
 let player;
 let show_yt_video = false;
 
-const apiKey = "snip";
+const apiKey = (window.SECRETS && window.SECRETS.YOUTUBE_API_KEY) || "";
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtubePlayer', {
@@ -60,6 +60,11 @@ function loadVideo(videoId) {
 }
 
 function searchYouTube() {
+  if (!apiKey) {
+    alert('YouTube API key is missing. Add it to secret-config.js (not committed to git).');
+    return;
+  }
+
   const query = document.getElementById('search').value.trim();
 
   if (!query) {

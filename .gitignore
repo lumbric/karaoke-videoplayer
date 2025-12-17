@@ -3,3 +3,4 @@ covers
 extra_metadata.json
 videos.json
 update-song-data.log
+secret-config.js
