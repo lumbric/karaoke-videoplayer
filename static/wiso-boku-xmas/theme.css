@@ -237,7 +237,7 @@ button {
 .cosmic-decoration:nth-child(3) { bottom: 18%; left: 12%; }
 .cosmic-decoration:nth-child(4) { bottom: 26%; right: 15%; }
 
-.header-box { position: fixed; top: 0; left: 0; right: 0; width: 100%; background: white; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); z-index: 100; padding: 1em 0; box-sizing: border-box; border-bottom: 1px solid rgba(0,170,90,0.45); }
+.header-box { position: fixed; top: 0; left: 0; right: 0; width: 100%; background: white; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); z-index: 100; padding: 1em 0; box-sizing: border-box; border-bottom: 2px solid var(--accent-orange); }
 .header-content { position: relative; width: 1000px; max-width: 100%; margin: auto; }
 .logo { position: absolute; left: -90px; top: -10px; width: 220px;  }
 
