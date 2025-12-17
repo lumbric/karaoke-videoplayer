@@ -129,10 +129,13 @@ function renderCards(videos) {
       <div class="no-results">
         <div class="no-results-message">Keine Videos gefunden</div>
         ${searchQuery ? `
-          <button class="btn btn-primary btn-large" onclick="requestSong('${searchQuery.replace(/'/g, "\\'")}')">
-            "${searchQuery}" <br>
-            für die Song-Kollektion vorschlagen
-          </button>
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+
+            <button class="btn btn-primary btn-large" onclick="searchYouTube()">
+              "${searchQuery}" <br>
+              auf YouTube suchen
+            </button>
+          </div>
         ` : ''}
       </div>
     `;

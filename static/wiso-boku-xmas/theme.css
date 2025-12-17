@@ -242,7 +242,7 @@ button {
 .logo { position: absolute; left: -90px; top: -10px; width: 220px;  }
 
 /* Requests */
-.no-results { text-align: center; padding: 40px 20px; color: var(--light-green); font-size: 1.1em; }
+.no-results { text-align: center; padding: 40px 20px; color: var(--accent-orange); font-size: 1.1em; }
 .no-results-message { margin-bottom: 40px; }
 
 .request-message-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; }
