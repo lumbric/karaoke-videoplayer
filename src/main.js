@@ -104,7 +104,7 @@ function showRandomVideos(reset = true) {
       cover = v.has_cover ? v.cover : THEME_CONFIG.COVER_FALLBACK_PATH;
       const div = document.createElement("div");
       div.className = "card";
-      div.innerHTML = `<img src="${cover}" onerror="this.src='static/cover_fallback.svg'"><div class="title">${v.displayTitle}</div>`;
+      div.innerHTML = `<img src="${cover}" onerror="this.src='${THEME_CONFIG.COVER_FALLBACK_PATH}'"><div class="title">${v.displayTitle}</div>`;
       div.onclick = () => playVideo(v);
       container.appendChild(div);
     });
@@ -199,7 +199,7 @@ function handleSearch(query, reset = true) {
       cover = v.has_cover ? v.cover : THEME_CONFIG.COVER_FALLBACK_PATH;
       const div = document.createElement("div");
       div.className = "card";
-      div.innerHTML = `<img src="${cover}" onerror="this.src='static/cover_fallback.svg'"><div class="title">${v.displayTitle}</div>`;
+      div.innerHTML = `<img src="${cover}" onerror="this.src='${THEME_CONFIG.COVER_FALLBACK_PATH}'"><div class="title">${v.displayTitle}</div>`;
       div.onclick = () => playVideo(v);
       container.appendChild(div);
     });
@@ -996,7 +996,12 @@ function initializeTheme() {
   
   // Set the page title and main title
   document.title = THEME_CONFIG.TITLE + ' 🎤';
-  document.getElementById('title').textContent = THEME_CONFIG.TITLE;
+  const titleEl = document.getElementById('title');
+  titleEl.textContent = THEME_CONFIG.TITLE;
+  const titleWithBraces = titleEl.textContent.replace(/(xmas)/i, '<span class="title-brace">{</span><span class="title-xmas">$1</span><span class="title-brace">}</span>');
+  if (titleWithBraces !== titleEl.textContent) {
+    titleEl.innerHTML = titleWithBraces;
+  }
   
   // Set the logo image
   document.getElementById('logo').src = THEME_CONFIG.LOGO_PATH;

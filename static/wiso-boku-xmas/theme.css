@@ -8,6 +8,10 @@
   --boku-green: #00aa5a; /* Cool Green */
   --earth-black: #0b0b0b; /* Earth Black (near black) */
 
+  /* Accents */
+  --accent-purple: #4b288c;
+  --accent-orange: #e6641e;
+
   /* Neutrals used on boku.ac.at */
   --grey-1: #474747;
   --grey-2: #efefef;
@@ -58,6 +62,9 @@ h1 {
 
 h1::before { content: '❄️'; font-size: .6em; margin-right: .5em; }
 h1::after  { content: '🎄'; font-size: .6em; margin-left:  .5em; }
+
+.title-brace { color: var(--accent-purple); font-weight: 800; letter-spacing: 0; }
+.title-xmas { color: var(--earth-black); font-weight: 800; }
 
 #search {
   margin: 1.5em auto 1em auto;
