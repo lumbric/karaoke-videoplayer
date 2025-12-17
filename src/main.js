@@ -303,16 +303,21 @@ function closePlayer() {
   btn.classList.remove("visible");
 }
 
-function logPlay(title, timestamp, playedSeconds, totalDuration, completed) {
+function logPlay(title, timestamp, playedSeconds, totalDuration, completed, extra = {}) {
+  const roundedPlayedSeconds = Math.round(playedSeconds);
+  const roundedTotalDuration = Math.round(totalDuration);
+
   playedLog.push({
     title,
     timestamp,
-    playedSeconds: Math.round(playedSeconds),
-    totalDuration: Math.round(totalDuration),
+    playedSeconds: roundedPlayedSeconds,
+    totalDuration: roundedTotalDuration,
     completed,
-    playPercentage: totalDuration > 0 ? Math.round((playedSeconds / totalDuration) * 100) : 0
+    playPercentage: roundedTotalDuration > 0 ? Math.round((roundedPlayedSeconds / roundedTotalDuration) * 100) : 0,
+    ...extra
   });
-  localStosearchElrage.setItem("playedLog", JSON.stringify(playedLog));
+
+  localStorage.setItem("playedLog", JSON.stringify(playedLog));
 }
 
 

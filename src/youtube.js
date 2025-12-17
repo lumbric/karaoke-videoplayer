@@ -1,9 +1,20 @@
 let player;
 let show_yt_video = false;
+let currentYouTubeVideo = null;
+let youtubePlayStartTimestamp = null;
+let youtubeLoggedStart = false;
 
 const apiKey = (window.SECRETS && window.SECRETS.YOUTUBE_API_KEY) || "";
 
 function stopYouTubePlayback() {
+  // Log partial progress if a YouTube session was started but not ended yet
+  const playerState = player && typeof player.getPlayerState === 'function' ? player.getPlayerState() : null;
+  const reachedEnd = typeof YT !== 'undefined' && YT.PlayerState ? playerState === YT.PlayerState.ENDED : false;
+
+  if (currentYouTubeVideo && youtubeLoggedStart && !reachedEnd) {
+    logYouTubePlayback(false);
+  }
+
   const youtubePlayerEl = document.getElementById('youtubePlayer');
   if (youtubePlayerEl) {
     youtubePlayerEl.classList.remove('fullscreen');
@@ -14,11 +25,41 @@ function stopYouTubePlayback() {
     player.stopVideo();
   }
 
+  resetYouTubeSession();
   show_yt_video = false;
 }
 
 // Expose to other modules (e.g., main.js) so normal video playback can hide the iframe
 window.stopYouTubePlayback = stopYouTubePlayback;
+
+function resetYouTubeSession() {
+  currentYouTubeVideo = null;
+  youtubePlayStartTimestamp = null;
+  youtubeLoggedStart = false;
+}
+
+function logYouTubePlayback(completed) {
+  if (!currentYouTubeVideo || typeof logPlay !== 'function') return;
+
+  const duration = player && typeof player.getDuration === 'function' ? player.getDuration() : 0;
+  const currentTime = player && typeof player.getCurrentTime === 'function' ? player.getCurrentTime() : 0;
+  const totalDuration = Number.isFinite(duration) ? duration : 0;
+  const playedSeconds = Number.isFinite(currentTime) ? currentTime : 0;
+  const timestamp = youtubePlayStartTimestamp || Date.now();
+
+  logPlay(
+    currentYouTubeVideo.title || 'YouTube Video',
+    timestamp,
+    completed ? (totalDuration || playedSeconds) : playedSeconds,
+    totalDuration,
+    completed,
+    {
+      source: 'youtube',
+      youtubeId: currentYouTubeVideo.id,
+      youtubeUrl: currentYouTubeVideo.url
+    }
+  );
+}
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtubePlayer', {
@@ -50,13 +91,36 @@ function onPlayerReady(event) {
 
 function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.ENDED) {
-    console.log('YouTube video ended');
+    logYouTubePlayback(true);
+    resetYouTubeSession();
+    return;
+  }
+
+  if (event.data === YT.PlayerState.PLAYING) {
+    if (!youtubePlayStartTimestamp) {
+      youtubePlayStartTimestamp = Date.now();
+    }
+
+    // Only record the initial start once per session
+    if (!youtubeLoggedStart) {
+      logYouTubePlayback(false);
+      youtubeLoggedStart = true;
+    }
   }
 }
 
-function loadVideo(videoId) {
+function loadVideo(videoId, title = '') {
   // Load the selected video
   console.log('Loading video ID:', videoId);
+
+  currentYouTubeVideo = {
+    id: videoId,
+    title: title || 'YouTube Video',
+    url: `https://youtu.be/${videoId}`
+  };
+  youtubePlayStartTimestamp = null;
+  youtubeLoggedStart = false;
+
   player.loadVideoById(videoId);
 
   const youtubePlayerEl = document.getElementById('youtubePlayer');
@@ -116,7 +180,7 @@ function searchYouTube() {
         `;
         div.onclick = () => {
           show_yt_video = true;
-          loadVideo(videoId);
+          loadVideo(videoId, title);
         };
         container.appendChild(div);
       });
