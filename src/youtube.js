@@ -3,6 +3,23 @@ let show_yt_video = false;
 
 const apiKey = (window.SECRETS && window.SECRETS.YOUTUBE_API_KEY) || "";
 
+function stopYouTubePlayback() {
+  const youtubePlayerEl = document.getElementById('youtubePlayer');
+  if (youtubePlayerEl) {
+    youtubePlayerEl.classList.remove('fullscreen');
+    youtubePlayerEl.classList.add('hidden');
+  }
+
+  if (player && typeof player.stopVideo === 'function') {
+    player.stopVideo();
+  }
+
+  show_yt_video = false;
+}
+
+// Expose to other modules (e.g., main.js) so normal video playback can hide the iframe
+window.stopYouTubePlayback = stopYouTubePlayback;
+
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtubePlayer', {
     height: '360',
@@ -39,24 +56,15 @@ function onPlayerStateChange(event) {
 
 function loadVideo(videoId) {
   // Load the selected video
-  console.log('Loading video ID:', player);
+  console.log('Loading video ID:', videoId);
   player.loadVideoById(videoId);
 
-  //const youtubePlayer = document.getElementById('youtubePlayer');
-  youtubePlayer.className = "fullscreen";
+  const youtubePlayerEl = document.getElementById('youtubePlayer');
+  youtubePlayerEl.classList.remove('hidden');
+  youtubePlayerEl.classList.add('fullscreen');
   
   const playerContainer = document.getElementById('playerContainer');
-  playerContainer.style.display = 'block';
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      const playerContainer = document.getElementById('playerContainer');
-      if (playerContainer.style.display === 'block') {
-        playerContainer.style.display = 'none';
-        player.stopVideo(); // Stop the video playback
-      }
-    }
-  });
+  playerContainer.style.display = 'flex';
 }
 
 function searchYouTube() {

@@ -216,6 +216,11 @@ function playVideo(video) {
   const container = document.getElementById("playerContainer");
   const btn = document.getElementById("closeBtn");
 
+  // Hide any active YouTube iframe before switching to local playback
+  if (window.stopYouTubePlayback) {
+    window.stopYouTubePlayback();
+  }
+
   player.src = video.file;
   container.style.display = "flex";
   btn.style.display = "block";
@@ -280,6 +285,11 @@ function closePlayer() {
   const player = document.getElementById("videoPlayer");
   const container = document.getElementById("playerContainer");
   const btn = document.getElementById("closeBtn");
+
+  // Ensure YouTube playback is stopped/hidden when closing the player
+  if (window.stopYouTubePlayback) {
+    window.stopYouTubePlayback();
+  }
 
   player.pause();
   player.src = "";
