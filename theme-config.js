@@ -1,13 +1,13 @@
 // Theme Configuration
 // Change the THEME_NAME to switch between different themes
-// Available themes: 'karaoke-ab-hof', 'dark-theme', 'neon-theme'
+// Available themes: 'karaoke-ab-hof', 'dark-theme', 'neon-theme', 'birthday-party', 'christmas-unicorn', 'inwe-boku-xmas'
 
 const THEME_CONFIG = {
   // Set the theme folder name here
-  THEME_NAME: 'birthday-party',
+  THEME_NAME: 'wiso-boku-xmas',
   
   // Theme title displayed in the header
-  TITLE: 'Birthday Karaoke',
+  TITLE: 'WISO XMAS 🎙️',
   
   // Theme paths (automatically calculated based on THEME_NAME)
   get CSS_PATH() {
