@@ -27,3 +27,33 @@
 .video-control-btn {
     z-index: 100;
 }
+
+.loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #f1e7ff;
+    padding: 24px 12px;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid #cd6391;
+    border-top-color: rgba(205, 99, 145, 0.25);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    flex-shrink: 0;
+}
+
+.loading-subtitle {
+    font-size: 0.95em;
+    opacity: 0.9;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -125,20 +125,19 @@ function renderCards(videos) {
 
   if (videos.length === 0) {
     const searchQuery = document.getElementById('search').value.trim();
-    container.innerHTML = `
-      <div class="no-results">
-        <div class="no-results-message">Keine Videos gefunden</div>
-        ${searchQuery ? `
-          <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-
-            <button class="btn btn-primary btn-large" onclick="searchYouTube()">
-              "${searchQuery}" <br>
-              auf YouTube suchen
-            </button>
-          </div>
-        ` : ''}
-      </div>
-    `;
+    if (searchQuery) {
+      if (!(isYouTubeSearching && searchQuery === currentYouTubeQuery)) {
+        searchYouTube(searchQuery, { auto: true });
+      } else {
+        renderYouTubeLoading(searchQuery);
+      }
+    } else {
+      container.innerHTML = `
+        <div class="no-results">
+          <div class="no-results-message">Keine Videos gefunden</div>
+        </div>
+      `;
+    }
     return;
   }
 

@@ -3,8 +3,49 @@ let show_yt_video = false;
 let currentYouTubeVideo = null;
 let youtubePlayStartTimestamp = null;
 let youtubeLoggedStart = false;
+let currentYouTubeQuery = "";
+let isYouTubeSearching = false;
 
 const apiKey = (window.SECRETS && window.SECRETS.YOUTUBE_API_KEY) || "";
+
+function escapeHtml(value) {
+  return (value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderYouTubeStatus(message, { showSpinner = false, query = "" } = {}) {
+  const container = document.getElementById('videoList');
+  if (!container) return;
+
+  const text = query ? `${message} "${escapeHtml(query)}"` : message;
+  container.innerHTML = `
+    <div class="no-results">
+      <div class="no-results-message">${text}</div>
+      ${showSpinner ? `
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <div class="loading-subtitle">Suche auf YouTube...</div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderYouTubeLoading(query) {
+  renderYouTubeStatus('Keine lokalen Treffer gefunden. Suche nach', { showSpinner: true, query });
+}
+
+function renderYouTubeEmpty(query) {
+  renderYouTubeStatus('Keine passenden YouTube-Videos fuer', { query });
+}
+
+function renderYouTubeError(query) {
+  renderYouTubeStatus('YouTube-Suche fehlgeschlagen fuer', { query });
+}
 
 function stopYouTubePlayback() {
   // Log partial progress if a YouTube session was started but not ended yet
@@ -131,49 +172,85 @@ function loadVideo(videoId, title = '') {
   playerContainer.style.display = 'flex';
 }
 
-function searchYouTube() {
-  if (!apiKey) {
-    alert('YouTube API key is missing. Add it to secret-config.js (not committed to git).');
-    return;
-  }
-
-  const query = document.getElementById('search').value.trim();
+function searchYouTube(queryFromCaller, options = {}) {
+  const { auto = false } = options;
+  const searchInput = document.getElementById('search');
+  const querySource = typeof queryFromCaller === 'string' ? queryFromCaller : (searchInput ? searchInput.value : '');
+  const query = (querySource || '').trim();
 
   if (!query) {
-    alert('Please enter a search term.');
+    if (!auto) {
+      alert('Please enter a search term.');
+    }
     return;
   }
+
+  if (!apiKey) {
+    const keyMessage = 'YouTube API key is missing. Add it to secret-config.js (not committed to git).';
+    if (!auto) {
+      alert(keyMessage);
+    } else {
+      renderYouTubeStatus('YouTube-Suche nicht verfuegbar (API key fehlt).');
+    }
+    return;
+  }
+
+  currentYouTubeQuery = query;
+  isYouTubeSearching = true;
+  renderYouTubeLoading(query);
 
   fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent('karaoke ' + query)}&type=video&maxResults=10&key=${apiKey}`)
     .then((response) => response.json())
     .then(async (data) => {
-      const ids = data.items.map((item) => item.id.videoId).join(',');
+      if (currentYouTubeQuery !== query) return;
 
-      // Check embeddability of videos
+      const items = Array.isArray(data.items) ? data.items : [];
+      if (items.length === 0) {
+        renderYouTubeEmpty(query);
+        return;
+      }
+
+      const ids = items
+        .map((item) => item.id && item.id.videoId)
+        .filter(Boolean)
+        .join(',');
+
+      if (!ids) {
+        renderYouTubeEmpty(query);
+        return;
+      }
+
       const statusRes = await fetch(
         `https://www.googleapis.com/youtube/v3/videos?part=status&id=${ids}&key=${apiKey}`
       );
       const statusData = await statusRes.json();
 
+      if (currentYouTubeQuery !== query) return;
+
       const embeddableMap = {};
-      statusData.items.forEach((video) => {
-        embeddableMap[video.id] = video.status.embeddable;
+      (statusData.items || []).forEach((video) => {
+        if (video && video.id) {
+          embeddableMap[video.id] = video.status && video.status.embeddable;
+        }
       });
 
       const container = document.getElementById('videoList');
-      container.innerHTML = ''; // Clear the current video list
+      if (!container) return;
+      container.innerHTML = '';
 
-      data.items.forEach((item) => {
-        const videoId = item.id.videoId;
+      let rendered = 0;
+
+      items.forEach((item) => {
+        const videoId = item.id && item.id.videoId;
 
         // Skip non-embeddable videos
-        if (!embeddableMap[videoId]) return;
+        if (!videoId || embeddableMap[videoId] === false) return;
 
         const thumb = item.snippet.thumbnails.medium.url;
         const title = item.snippet.title;
 
         const div = document.createElement('div');
-        div.className = 'card'; // Use the same class for consistent styling
+        div.className = 'card';
         div.innerHTML = `
           <img src="${thumb}" alt="${title}">
           <div class="title">${title}</div>
@@ -182,10 +259,23 @@ function searchYouTube() {
           show_yt_video = true;
           loadVideo(videoId, title);
         };
+        rendered++;
         container.appendChild(div);
       });
+
+      if (rendered === 0) {
+        renderYouTubeEmpty(query);
+      }
     })
     .catch((error) => {
       console.error('Error fetching YouTube data:', error);
+      if (currentYouTubeQuery === query) {
+        renderYouTubeError(query);
+      }
+    })
+    .finally(() => {
+      if (currentYouTubeQuery === query) {
+        isYouTubeSearching = false;
+      }
     });
 }
