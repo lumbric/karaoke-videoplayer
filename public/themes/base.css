@@ -328,6 +328,24 @@ textarea {
   gap: 4px;
 }
 
+.stats-recent-list {
+  list-style: none;
+  padding: 0;
+}
+
+.stats-recent-list li {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--muted) 20%, white);
+}
+
+.stats-recent-list li:last-child {
+  border-bottom: 0;
+}
+
 .stats-chart-card {
   min-height: 260px;
 }
@@ -470,5 +488,9 @@ textarea {
   .stats-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .stats-recent-list li {
+    grid-template-columns: 1fr;
   }
 }

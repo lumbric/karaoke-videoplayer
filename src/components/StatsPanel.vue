@@ -10,8 +10,12 @@ const emit = defineEmits<{
 
 const topSongsCanvas = ref<HTMLCanvasElement | null>(null);
 const hourlyCanvas = ref<HTMLCanvasElement | null>(null);
+const completionCanvas = ref<HTMLCanvasElement | null>(null);
+const playTimeCanvas = ref<HTMLCanvasElement | null>(null);
 const topSongsChart = ref<Chart | null>(null);
 const hourlyChart = ref<Chart | null>(null);
+const completionChart = ref<Chart | null>(null);
+const playTimeChart = ref<Chart | null>(null);
 const playedLog = ref(loadPlayedLog());
 
 const summary = computed(() => aggregatePlayEvents(playedLog.value));
@@ -39,6 +43,21 @@ function exportStats(): void {
   link.href = toDataUri(payload);
   link.download = `karaoke-stats-${new Date().toISOString().slice(0, 10)}.json`;
   link.click();
+}
+
+function formatTimestamp(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) {
+    return value;
+  }
+
+  return date.toLocaleString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 }
 
 function createTopSongsChart(): void {
@@ -122,21 +141,104 @@ function createHourlyChart(): void {
   hourlyChart.value = new Chart(hourlyCanvas.value, config);
 }
 
+function createCompletionChart(): void {
+  if (!completionCanvas.value) {
+    return;
+  }
+
+  completionChart.value?.destroy();
+
+  const labels = summary.value.completionDistribution.map((entry) => entry.label);
+  const data = summary.value.completionDistribution.map((entry) => entry.count);
+
+  const config: ChartConfiguration<"bar"> = {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Anzahl",
+        data,
+        borderRadius: 8,
+        backgroundColor: "rgba(14, 106, 90, 0.68)"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
+      }
+    }
+  };
+
+  completionChart.value = new Chart(completionCanvas.value, config);
+}
+
+function createPlayTimeChart(): void {
+  if (!playTimeCanvas.value) {
+    return;
+  }
+
+  playTimeChart.value?.destroy();
+
+  const labels = summary.value.playTimeDistribution.map((entry) => entry.label);
+  const data = summary.value.playTimeDistribution.map((entry) => entry.count);
+
+  const config: ChartConfiguration<"doughnut"> = {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: [
+          "rgba(14, 106, 90, 0.85)",
+          "rgba(245, 173, 0, 0.85)",
+          "rgba(97, 119, 112, 0.85)",
+          "rgba(27, 38, 36, 0.75)"
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom"
+        }
+      }
+    }
+  };
+
+  playTimeChart.value = new Chart(playTimeCanvas.value, config);
+}
+
 watch(summary, async () => {
   await nextTick();
   createTopSongsChart();
   createHourlyChart();
+  createCompletionChart();
+  createPlayTimeChart();
 });
 
 onMounted(async () => {
   await nextTick();
   createTopSongsChart();
   createHourlyChart();
+  createCompletionChart();
+  createPlayTimeChart();
 });
 
 onBeforeUnmount(() => {
   topSongsChart.value?.destroy();
   hourlyChart.value?.destroy();
+  completionChart.value?.destroy();
+  playTimeChart.value?.destroy();
 });
 </script>
 
@@ -187,6 +289,34 @@ onBeforeUnmount(() => {
           <div class="stats-chart-wrap">
             <canvas ref="hourlyCanvas" />
           </div>
+        </article>
+
+        <article class="stats-card stats-chart-card">
+          <h3>Completion Verteilung</h3>
+          <div class="stats-chart-wrap">
+            <canvas ref="completionCanvas" />
+          </div>
+        </article>
+
+        <article class="stats-card stats-chart-card">
+          <h3>Playtime Verteilung</h3>
+          <div class="stats-chart-wrap">
+            <canvas ref="playTimeCanvas" />
+          </div>
+        </article>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stats-card">
+          <h3>Recent Activity</h3>
+          <ul class="stats-recent-list">
+            <li v-for="event in summary.recentActivity" :key="`${event.timestamp}-${event.title}`">
+              <span>{{ formatTimestamp(event.timestamp) }}</span>
+              <strong>{{ event.title }}</strong>
+              <span>{{ event.playPercentage }}%</span>
+            </li>
+            <li v-if="summary.recentActivity.length === 0">Keine Aktivitaet</li>
+          </ul>
         </article>
       </section>
 
