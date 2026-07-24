@@ -31,9 +31,13 @@ function transliterateGreek(input: string): string {
 }
 
 export function normalizeForSearch(input: string): string {
-  return transliterateGreek(input.toLowerCase())
+  // Remove diacritics before transliteration so greek letters like ή map to η.
+  const deaccented = input
+    .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  return transliterateGreek(deaccented)
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();

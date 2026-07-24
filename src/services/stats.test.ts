@@ -43,10 +43,23 @@ describe("aggregatePlayEvents", () => {
   });
 
   it("computes advanced lists", () => {
-    const summary = aggregatePlayEvents(sample);
+    const advancedSample: PlayEvent[] = [
+      ...sample,
+      {
+        title: "Song C",
+        timestamp: "2026-07-25T11:10:00.000Z",
+        playedSeconds: 210,
+        totalDuration: 220,
+        completed: true,
+        playPercentage: 95,
+        source: "local"
+      }
+    ];
+
+    const summary = aggregatePlayEvents(advancedSample);
 
     expect(summary.instantSkips.some((song) => song.title === "Song A")).toBe(true);
-    expect(summary.hiddenGems.some((song) => song.title === "Song A")).toBe(true);
+    expect(summary.hiddenGems.some((song) => song.title === "Song C")).toBe(true);
   });
 });
 
