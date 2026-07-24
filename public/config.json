@@ -30,7 +30,7 @@
     "timeoutMs": 8000
   },
   "paths": {
-    "songsJson": "/archive/videos.json",
+    "songsJson": "/data/songs.json",
     "videosBase": "/songs",
     "coversBase": "/covers"
   }
