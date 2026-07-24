@@ -31,7 +31,7 @@
   },
   "paths": {
     "songsJson": "/archive/videos.json",
-    "videosBase": "/videos",
+    "videosBase": "/songs",
     "coversBase": "/covers"
   }
 }

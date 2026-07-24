@@ -22,12 +22,31 @@ function deriveDisplayTitle(raw: SongRecordRaw): string {
   return fromFilename.length > 0 ? fromFilename : "Unbenannter Song";
 }
 
-function resolveFilePath(raw: SongRecordRaw, config: AppConfig): string {
+function encodeMediaPath(path: string): string {
+  return encodeURI(path);
+}
+
+function uniquePaths(paths: string[]): string[] {
+  return [...new Set(paths.filter((entry) => entry.trim().length > 0))];
+}
+
+function buildVideoCandidates(raw: SongRecordRaw, config: AppConfig): string[] {
   if (raw.file?.trim()) {
-    return raw.file;
+    return [encodeMediaPath(raw.file.trim())];
   }
 
-  return `${config.paths.videosBase}/${raw.filename}.mp4`;
+  const filename = raw.filename.trim();
+  const hasExtension = /\.[a-z0-9]+$/i.test(filename);
+  const bases = uniquePaths([config.paths.videosBase, "/songs", "/videos"]);
+  const names = hasExtension ? [filename] : [`${filename}.mp4`, `${filename}.webm`, `${filename}.m4v`];
+
+  return uniquePaths(
+    bases.flatMap((base) => names.map((name) => encodeMediaPath(`${base}/${name}`)))
+  );
+}
+
+function resolveFilePath(raw: SongRecordRaw, config: AppConfig): string {
+  return buildVideoCandidates(raw, config)[0] ?? "";
 }
 
 function resolveCoverPath(raw: SongRecordRaw, config: AppConfig): string {
@@ -84,6 +103,7 @@ export function mapSongRaw(raw: SongRecordRaw, config: AppConfig): SongRecord {
     genres,
     durationSeconds: raw.duration_seconds,
     filePath: resolveFilePath(raw, config),
+    videoCandidates: buildVideoCandidates(raw, config),
     coverPath: resolveCoverPath(raw, config),
     displayTitle,
     searchIndex: buildSearchIndex(raw, displayTitle, genres)

@@ -7,6 +7,8 @@
   --accent: #005f52;
   --accent-2: #f0b429;
   --danger: #b42318;
+  --icon-color: var(--accent);
+  --icon-color-inverse: #ffffff;
   --radius: 14px;
   --shadow: 0 12px 28px rgba(11, 40, 36, 0.1);
 }
@@ -106,15 +108,116 @@ textarea {
   color: var(--text);
 }
 
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  padding: 0;
+}
+
+.btn-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
 .btn-primary {
   background: linear-gradient(130deg, var(--accent), color-mix(in srgb, var(--accent) 65%, black));
-  color: #fff;
+  color: var(--icon-color-inverse);
+}
+
+.btn-primary.btn-icon svg,
+.btn-icon svg {
+  color: currentColor;
 }
 
 .song-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 14px;
+}
+
+.player-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  background: #000;
+}
+
+.player-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.player-glass {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: clamp(14px, 2vw, 24px);
+  background: linear-gradient(180deg, rgba(2, 8, 7, 0.1), rgba(2, 8, 7, 0.78) 78%, rgba(2, 8, 7, 0.9));
+  opacity: 1;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.player-glass.is-hidden {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
+.player-shell {
+  width: min(1180px, 100%);
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) 1fr;
+  gap: 18px;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.93);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.player-cover {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.player-body {
+  display: grid;
+  gap: 16px;
+  padding: 18px 20px 20px;
+}
+
+.player-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.player-title {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+}
+
+.player-meta,
+.player-status {
+  margin: 0;
+  color: var(--muted);
+}
+
+.player-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .song-card {
@@ -215,5 +318,21 @@ textarea {
 
   .song-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .player-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .player-cover {
+    min-height: 140px;
+  }
+
+  .player-glass {
+    align-items: stretch;
+  }
+
+  .player-body {
+    padding: 16px;
   }
 }

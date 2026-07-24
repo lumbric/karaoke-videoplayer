@@ -1,6 +1,7 @@
-import type { SongSuggestion } from "../types";
+import type { PlayEvent, SongSuggestion } from "../types";
 
 const SONG_REQUESTS_KEY = "songRequests";
+const PLAYED_LOG_KEY = "playedLog";
 
 function parseJsonArray<T>(raw: string | null): T[] {
   if (!raw) {
@@ -17,6 +18,16 @@ function parseJsonArray<T>(raw: string | null): T[] {
 
 export function loadSongSuggestions(): SongSuggestion[] {
   return parseJsonArray<SongSuggestion>(localStorage.getItem(SONG_REQUESTS_KEY));
+}
+
+export function loadPlayedLog(): PlayEvent[] {
+  return parseJsonArray<PlayEvent>(localStorage.getItem(PLAYED_LOG_KEY));
+}
+
+export function appendPlayEvent(entry: PlayEvent): void {
+  const current = loadPlayedLog();
+  current.push(entry);
+  localStorage.setItem(PLAYED_LOG_KEY, JSON.stringify(current));
 }
 
 export function saveSongSuggestion(entry: SongSuggestion): { ok: true } | { ok: false; reason: string } {

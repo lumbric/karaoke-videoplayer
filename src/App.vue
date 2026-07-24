@@ -2,14 +2,19 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import SongRequestForm from "./components/SongRequestForm.vue";
+import PlaybackModal from "./components/PlaybackModal.vue";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
+import { usePlaybackStore } from "./stores/playbackStore";
+import type { SongRecord } from "./types";
 
 const configStore = useConfigStore();
 const catalogStore = useCatalogStore();
+const playbackStore = usePlaybackStore();
 
 const { config } = storeToRefs(configStore);
 const { visibleSongs, filteredSongs, availableGenres, loading, error, selectedGenres, query, hasMoreVisible } = storeToRefs(catalogStore);
+const { activeSong } = storeToRefs(playbackStore);
 
 const selectedGenre = ref<string>("");
 const searchInput = ref<HTMLInputElement | null>(null);
@@ -20,8 +25,8 @@ const logoPath = computed(() => config.value?.theme.logoPath ?? "");
 const fallbackCover = computed(() => config.value?.theme.coverFallbackPath ?? "");
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
 
-function onSongClicked(title: string): void {
-  alert(`Playback-Phase kommt als naechster Schritt. Ausgewaehlt: ${title}`);
+function onSongClicked(song: SongRecord): void {
+  playbackStore.openSong(song);
 }
 
 function applyGenreFilter(): void {
@@ -36,6 +41,13 @@ function applyGenreFilter(): void {
 function clearAll(): void {
   selectedGenre.value = "";
   catalogStore.clearFilters();
+  nextTick(() => {
+    searchInput.value?.focus();
+  });
+}
+
+function closePlayer(): void {
+  playbackStore.closePlayback(false);
   nextTick(() => {
     searchInput.value?.focus();
   });
@@ -70,6 +82,11 @@ const onKeyDown = (event: KeyboardEvent): void => {
   }
 
   if (key === "escape") {
+    if (playbackStore.activeSong) {
+      closePlayer();
+      return;
+    }
+
     if (query.value || selectedGenres.value.length > 0) {
       clearAll();
     }
@@ -91,6 +108,13 @@ function formatMeta(song: { artist?: string; genres: string[] }): string {
   const bits = [song.artist ?? "", song.genres.join(", ")].filter(Boolean);
   return bits.join(" - ");
 }
+
+const resetIcon = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 5a7 7 0 1 1-6.16 3.63" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M5 5v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+`;
 </script>
 
 <template>
@@ -118,7 +142,7 @@ function formatMeta(song: { artist?: string; genres: string[] }): string {
         <option v-for="genre in availableGenres" :key="genre" :value="genre">{{ genre }}</option>
       </select>
 
-      <button class="btn" type="button" @click="clearAll">Zuruecksetzen</button>
+      <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll" v-html="resetIcon"></button>
     </section>
 
     <p v-if="error" class="feedback error">{{ error }}</p>
@@ -130,7 +154,7 @@ function formatMeta(song: { artist?: string; genres: string[] }): string {
         :key="song.id"
         class="song-card"
         type="button"
-        @click="onSongClicked(song.displayTitle)"
+        @click="onSongClicked(song)"
       >
         <img
           class="song-cover"
@@ -152,5 +176,11 @@ function formatMeta(song: { artist?: string; genres: string[] }): string {
     </section>
 
     <div v-if="hasMoreVisible" ref="loadSentinel" class="load-sentinel" aria-hidden="true"></div>
+    <PlaybackModal
+      v-if="activeSong"
+      :song="activeSong"
+      :fallback-cover="fallbackCover"
+      @close="closePlayer"
+    />
   </main>
 </template>

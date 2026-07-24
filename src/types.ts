@@ -1,5 +1,10 @@
 export type SongSource = "local" | "online";
 
+export interface PlayEventProviderMeta {
+  id?: string;
+  url?: string;
+}
+
 export interface SongRecordRaw {
   id?: string;
   filename: string;
@@ -20,6 +25,7 @@ export interface SongRecord {
   genres: string[];
   durationSeconds?: number;
   filePath: string;
+  videoCandidates: string[];
   coverPath: string;
   displayTitle: string;
   searchIndex: string;
@@ -68,4 +74,15 @@ export interface SongSuggestion {
   artist: string;
   additionalInfo?: string;
   createdAt: string;
+}
+
+export interface PlayEvent {
+  title: string;
+  timestamp: string;
+  playedSeconds: number;
+  totalDuration: number;
+  completed: boolean;
+  playPercentage: number;
+  source: SongSource;
+  provider?: PlayEventProviderMeta;
 }
