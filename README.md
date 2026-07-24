@@ -4,7 +4,7 @@ Frontend-only SPA for kiosk karaoke usage. Built with Vue 3, Vite, TypeScript, P
 
 ## Current Status
 
-This repository now contains Phase A Step 1:
+Phase A (offline core) is implemented with:
 - runtime config loading from config.json before app mount
 - fatal startup error for missing/invalid config
 - base + override theme loading
@@ -12,14 +12,16 @@ This repository now contains Phase A Step 1:
 - search-as-you-type with normalization, typo tolerance, and Greek transliteration
 - genre filter and reset flow
 - batched endless list rendering
+- fullscreen playback with close, pause/resume, restart controls
+- auto-hide playback controls on inactivity
+- local play-event logging
+- statistics dashboard, charts, advanced lists, and JSON export
 - no-results song request form with localStorage persistence and duplicate prevention
-- baseline unit/component/e2e tests for this scope
+- unit and component test baseline for core modules
 
-Not yet in this step:
-- fullscreen playback controls
-- statistics dashboard and export
-- online search
-- AI suggestions
+Still out of scope for Phase A (planned next):
+- online search (Phase B)
+- AI suggestions (Phase C)
 
 ## Install
 

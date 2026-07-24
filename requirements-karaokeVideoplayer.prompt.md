@@ -410,3 +410,32 @@ If schedule risk appears, Phase A must not be compromised.
 
 ## 20. Final Instruction to Implementing Agent
 Implement from scratch using this specification only. Do not depend on legacy code assumptions. If any requirement is ambiguous, choose deterministic behavior, document assumptions, and keep compatibility with frontend-only local deployment.
+
+## 21. Conversation Addendum (Binding Clarifications)
+
+This section captures explicit project decisions made during implementation and review.
+
+### 21.1 Runtime Data Paths
+- Default songs data source is `/data/songs.json`.
+- Default videos base path is `/songs`.
+- Default covers base path is `/covers`.
+- Theme fallback cover remains configured via `theme.coverFallbackPath`.
+
+### 21.2 Playback UI Behavior
+- Playback must be fullscreen.
+- Playback controls must auto-hide after short inactivity and reappear on input activity.
+- Control set remains restricted to close, pause/resume, restart.
+- Close control is an `X` with accessible label `Schließen`.
+
+### 21.3 Cover Rendering Stability
+- Cover fallback behavior must avoid repeated failed-image reload loops during filtering/search.
+- Once a cover path fails for a song card, the UI should keep using fallback for that song card session state.
+
+### 21.4 Statistics Clarifications
+- Statistics consume local `playedLog` entries only.
+- Statistics include export to JSON.
+- Advanced stats lists use explicit deterministic thresholds defined in code and tests.
+
+### 21.5 Testing and Docker Workflow
+- Containerized test command is `docker compose run --rm --build test` when code changed and image freshness is required.
+- Rebuild (`--build`) is mandatory for reliable test results after local source changes.
