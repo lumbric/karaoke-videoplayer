@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { storeToRefs } from "pinia";
 import SongRequestForm from "./components/SongRequestForm.vue";
 import PlaybackModal from "./components/PlaybackModal.vue";
+import StatsPanel from "./components/StatsPanel.vue";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
 import { usePlaybackStore } from "./stores/playbackStore";
@@ -17,6 +18,7 @@ const { visibleSongs, filteredSongs, availableGenres, loading, error, selectedGe
 const { activeSong } = storeToRefs(playbackStore);
 
 const selectedGenre = ref<string>("");
+const statsOpen = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 const loadSentinel = ref<HTMLDivElement | null>(null);
 let observer: IntersectionObserver | null = null;
@@ -53,6 +55,17 @@ function closePlayer(): void {
   });
 }
 
+function openStats(): void {
+  statsOpen.value = true;
+}
+
+function closeStats(): void {
+  statsOpen.value = false;
+  nextTick(() => {
+    searchInput.value?.focus();
+  });
+}
+
 function setupObserver(): void {
   observer?.disconnect();
   if (!loadSentinel.value) {
@@ -84,6 +97,11 @@ const onKeyDown = (event: KeyboardEvent): void => {
   if (key === "escape") {
     if (playbackStore.activeSong) {
       closePlayer();
+      return;
+    }
+
+    if (statsOpen.value) {
+      closeStats();
       return;
     }
 
@@ -142,6 +160,7 @@ const resetIcon = `
       </select>
 
       <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll" v-html="resetIcon"></button>
+      <button class="btn" type="button" @click="openStats">Statistik</button>
     </section>
 
     <p v-if="error" class="feedback error">{{ error }}</p>
@@ -181,5 +200,6 @@ const resetIcon = `
       :fallback-cover="fallbackCover"
       @close="closePlayer"
     />
+    <StatsPanel v-if="statsOpen" @close="closeStats" />
   </main>
 </template>
