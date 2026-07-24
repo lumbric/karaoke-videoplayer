@@ -1,0 +1,37 @@
+{
+  "app": {
+    "title": "Karaoke Song Player"
+  },
+  "theme": {
+    "name": "default",
+    "cssPath": "/themes/default.css",
+    "logoPath": "/poster2026.jpg",
+    "coverFallbackPath": "/themes/default-cover-fallback.svg"
+  },
+  "features": {
+    "onlineSearch": false,
+    "aiSuggestions": false
+  },
+  "search": {
+    "batchSize": 30,
+    "maxDisplayCount": 240,
+    "initialOrder": "alphabetical",
+    "randomSeed": 42,
+    "showMetadataSnippet": true
+  },
+  "providers": {
+    "invidious": {
+      "baseUrls": []
+    }
+  },
+  "ai": {
+    "model": "gpt-4o-mini",
+    "maxSuggestions": 5,
+    "timeoutMs": 8000
+  },
+  "paths": {
+    "songsJson": "/archive/videos.json",
+    "videosBase": "/videos",
+    "coversBase": "/covers"
+  }
+}

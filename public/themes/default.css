@@ -1,0 +1,21 @@
+:root {
+  --bg: #eff6f5;
+  --surface: #ffffff;
+  --surface-2: #ebf0ee;
+  --text: #1a2724;
+  --muted: #4c6f66;
+  --accent: #0e6a5a;
+  --accent-2: #f5ad00;
+  --danger: #b42318;
+  --radius: 14px;
+}
+
+.title {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+}
+
+.song-card {
+  border: 1px solid color-mix(in srgb, var(--accent) 10%, white);
+}

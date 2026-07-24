@@ -4,8 +4,17 @@ extra_metadata.json
 videos.json
 update-song-data.log
 secret-config.js
+secret-config.local.json
+.env
+.env.*
 
 
 archive
 extra-download-songs
 stats_kultur-ab-hof-2024
+
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/

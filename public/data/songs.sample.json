@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sample-1",
+    "filename": "Nena - 99 Luftballons",
+    "title": "99 Luftballons",
+    "artist": "Nena",
+    "genre": ["pop", "deutschpop"],
+    "duration_seconds": 231,
+    "has_cover": false
+  },
+  {
+    "id": "sample-2",
+    "filename": "ABBA - Dancing Queen",
+    "title": "Dancing Queen",
+    "artist": "ABBA",
+    "genre": ["pop", "disco"],
+    "duration_seconds": 231,
+    "has_cover": false
+  },
+  {
+    "id": "sample-3",
+    "filename": "Queen - Bohemian Rhapsody",
+    "title": "Bohemian Rhapsody",
+    "artist": "Queen",
+    "genre": ["rock"],
+    "duration_seconds": 354,
+    "has_cover": false
+  }
+]
