@@ -21,6 +21,7 @@ const selectedGenre = ref<string>("");
 const statsOpen = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 const loadSentinel = ref<HTMLDivElement | null>(null);
+const failedCoverIds = ref(new Set<string>());
 let observer: IntersectionObserver | null = null;
 
 const logoPath = computed(() => config.value?.theme.logoPath ?? "");
@@ -127,6 +128,25 @@ function formatMeta(song: { artist?: string; genres: string[] }): string {
   return bits.join(" - ");
 }
 
+function getCoverSrc(song: SongRecord): string {
+  if (failedCoverIds.value.has(song.id)) {
+    return fallbackCover.value;
+  }
+
+  return song.coverPath;
+}
+
+function onCoverError(songId: string, event: Event): void {
+  const next = new Set(failedCoverIds.value);
+  next.add(songId);
+  failedCoverIds.value = next;
+
+  const target = event.target as HTMLImageElement | null;
+  if (target) {
+    target.src = fallbackCover.value;
+  }
+}
+
 const resetIcon = `
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M12 5a7 7 0 1 1-6.16 3.63" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -176,9 +196,10 @@ const resetIcon = `
       >
         <img
           class="song-cover"
-          :src="song.coverPath"
+          :src="getCoverSrc(song)"
           :alt="`Cover ${song.displayTitle}`"
-          @error="($event.target as HTMLImageElement).src = fallbackCover"
+          loading="lazy"
+          @error="onCoverError(song.id, $event)"
         />
         <div class="song-body">
           <h2 class="song-title">{{ song.displayTitle }}</h2>
