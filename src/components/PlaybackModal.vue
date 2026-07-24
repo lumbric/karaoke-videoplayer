@@ -44,15 +44,19 @@ const playIcon = `
 `;
 
 const restartIcon = `
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M12 5a7 7 0 1 1-6.16 3.63" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M5 5v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <svg viewBox="0 0 95 75" aria-hidden="true" focusable="false">
+    <g transform="translate(-83.642394,-120.86914)">
+      <path
+        d="m 117.95117,127.04102 c -14.78481,0.0365 -27.920524,9.56965 -32.566404,23.625 -4.645884,14.05535 0.210559,29.54997 12.046875,38.42187 11.836309,8.8719 28.058029,9.16484 40.205079,0.72461 12.14705,-8.44023 17.55492,-23.75151 13.41601,-37.96484 a 4,4 0 0 0 -4.95898,-2.72266 4,4 0 0 0 -2.72266,4.95898 c 3.1869,10.94408 -0.95708,22.66585 -10.30078,29.15821 -9.3437,6.49236 -21.73464,6.27011 -30.83984,-0.55469 -9.105205,-6.8248 -12.827146,-18.68966 -9.250001,-29.51172 3.577143,-10.82206 13.623741,-18.10666 24.990231,-18.13476 a 4,4 0 0 0 0.20118,-0.041 4,4 0 0 0 0.0977,0.041 h 38 a 4,4 0 0 0 4,-4 4,4 0 0 0 -4,-4 h -38 a 4,4 0 0 0 -0.1582,0.0664 4,4 0 0 0 -0.16016,-0.0664 z m 32.04102,-6.17188 v 20.34375 l 17.59765,-10.17187 c -5.86477,-3.39255 -11.73159,-6.78156 -17.59765,-10.17188 z"
+        fill="currentColor"
+      />
+    </g>
   </svg>
 `;
 
 const stopIcon = `
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M7 7h10v10H7z" fill="currentColor" />
+    <path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
   </svg>
 `;
 
@@ -216,6 +220,10 @@ onBeforeUnmount(() => {
     />
 
     <div class="player-glass" :class="{ 'is-hidden': !controlsVisible }">
+      <button class="player-close btn btn-icon" type="button" title="Schließen" aria-label="Schließen" @click="closePlayer">
+        <span v-html="stopIcon"></span>
+      </button>
+
       <div class="player-shell">
         <img class="player-cover" :src="song.coverPath" :alt="`Cover ${song.displayTitle}`" @error="($event.target as HTMLImageElement).src = fallbackCover" />
         <div class="player-body">
@@ -224,18 +232,15 @@ onBeforeUnmount(() => {
             <p class="player-meta">{{ displayMeta }}</p>
             <p v-if="!hasMetadata" class="player-status">Video wird geladen...</p>
           </div>
+        </div>
 
-          <div class="player-actions">
-              <button class="btn btn-primary btn-icon" type="button" :title="playbackStore.isPaused ? 'Play' : 'Pause'" :aria-label="playbackStore.isPaused ? 'Play' : 'Pause'" @click="togglePause">
-                <span v-html="playbackStore.isPaused ? playIcon : pauseIcon"></span>
-            </button>
-              <button class="btn btn-icon" type="button" title="Neu Starten" aria-label="Neu Starten" @click="restartFromBeginning">
-                <span v-html="restartIcon"></span>
-              </button>
-              <button class="btn btn-icon" type="button" title="Stop" aria-label="Stop" @click="closePlayer">
-                <span v-html="stopIcon"></span>
-              </button>
-          </div>
+        <div class="player-actions" aria-label="Wiedergabe-Steuerung">
+          <button class="btn btn-primary btn-icon player-action-button" type="button" :title="playbackStore.isPaused ? 'Play' : 'Pause'" :aria-label="playbackStore.isPaused ? 'Play' : 'Pause'" @click="togglePause">
+            <span v-html="playbackStore.isPaused ? playIcon : pauseIcon"></span>
+          </button>
+          <button class="btn btn-icon player-action-button" type="button" title="Neu Starten" aria-label="Neu Starten" @click="restartFromBeginning">
+            <span v-html="restartIcon"></span>
+          </button>
         </div>
       </div>
     </div>

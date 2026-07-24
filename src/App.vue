@@ -124,7 +124,6 @@ const resetIcon = `
         <img v-if="logoPath" class="logo" :src="logoPath" alt="Logo" />
         <h1 class="title">{{ config?.app.title }}</h1>
       </div>
-      <span class="feedback">{{ filteredSongs.length }} Songs</span>
     </header>
 
     <section class="controls" aria-label="Suche und Filter">
