@@ -21,6 +21,8 @@ const controlsVisible = ref(true);
 
 let hideTimer: number | null = null;
 const hideDelayMs = 2200;
+let previousBodyOverflow = "";
+let previousHtmlOverflow = "";
 
 const displayMeta = computed(() => {
   const bits = [props.song.artist ?? "", props.song.genres.join(", ")].filter(Boolean);
@@ -158,6 +160,10 @@ function onWindowActivity(): void {
   revealControls();
 }
 
+function preventPictureInPicture(event: Event): void {
+  event.preventDefault();
+}
+
 watch(
   () => props.song,
   async () => {
@@ -174,6 +180,11 @@ watch(
 );
 
 onMounted(() => {
+  previousBodyOverflow = document.body.style.overflow;
+  previousHtmlOverflow = document.documentElement.style.overflow;
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+
   window.addEventListener("pointermove", onWindowActivity);
   window.addEventListener("mousemove", onWindowActivity);
   window.addEventListener("keydown", onWindowActivity);
@@ -191,6 +202,8 @@ onBeforeUnmount(() => {
   window.removeEventListener("mousemove", onWindowActivity);
   window.removeEventListener("keydown", onWindowActivity);
   window.removeEventListener("touchstart", onWindowActivity);
+  document.body.style.overflow = previousBodyOverflow;
+  document.documentElement.style.overflow = previousHtmlOverflow;
 });
 </script>
 
@@ -214,10 +227,13 @@ onBeforeUnmount(() => {
       :src="activeVideoSource"
       autoplay
       playsinline
+      disablepictureinpicture
+      controlslist="nodownload noplaybackrate noremoteplayback"
       @loadedmetadata="handleLoadedMetadata"
       @timeupdate="handleTimeUpdate"
       @error="handleError"
       @ended="handleEnded"
+      @enterpictureinpicture="preventPictureInPicture"
     />
 
     <div class="player-glass" :class="{ 'is-hidden': !controlsVisible }">

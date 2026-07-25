@@ -7,6 +7,7 @@ interface CatalogState {
   allSongs: SongRecord[];
   query: string;
   selectedGenres: string[];
+  idleShuffleSeed: number;
   renderedCount: number;
   maxDisplayCount: number;
   batchSize: number;
@@ -18,11 +19,28 @@ function compareSongsStable(a: SongRecord, b: SongRecord): number {
   return a.displayTitle.localeCompare(b.displayTitle, "de") || a.filename.localeCompare(b.filename, "de");
 }
 
+function seededRandom(value: number): number {
+  const x = Math.sin(value) * 10000;
+  return x - Math.floor(x);
+}
+
+function songHash(song: SongRecord): number {
+  const key = `${song.id}:${song.displayTitle}:${song.filename}`;
+  let hash = 0;
+
+  for (let i = 0; i < key.length; i += 1) {
+    hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
+  }
+
+  return Math.abs(hash);
+}
+
 export const useCatalogStore = defineStore("catalog", {
   state: (): CatalogState => ({
     allSongs: [],
     query: "",
     selectedGenres: [],
+    idleShuffleSeed: Date.now(),
     renderedCount: 0,
     maxDisplayCount: 200,
     batchSize: 30,
@@ -66,6 +84,12 @@ export const useCatalogStore = defineStore("catalog", {
 
       if (hasQuery) {
         ranked.sort((a, b) => b.score - a.score || a.index - b.index || compareSongsStable(a.song, b.song));
+      } else {
+        ranked.sort((a, b) => {
+          const aRandom = seededRandom(songHash(a.song) + state.idleShuffleSeed + a.index * 17);
+          const bRandom = seededRandom(songHash(b.song) + state.idleShuffleSeed + b.index * 17);
+          return aRandom - bRandom || a.index - b.index || compareSongsStable(a.song, b.song);
+        });
       }
 
       return ranked.map((entry) => entry.song);
@@ -78,6 +102,9 @@ export const useCatalogStore = defineStore("catalog", {
     }
   },
   actions: {
+    reshuffleIdleOrder(): void {
+      this.idleShuffleSeed = Math.floor(Math.random() * 1_000_000_000);
+    },
     async initialize(config: AppConfig): Promise<void> {
       this.loading = true;
       this.error = null;
@@ -87,6 +114,7 @@ export const useCatalogStore = defineStore("catalog", {
 
       try {
         this.allSongs = await loadSongCatalog(config);
+        this.reshuffleIdleOrder();
         this.renderedCount = this.batchSize;
       } catch (error) {
         this.error = `Songliste konnte nicht geladen werden: ${String(error)}`;
@@ -95,7 +123,12 @@ export const useCatalogStore = defineStore("catalog", {
       }
     },
     setQuery(query: string): void {
+      const hadQuery = this.query.trim().length > 0;
+      const hasQuery = query.trim().length > 0;
       this.query = query;
+      if (hadQuery && !hasQuery) {
+        this.reshuffleIdleOrder();
+      }
       this.renderedCount = this.batchSize;
     },
     setGenres(genres: string[]): void {
@@ -105,6 +138,7 @@ export const useCatalogStore = defineStore("catalog", {
     clearFilters(): void {
       this.query = "";
       this.selectedGenres = [];
+      this.reshuffleIdleOrder();
       this.renderedCount = this.batchSize;
     },
     loadMore(): void {

@@ -18,3 +18,9 @@ dist/
 coverage/
 playwright-report/
 test-results/
+
+poster2026.jpg
+public/data/songs.json
+public/songs
+public/songs/
+public/songs-LOCAL/
