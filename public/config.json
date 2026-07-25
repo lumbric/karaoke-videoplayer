@@ -9,7 +9,7 @@
     "coverFallbackPath": "/themes/default-cover-fallback.svg"
   },
   "features": {
-    "onlineSearch": false,
+    "onlineSearch": true,
     "aiSuggestions": false
   },
   "search": {
@@ -21,7 +21,14 @@
   },
   "providers": {
     "invidious": {
-      "baseUrls": []
+      "baseUrls": [
+        "https://inv.nadeko.net",
+        "https://invidious.nerdvpn.de",
+        "https://yt.chocolatemoo53.com",
+        "https://invidious.tiekoetter.com",
+        "https://invidious.f5.si",
+        "https://iv.nboeck.de"
+      ]
     }
   },
   "ai": {

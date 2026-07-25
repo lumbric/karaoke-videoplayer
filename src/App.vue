@@ -130,7 +130,7 @@ watch(
     }
 
     if (offlineCount === 0) {
-      await onlineSearchStore.search(config.value, trimmedQuery, "fallback");
+      await onlineSearchStore.search(trimmedQuery, "fallback");
       return;
     }
 
@@ -141,11 +141,11 @@ watch(
 );
 
 async function runExplicitOnlineSearch(): Promise<void> {
-  if (!config.value || query.value.trim().length === 0) {
+  if (query.value.trim().length === 0) {
     return;
   }
 
-  await onlineSearchStore.search(config.value, query.value, "explicit");
+  await onlineSearchStore.search(query.value, "explicit");
 }
 
 const onKeyDown = (event: KeyboardEvent): void => {

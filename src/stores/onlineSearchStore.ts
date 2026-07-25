@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { AppConfig, OnlineSongResult } from "../types";
+import type { OnlineSongResult } from "../types";
 import { searchOnlineSongs } from "../services/onlineSearch";
 
 type SearchMode = "idle" | "fallback" | "explicit";
@@ -33,7 +33,7 @@ export const useOnlineSearchStore = defineStore("onlineSearch", {
       this.mode = "idle";
       this.results = [];
     },
-    async search(config: AppConfig, query: string, mode: SearchMode): Promise<void> {
+    async search(query: string, mode: SearchMode): Promise<void> {
       const trimmedQuery = query.trim();
       if (trimmedQuery.length === 0) {
         this.clear();
@@ -48,7 +48,7 @@ export const useOnlineSearchStore = defineStore("onlineSearch", {
       this.mode = mode;
 
       try {
-        const results = await searchOnlineSongs(config, trimmedQuery);
+        const results = await searchOnlineSongs(trimmedQuery);
         if (this.requestId !== requestId) {
           return;
         }
