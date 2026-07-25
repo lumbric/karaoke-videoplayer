@@ -68,7 +68,7 @@ function toSongRecord(baseUrl: string, item: InvidiousSearchItem): OnlineSongRes
   };
 }
 
-async function searchOnlineSongs(query: string, fetchImpl: typeof fetch = fetch): Promise<OnlineSongResult[]> {
+export async function searchOnlineSongs(query: string, fetchImpl: typeof fetch = fetch): Promise<OnlineSongResult[]> {
   const trimmedQuery = query.trim();
   if (trimmedQuery.length === 0) {
     return [];
