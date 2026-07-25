@@ -80,4 +80,19 @@ describe("App cover handling", () => {
     const imageAfter = wrapper.get("img.song-cover");
     expect(imageAfter.attributes("src")).toContain("/themes/default-cover-fallback.svg");
   });
+
+  it("shows a placeholder frame until the cover has loaded", async () => {
+    const wrapper = mount(App);
+
+    const frame = wrapper.get(".song-cover-frame");
+    const image = wrapper.get("img.song-cover");
+
+    expect(frame.classes()).not.toContain("is-loaded");
+    expect(image.classes()).not.toContain("is-visible");
+
+    await image.trigger("load");
+
+    expect(frame.classes()).toContain("is-loaded");
+    expect(image.classes()).toContain("is-visible");
+  });
 });
