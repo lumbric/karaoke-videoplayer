@@ -5,8 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "proxy": "node proxy-server.js",
-    "proxy:3000": "PORT=3000 node proxy-server.js",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
