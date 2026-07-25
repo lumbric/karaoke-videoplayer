@@ -55,20 +55,47 @@ async function tryInvidiousFetch(path: string): Promise<Response> {
 async function fetchVideoFromInstance(baseUrl: string, path: string): Promise<Response> {
   try {
     const fullUrl = `${baseUrl}${path}`;
+    console.log(`[Video Proxy] Trying: ${fullUrl}`);
     const response = await fetch(fullUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Accept: "video/*, application/octet-stream"
       }
     });
 
     if (response.ok) {
+      const contentType = response.headers.get("content-type") || "";
+      console.log(`[Video Proxy] Success: HTTP ${response.status}, Content-Type: ${contentType}`);
       return response;
     }
 
+    console.error(`[Video Proxy] Failed: HTTP ${response.status}`);
     throw new Error(`HTTP ${response.status}`);
   } catch (error) {
-    throw error instanceof Error ? error : new Error(String(error));
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error(`[Video Proxy] Exception: ${msg}`);
+    throw error;
   }
+}
+
+/**
+ * Try fetching video from multiple instances in sequence
+ */
+async function tryFetchVideoWithFallback(path: string): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let i = 0; i < INVIDIOUS_INSTANCES.length; i++) {
+    try {
+      return await fetchVideoFromInstance(INVIDIOUS_INSTANCES[i], path);
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.log(`[Video Proxy] Trying next instance (${i + 1}/${INVIDIOUS_INSTANCES.length})...`);
+    }
+  }
+
+  throw new Error(
+    `All Invidious instances failed for video. Last error: ${lastError?.message}`
+  );
 }
 
 export default function viteProxyMiddleware() {
@@ -86,9 +113,9 @@ export default function viteProxyMiddleware() {
           }
 
           try {
-            // Extract the query string
-            const path = (req.url || "").split("?")[1];
-            const fullPath = `/api/v1/search?${path}`;
+            // req.url is like "?q=...&type=video&page=1"
+            const queryString = (req.url || "").split("?")[1] || "";
+            const fullPath = `/api/v1/search?${queryString}`;
 
             const response = await tryInvidiousFetch(fullPath);
             const data = await response.text();
@@ -111,8 +138,9 @@ export default function viteProxyMiddleware() {
           }
         });
 
-        // Proxy for video content (latest_version, vi/)
-        server.middlewares.use("/api/video", async (req: IncomingMessage, res: ServerResponse) => {
+        // Proxy for video content (latest_version)
+        // Matches: /api/video/{instance_index}/latest_version?id=...&itag=...
+        server.middlewares.use("/api/video/", async (req: IncomingMessage, res: ServerResponse) => {
           if (req.method !== "GET") {
             res.writeHead(405);
             res.end("Method not allowed");
@@ -120,30 +148,48 @@ export default function viteProxyMiddleware() {
           }
 
           try {
-            // Parse: /api/video/{instance_index}/path?query
-            // Example: /api/video/0/latest_version?id=abc&itag=18&local=true
-            const url = new URL(req.url || "/api/video/0", "http://localhost");
-            const pathParts = url.pathname.split("/").filter((p) => p.length > 0); // ["api", "video", "0", "latest_version"]
+            // req.url is like "/0/latest_version?id=...&itag=..."
+            const urlPath = req.url || "/0/latest_version";
+            const [pathPart, queryPart] = urlPath.split("?");
+            const pathSegments = pathPart.split("/").filter((p) => p.length > 0);
 
-            if (pathParts.length < 3) {
-              res.writeHead(400);
+            if (pathSegments.length < 2) {
+              console.error(`[Video Proxy] Invalid path segments: ${pathSegments.join("/")} from ${urlPath}`);
+              res.writeHead(400, { "Content-Type": "text/plain" });
               res.end("Invalid request");
               return;
             }
 
-            const instanceIndex = parseInt(pathParts[2] || "0");
-            const instanceIdx = Math.max(0, Math.min(instanceIndex, INVIDIOUS_INSTANCES.length - 1));
-            const endpointPath = "/" + pathParts.slice(3).join("/");
-            const queryString = url.search;
+            // pathSegments: ["0", "latest_version"] or higher numbers for fallback
+            const instanceIdx = parseInt(pathSegments[0] || "0");
+            const endpoint = "/" + pathSegments.slice(1).join("/");
+            const fullPath = `${endpoint}${queryPart ? "?" + queryPart : ""}`;
 
-            const response = await fetchVideoFromInstance(
-              INVIDIOUS_INSTANCES[instanceIdx],
-              `${endpointPath}${queryString}`
-            );
+            console.log(`[Video Proxy] Instance ${instanceIdx}: ${fullPath}`);
+
+            // Try the specific instance, then fallback to others
+            let response: Response | null = null;
+            for (let i = instanceIdx; i < INVIDIOUS_INSTANCES.length; i++) {
+              try {
+                response = await fetchVideoFromInstance(INVIDIOUS_INSTANCES[i], fullPath);
+                break;
+              } catch (error) {
+                console.log(`[Video Proxy] Instance ${i} failed, trying next...`);
+                if (i === INVIDIOUS_INSTANCES.length - 1) {
+                  throw error;
+                }
+              }
+            }
+
+            if (!response) {
+              throw new Error("No response from any instance");
+            }
+
             const buffer = await response.arrayBuffer();
+            const contentType = response.headers.get("content-type") || "video/mp4";
 
             res.writeHead(200, {
-              "Content-Type": response.headers.get("content-type") || "application/octet-stream",
+              "Content-Type": contentType,
               "Content-Length": buffer.byteLength,
               "Access-Control-Allow-Origin": "*",
               "Cache-Control": "public, max-age=86400"
@@ -151,9 +197,9 @@ export default function viteProxyMiddleware() {
             res.end(Buffer.from(buffer));
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : "Unknown error";
-            console.error(`[Video Proxy] ${errorMsg}`);
+            console.error(`[Video Proxy] Error: ${errorMsg}`);
 
-            res.writeHead(502);
+            res.writeHead(502, { "Content-Type": "text/plain" });
             res.end(`Error: ${errorMsg}`);
           }
         });

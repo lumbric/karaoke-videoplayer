@@ -15,11 +15,15 @@ function normalizeBaseUrl(baseUrl: string): string {
 }
 
 function buildVideoCandidates(videoId: string): string[] {
-  // Use proxied video URLs: /api/video/{instance}/latest_version?id=...&itag=...
-  return [18, 22].map(
-    (itag) =>
-      `/api/video/0/latest_version?id=${encodeURIComponent(videoId)}&itag=${itag}&local=true`
-  );
+  // Use proxied video URLs via latest_version Invidious endpoint
+  // Falls back to YouTube redirect if latest_version fails
+  return [
+    // Try Invidious latest_version endpoint (proxy)
+    `/api/video/0/latest_version?id=${encodeURIComponent(videoId)}&itag=22`,
+    `/api/video/0/latest_version?id=${encodeURIComponent(videoId)}&itag=18`,
+    // Fallback to YouTube direct (browser may allow if no CORS blocks)
+    `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`
+  ];
 }
 
 function resolveThumbnail(item: InvidiousSearchItem): string {
