@@ -76,6 +76,11 @@ export interface SongSuggestion {
   createdAt: string;
 }
 
+export interface OnlineSongResult {
+  song: SongRecord;
+  provider: PlayEventProviderMeta;
+}
+
 export interface PlayEvent {
   title: string;
   timestamp: string;

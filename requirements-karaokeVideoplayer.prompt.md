@@ -426,16 +426,25 @@ This section captures explicit project decisions made during implementation and 
 - Playback controls must auto-hide after short inactivity and reappear on input activity.
 - Control set remains restricted to close, pause/resume, restart.
 - Close control is an `X` with accessible label `Schließen`.
+- Picture-in-Picture must be disabled during playback.
+- Page scrolling must be locked while the fullscreen player is open.
 
 ### 21.3 Cover Rendering Stability
 - Cover fallback behavior must avoid repeated failed-image reload loops during filtering/search.
 - Once a cover path fails for a song card, the UI should keep using fallback for that song card session state.
+- Song cards must reserve stable cover/title/meta space before image load completes.
+- Before a cover is loaded, the card should show a calm static placeholder surface rather than visible fallback text.
 
-### 21.4 Statistics Clarifications
+### 21.4 Browse Order and Grid Stability
+- Default browse order is random rather than alphabetical.
+- Returning to idle browse state after clearing search should reshuffle deterministically for that session state.
+- Song cards should keep equal outer dimensions in the grid regardless of image load timing or metadata length.
+
+### 21.5 Statistics Clarifications
 - Statistics consume local `playedLog` entries only.
 - Statistics include export to JSON.
 - Advanced stats lists use explicit deterministic thresholds defined in code and tests.
 
-### 21.5 Testing and Docker Workflow
+### 21.6 Testing and Docker Workflow
 - Containerized test command is `docker compose run --rm --build test` when code changed and image freshness is required.
 - Rebuild (`--build`) is mandatory for reliable test results after local source changes.

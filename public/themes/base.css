@@ -138,6 +138,12 @@ textarea {
   gap: 14px;
 }
 
+.online-actions {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+
 .player-overlay {
   position: fixed;
   inset: 0;

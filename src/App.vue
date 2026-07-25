@@ -6,15 +6,18 @@ import PlaybackModal from "./components/PlaybackModal.vue";
 import StatsPanel from "./components/StatsPanel.vue";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
+import { useOnlineSearchStore } from "./stores/onlineSearchStore";
 import { usePlaybackStore } from "./stores/playbackStore";
 import type { SongRecord } from "./types";
 
 const configStore = useConfigStore();
 const catalogStore = useCatalogStore();
+const onlineSearchStore = useOnlineSearchStore();
 const playbackStore = usePlaybackStore();
 
 const { config } = storeToRefs(configStore);
 const { visibleSongs, filteredSongs, availableGenres, loading, error, selectedGenres, query, hasMoreVisible } = storeToRefs(catalogStore);
+const { results: onlineResults, loading: onlineLoading, error: onlineError, mode: onlineMode, activeQuery: onlineActiveQuery } = storeToRefs(onlineSearchStore);
 const { activeSong } = storeToRefs(playbackStore);
 
 const selectedGenre = ref<string>("");
@@ -28,8 +31,26 @@ let observer: IntersectionObserver | null = null;
 const logoPath = computed(() => config.value?.theme.logoPath ?? "");
 const fallbackCover = computed(() => config.value?.theme.coverFallbackPath ?? "");
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
+const onlineSearchEnabled = computed(() => config.value?.features.onlineSearch ?? false);
+const onlineSongs = computed(() => onlineResults.value.map((entry) => entry.song));
+const showingOnlineResults = computed(() => onlineMode.value !== "idle" && onlineSongs.value.length > 0);
+const activeSongs = computed(() => (showingOnlineResults.value ? onlineSongs.value : visibleSongs.value));
+const hasAnyActiveSongs = computed(() => activeSongs.value.length > 0);
+const showSuggestionForm = computed(() => query.value.trim().length > 0 && filteredSongs.value.length === 0 && onlineSongs.value.length === 0 && !onlineLoading.value);
+const showOnlineSearchButton = computed(() => onlineSearchEnabled.value && query.value.trim().length > 0);
+const showOnlineFallbackHint = computed(() => onlineSearchEnabled.value && filteredSongs.value.length === 0 && query.value.trim().length > 0);
+
+function findOnlineProvider(songId: string) {
+  return onlineResults.value.find((entry) => entry.song.id === songId)?.provider;
+}
 
 function onSongClicked(song: SongRecord): void {
+  const provider = findOnlineProvider(song.id);
+  if (provider) {
+    playbackStore.openSong(song, "online", provider);
+    return;
+  }
+
   playbackStore.openSong(song);
 }
 
@@ -45,6 +66,7 @@ function applyGenreFilter(): void {
 function clearAll(): void {
   selectedGenre.value = "";
   catalogStore.clearFilters();
+  onlineSearchStore.clear();
   nextTick(() => {
     searchInput.value?.focus();
   });
@@ -88,6 +110,43 @@ function setupObserver(): void {
 watch(loadSentinel, () => {
   setupObserver();
 });
+
+watch(
+  [query, () => filteredSongs.value.length, onlineSearchEnabled],
+  async ([nextQuery, offlineCount, enabled]) => {
+    const trimmedQuery = nextQuery.trim();
+
+    if (!enabled || trimmedQuery.length === 0 || !config.value) {
+      onlineSearchStore.clear();
+      return;
+    }
+
+    if (onlineMode.value === "explicit" && onlineActiveQuery.value === trimmedQuery) {
+      return;
+    }
+
+    if (onlineMode.value !== "idle" && onlineActiveQuery.value !== trimmedQuery) {
+      onlineSearchStore.clear();
+    }
+
+    if (offlineCount === 0) {
+      await onlineSearchStore.search(config.value, trimmedQuery, "fallback");
+      return;
+    }
+
+    if (onlineMode.value === "fallback") {
+      onlineSearchStore.clear();
+    }
+  }
+);
+
+async function runExplicitOnlineSearch(): Promise<void> {
+  if (!config.value || query.value.trim().length === 0) {
+    return;
+  }
+
+  await onlineSearchStore.search(config.value, query.value, "explicit");
+}
 
 const onKeyDown = (event: KeyboardEvent): void => {
   const key = event.key.toLowerCase();
@@ -202,9 +261,16 @@ const resetIcon = `
     <p v-if="error" class="feedback error">{{ error }}</p>
     <p v-else-if="loading" class="feedback">Songs werden geladen...</p>
 
-    <section v-else-if="visibleSongs.length > 0" class="song-grid" aria-label="Songliste">
+    <div v-if="showOnlineSearchButton" class="online-actions">
+      <button class="btn" type="button" @click="runExplicitOnlineSearch">Online suchen</button>
+      <p v-if="showOnlineFallbackHint && onlineMode === 'fallback' && onlineLoading" class="feedback">Keine lokalen Treffer. Online-Suche laeuft...</p>
+      <p v-else-if="onlineError" class="feedback error">{{ onlineError }}</p>
+      <p v-else-if="showingOnlineResults" class="feedback">Online-Ergebnisse fuer "{{ onlineActiveQuery }}"</p>
+    </div>
+
+    <section v-if="hasAnyActiveSongs" class="song-grid" aria-label="Songliste">
       <button
-        v-for="song in visibleSongs"
+        v-for="song in activeSongs"
         :key="song.id"
         class="song-card"
         type="button"
@@ -228,13 +294,14 @@ const resetIcon = `
       </button>
     </section>
 
-    <SongRequestForm v-else-if="query.trim().length > 0" />
-    <section v-else class="empty">
+    <p v-else-if="query.trim().length > 0 && onlineLoading" class="feedback">Online-Suche laeuft...</p>
+    <SongRequestForm v-else-if="showSuggestionForm" />
+    <section v-else-if="!loading" class="empty">
       <h3>Keine Songs verfuegbar</h3>
       <p>Bitte pruefe die Konfiguration und Songdaten.</p>
     </section>
 
-    <div v-if="hasMoreVisible" ref="loadSentinel" class="load-sentinel" aria-hidden="true"></div>
+    <div v-if="hasMoreVisible && !showingOnlineResults" ref="loadSentinel" class="load-sentinel" aria-hidden="true"></div>
     <PlaybackModal
       v-if="activeSong"
       :song="activeSong"
