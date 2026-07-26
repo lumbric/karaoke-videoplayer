@@ -53,7 +53,9 @@ function tokenScore(queryToken: string, haystackTokens: string[]): number {
     const distance = levenshteinDistance(queryToken, token);
     const maxDistance = queryToken.length <= 4 ? 1 : 2;
     if (distance <= maxDistance) {
-      best = Math.max(best, 52 - distance * 10 - Math.abs(token.length - queryToken.length));
+      const lengthDelta = Math.abs(token.length - queryToken.length);
+      const baseScore = distance === 1 ? 64 : 54;
+      best = Math.max(best, baseScore - (distance - 1) * 8 - lengthDelta * 4);
     }
   }
 

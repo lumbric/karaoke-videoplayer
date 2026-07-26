@@ -21,4 +21,9 @@ describe("getSearchScore", () => {
     const score = getSearchScore("privet", "Привет мир karaoke");
     expect(score).toBeGreaterThan(0);
   });
+
+  it("matches close german umlaut typo", () => {
+    const score = getSearchScore("ärte", "ärzte");
+    expect(score).toBeGreaterThan(0);
+  });
 });
