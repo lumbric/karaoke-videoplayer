@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#332e5d" />
+  <rect x="36" y="36" width="1208" height="648" rx="20" fill="none" stroke="#cd6391" stroke-width="8" />
+  <rect x="120" y="120" width="1040" height="480" rx="18" fill="#ffffff" opacity="0.08" />
+  <text x="640" y="340" fill="#ffffff" font-family="Trebuchet MS, Arial, sans-serif" font-size="62" font-weight="700" text-anchor="middle">Kein Cover vorhanden</text>
+  <text x="640" y="398" fill="#f1d8e6" font-family="Trebuchet MS, Arial, sans-serif" font-size="28" text-anchor="middle">Karaoke ab HOf 2025</text>
+</svg>
