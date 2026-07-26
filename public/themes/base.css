@@ -71,7 +71,7 @@ textarea {
 
 .controls {
   display: grid;
-  grid-template-columns: 1fr minmax(170px, 220px) auto auto;
+  grid-template-columns: 1fr minmax(170px, 220px) auto;
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -109,12 +109,21 @@ textarea {
   justify-content: center;
   width: 48px;
   padding: 0;
+  font-size: 1.35rem;
+  line-height: 1;
 }
 
 .btn-icon svg {
   width: 22px;
   height: 22px;
   display: block;
+}
+
+.stats-button {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 30;
 }
 
 .btn-primary {

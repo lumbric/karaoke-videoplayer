@@ -163,12 +163,7 @@ function onCoverError(songId: string, event: Event): void {
   }
 }
 
-const resetIcon = `
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M12 5a7 7 0 1 1-6.16 3.63" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M5 5v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-  </svg>
-`;
+const resetIcon = "&#10227;";
 </script>
 
 <template>
@@ -186,7 +181,7 @@ const resetIcon = `
         class="search"
         :value="query"
         type="search"
-        placeholder="Songs suchen..."
+        placeholder="Suchen..."
         @input="catalogStore.setQuery(($event.target as HTMLInputElement).value)"
       />
 
@@ -196,7 +191,6 @@ const resetIcon = `
       </select>
 
       <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll" v-html="resetIcon"></button>
-      <button class="btn" type="button" @click="openStats">Statistik</button>
     </section>
 
     <p v-if="error" class="feedback error">{{ error }}</p>
@@ -241,6 +235,7 @@ const resetIcon = `
       :fallback-cover="fallbackCover"
       @close="closePlayer"
     />
+    <button class="btn stats-button" type="button" @click="openStats">Statistik</button>
     <StatsPanel v-if="statsOpen" @close="closeStats" />
   </main>
 </template>
