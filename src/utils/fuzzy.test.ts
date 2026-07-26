@@ -16,4 +16,9 @@ describe("getSearchScore", () => {
     const score = getSearchScore("classical symphony", "metallica sandman");
     expect(score).toBeLessThan(0);
   });
+
+  it("matches transliterated cyrillic query", () => {
+    const score = getSearchScore("privet", "Привет мир karaoke");
+    expect(score).toBeGreaterThan(0);
+  });
 });

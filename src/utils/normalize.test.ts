@@ -9,4 +9,12 @@ describe("normalizeForSearch", () => {
   it("transliterates greek", () => {
     expect(normalizeForSearch("Αθήνα")).toBe("athina");
   });
+
+  it("expands german umlauts", () => {
+    expect(normalizeForSearch("Füße schön")).toBe("fuesse schoen");
+  });
+
+  it("transliterates cyrillic", () => {
+    expect(normalizeForSearch("Привет Мир")).toBe("privet mir");
+  });
 });
