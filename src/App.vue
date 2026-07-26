@@ -22,6 +22,7 @@ const statsOpen = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 const loadSentinel = ref<HTMLDivElement | null>(null);
 const failedCoverIds = ref(new Set<string>());
+const loadedCoverIds = ref(new Set<string>());
 let observer: IntersectionObserver | null = null;
 
 const logoPath = computed(() => config.value?.theme.logoPath ?? "");
@@ -123,8 +124,9 @@ onBeforeUnmount(() => {
   observer?.disconnect();
 });
 
-function formatMeta(song: { artist?: string; genres: string[] }): string {
-  const bits = [song.artist ?? "", song.genres.join(", ")].filter(Boolean);
+function formatMeta(song: { artist?: string; filename: string; genres: string[] }): string {
+  const primary = song.artist?.trim() || song.filename;
+  const bits = [primary, song.genres.join(", ")].filter(Boolean);
   return bits.join(" - ");
 }
 
@@ -136,13 +138,27 @@ function getCoverSrc(song: SongRecord): string {
   return song.coverPath;
 }
 
+function isCoverLoaded(songId: string): boolean {
+  return loadedCoverIds.value.has(songId);
+}
+
+function onCoverLoad(songId: string): void {
+  const next = new Set(loadedCoverIds.value);
+  next.add(songId);
+  loadedCoverIds.value = next;
+}
+
 function onCoverError(songId: string, event: Event): void {
+  const loadedNext = new Set(loadedCoverIds.value);
+  loadedNext.delete(songId);
+  loadedCoverIds.value = loadedNext;
+
   const next = new Set(failedCoverIds.value);
   next.add(songId);
   failedCoverIds.value = next;
 
   const target = event.target as HTMLImageElement | null;
-  if (target) {
+  if (target && target.src !== fallbackCover.value) {
     target.src = fallbackCover.value;
   }
 }
@@ -194,16 +210,20 @@ const resetIcon = `
         type="button"
         @click="onSongClicked(song)"
       >
-        <img
-          class="song-cover"
-          :src="getCoverSrc(song)"
-          :alt="`Cover ${song.displayTitle}`"
-          loading="lazy"
-          @error="onCoverError(song.id, $event)"
-        />
+        <div class="song-cover-frame" :class="{ 'is-loaded': isCoverLoaded(song.id) }" aria-hidden="true">
+          <img
+            class="song-cover"
+            :class="{ 'is-visible': isCoverLoaded(song.id) }"
+            :src="getCoverSrc(song)"
+            :alt="`Cover ${song.displayTitle}`"
+            loading="lazy"
+            @load="onCoverLoad(song.id)"
+            @error="onCoverError(song.id, $event)"
+          />
+        </div>
         <div class="song-body">
           <h2 class="song-title">{{ song.displayTitle }}</h2>
-          <p v-if="showMetadataSnippet" class="song-meta">{{ formatMeta(song) }}</p>
+          <p class="song-meta" :class="{ 'is-hidden': !showMetadataSnippet }">{{ formatMeta(song) }}</p>
         </div>
       </button>
     </section>
