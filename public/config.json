@@ -5,7 +5,7 @@
   "theme": {
     "name": "default",
     "cssPath": "/themes/default.css",
-    "logoPath": "/poster2026.jpg",
+    "logoPath": "/themes/default-logo.svg",
     "coverFallbackPath": "/themes/default-cover-fallback.svg"
   },
   "features": {
