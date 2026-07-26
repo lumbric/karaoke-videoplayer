@@ -163,7 +163,7 @@ function onCoverError(songId: string, event: Event): void {
   }
 }
 
-const resetIcon = "&#10227;";
+const resetIcon = "⟳";
 </script>
 
 <template>
@@ -190,7 +190,7 @@ const resetIcon = "&#10227;";
         <option v-for="genre in availableGenres" :key="genre" :value="genre">{{ genre }}</option>
       </select>
 
-      <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll" v-html="resetIcon"></button>
+      <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll">{{ resetIcon }}</button>
     </section>
 
     <p v-if="error" class="feedback error">{{ error }}</p>
