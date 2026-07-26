@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#f3dde6" />
+  <circle cx="108" cy="104" r="4" fill="#3f3b78" />
+  <circle cx="1160" cy="132" r="4" fill="#3f3b78" />
+  <circle cx="182" cy="598" r="4" fill="#3f3b78" />
+  <circle cx="1110" cy="572" r="4" fill="#3f3b78" />
+  <rect x="36" y="36" width="1208" height="648" rx="20" fill="none" stroke="#3f3b78" stroke-width="8" />
+  <path d="M88 606c18-30 56-48 92-48" fill="none" stroke="#00a35a" stroke-width="8" stroke-linecap="round" />
+  <path d="M1190 598c-18-30-56-48-92-48" fill="none" stroke="#00a35a" stroke-width="8" stroke-linecap="round" />
+  <text x="640" y="336" fill="#000000" font-family="Trebuchet MS, Arial, sans-serif" font-size="58" font-weight="700" text-anchor="middle">Kein Cover vorhanden</text>
+  <text x="640" y="394" fill="#3f3b78" font-family="Trebuchet MS, Arial, sans-serif" font-size="28" text-anchor="middle">Karaoke ab HOf 2026</text>
+</svg>
