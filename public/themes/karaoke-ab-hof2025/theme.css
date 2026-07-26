@@ -136,9 +136,12 @@ body {
 }
 
 .player-overlay,
-.player-glass,
 .stats-overlay {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+.player-glass {
+  background: transparent;
 }
 
 .player-shell,

@@ -166,7 +166,7 @@ textarea {
   display: flex;
   align-items: flex-end;
   padding: clamp(14px, 2vw, 24px);
-  background: #000;
+  background: transparent;
 }
 
 .player-glass.is-hidden {
