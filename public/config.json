@@ -4,9 +4,9 @@
   },
   "theme": {
     "name": "default",
-    "cssPath": "/themes/default.css",
-    "logoPath": "/themes/default-logo.svg",
-    "coverFallbackPath": "/themes/default-cover-fallback.svg"
+    "cssPath": "/themes/karaoke-ab-hof2025/theme.css",
+    "logoPath": "/themes/karaoke-ab-hof2025/logo.svg",
+    "coverFallbackPath": "/themes/karaoke-ab-hof2025/cover_fallback.svg"
   },
   "features": {
     "onlineSearch": false,
