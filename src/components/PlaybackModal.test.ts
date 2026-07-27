@@ -25,6 +25,8 @@ describe("PlaybackModal", () => {
     vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(() => Promise.resolve());
     vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
     vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => undefined);
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
   });
 
   it("emits close when close button is clicked", async () => {
@@ -59,5 +61,48 @@ describe("PlaybackModal", () => {
 
     expect(video.currentTime).toBe(0);
     expect(progressSpy).toHaveBeenCalled();
+  });
+
+  it("disables picture-in-picture and remote playback on the video element", () => {
+    const wrapper = mount(PlaybackModal, {
+      props: {
+        song,
+        fallbackCover: "/themes/default-cover-fallback.svg"
+      }
+    });
+
+    const video = wrapper.get("video");
+    expect(video.attributes("disablepictureinpicture")).toBeDefined();
+    expect(video.attributes("disableremoteplayback")).toBeDefined();
+  });
+
+  it("locks and restores document scroll while playback is mounted", async () => {
+    const wrapper = mount(PlaybackModal, {
+      props: {
+        song,
+        fallbackCover: "/themes/default-cover-fallback.svg"
+      }
+    });
+
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(document.documentElement.style.overflow).toBe("hidden");
+
+    wrapper.unmount();
+    await wrapper.vm.$nextTick();
+
+    expect(document.body.style.overflow).toBe("");
+    expect(document.documentElement.style.overflow).toBe("");
+  });
+
+  it("renders progress bar without exact time label", () => {
+    const wrapper = mount(PlaybackModal, {
+      props: {
+        song,
+        fallbackCover: "/themes/default-cover-fallback.svg"
+      }
+    });
+
+    expect(wrapper.find(".player-progress-track").exists()).toBe(true);
+    expect(wrapper.find(".player-progress-label").exists()).toBe(false);
   });
 });

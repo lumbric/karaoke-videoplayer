@@ -448,3 +448,20 @@ This section captures explicit project decisions made during implementation and 
 ### 21.6 Testing and Docker Workflow
 - Containerized test command is `docker compose run --rm --build test` when code changed and image freshness is required.
 - Rebuild (`--build`) is mandatory for reliable test results after local source changes.
+
+### 21.7 Fixed Top Layout and Scroll Behavior
+- Header and search/filter controls are grouped in a fixed top container.
+- Main catalog content scrolls beneath the fixed top area.
+- Statistics quick-action button remains fixed at bottom-right in browse mode.
+- Fixed top spacing and catalog top-offset must be responsive and theme-compatible.
+
+### 21.8 Theme Edge Fade and Card Transition
+- Event themes may apply a soft fade at the lower edge of the fixed top container.
+- The fade is visual-only and must not block pointer interaction.
+- Card grid layout must stay stable while scrolling under the header fade treatment.
+
+### 21.9 Playback Loading and Progress Clarifications
+- Loading state in fullscreen playback should use a centered visual loader, not inline status text inside song metadata.
+- Loader visibility should be delayed briefly (about 400ms+) to avoid flicker on fast loads.
+- Playback progress bar and time label remain visible in fullscreen playback across all themes.
+- Playback controls (pause/resume, restart) are rendered as a separate dock outside the cover/title information block.

@@ -15,12 +15,17 @@ const emit = defineEmits<{
 const playbackStore = usePlaybackStore();
 const overlayElement = ref<HTMLElement | null>(null);
 const videoElement = ref<HTMLVideoElement | null>(null);
-const hasMetadata = ref(false);
+const isLoading = ref(true);
+const showLoadingIndicator = ref(false);
 const candidateIndex = ref(0);
 const controlsVisible = ref(true);
+let previousBodyOverflow = "";
+let previousDocumentOverflow = "";
 
 let hideTimer: number | null = null;
 const hideDelayMs = 2200;
+let loadingIndicatorTimer: number | null = null;
+const loadingIndicatorDelayMs = 450;
 
 const displayMeta = computed(() => {
   const bits = [props.song.artist ?? "", props.song.genres.join(", ")].filter(Boolean);
@@ -29,6 +34,16 @@ const displayMeta = computed(() => {
 
 const activeVideoSource = computed(() => {
   return props.song.videoCandidates[candidateIndex.value] ?? props.song.filePath;
+});
+
+const progressPercent = computed(() => {
+  const total = playbackStore.totalDurationSeconds || props.song.durationSeconds || 0;
+
+  if (!total || total <= 0) {
+    return 0;
+  }
+
+  return Math.min(100, Math.max(0, (playbackStore.currentTimeSeconds / total) * 100));
 });
 
 const pauseIcon = `
@@ -68,6 +83,30 @@ function clearHideTimer(): void {
   }
 }
 
+function clearLoadingIndicatorTimer(): void {
+  if (loadingIndicatorTimer !== null) {
+    window.clearTimeout(loadingIndicatorTimer);
+    loadingIndicatorTimer = null;
+  }
+}
+
+function startLoadingState(): void {
+  isLoading.value = true;
+  showLoadingIndicator.value = false;
+  clearLoadingIndicatorTimer();
+  loadingIndicatorTimer = window.setTimeout(() => {
+    if (isLoading.value) {
+      showLoadingIndicator.value = true;
+    }
+  }, loadingIndicatorDelayMs);
+}
+
+function stopLoadingState(): void {
+  isLoading.value = false;
+  showLoadingIndicator.value = false;
+  clearLoadingIndicatorTimer();
+}
+
 function scheduleHideControls(): void {
   clearHideTimer();
   hideTimer = window.setTimeout(() => {
@@ -89,13 +128,23 @@ function syncProgress(): void {
 }
 
 function handleLoadedMetadata(): void {
-  hasMetadata.value = true;
+  stopLoadingState();
+  playbackStore.setPaused(false);
   syncProgress();
+}
+
+function handleCanPlay(): void {
+  stopLoadingState();
+}
+
+function handleWaiting(): void {
+  startLoadingState();
 }
 
 function handleError(): void {
   const nextIndex = candidateIndex.value + 1;
   if (nextIndex < props.song.videoCandidates.length) {
+    startLoadingState();
     candidateIndex.value = nextIndex;
     void nextTick(() => {
       if (videoElement.value) {
@@ -158,10 +207,22 @@ function onWindowActivity(): void {
   revealControls();
 }
 
+function lockDocumentScroll(): void {
+  previousBodyOverflow = document.body.style.overflow;
+  previousDocumentOverflow = document.documentElement.style.overflow;
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function unlockDocumentScroll(): void {
+  document.body.style.overflow = previousBodyOverflow;
+  document.documentElement.style.overflow = previousDocumentOverflow;
+}
+
 watch(
   () => props.song,
   async () => {
-    hasMetadata.value = false;
+    startLoadingState();
     candidateIndex.value = 0;
     controlsVisible.value = true;
     await nextTick();
@@ -174,6 +235,8 @@ watch(
 );
 
 onMounted(() => {
+  startLoadingState();
+  lockDocumentScroll();
   window.addEventListener("pointermove", onWindowActivity);
   window.addEventListener("mousemove", onWindowActivity);
   window.addEventListener("keydown", onWindowActivity);
@@ -187,6 +250,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   clearHideTimer();
+  clearLoadingIndicatorTimer();
+  unlockDocumentScroll();
   window.removeEventListener("pointermove", onWindowActivity);
   window.removeEventListener("mousemove", onWindowActivity);
   window.removeEventListener("keydown", onWindowActivity);
@@ -214,7 +279,11 @@ onBeforeUnmount(() => {
       :src="activeVideoSource"
       autoplay
       playsinline
+      disablepictureinpicture
+      disableremoteplayback
       @loadedmetadata="handleLoadedMetadata"
+      @canplay="handleCanPlay"
+      @waiting="handleWaiting"
       @timeupdate="handleTimeUpdate"
       @error="handleError"
       @ended="handleEnded"
@@ -231,18 +300,27 @@ onBeforeUnmount(() => {
           <div class="player-copy">
             <h2 class="player-title">{{ song.displayTitle }}</h2>
             <p class="player-meta">{{ displayMeta }}</p>
-            <p v-if="!hasMetadata" class="player-status">Video wird geladen...</p>
           </div>
         </div>
+      </div>
 
-        <div class="player-actions" aria-label="Wiedergabe-Steuerung">
-          <button class="btn btn-primary btn-icon player-action-button" type="button" :title="playbackStore.isPaused ? 'Play' : 'Pause'" :aria-label="playbackStore.isPaused ? 'Play' : 'Pause'" @click="togglePause">
-            <span v-html="playbackStore.isPaused ? playIcon : pauseIcon"></span>
-          </button>
-          <button class="btn btn-icon player-action-button" type="button" title="Neu Starten" aria-label="Neu Starten" @click="restartFromBeginning">
-            <span v-html="restartIcon"></span>
-          </button>
-        </div>
+      <div class="player-controls-dock player-actions" aria-label="Wiedergabe-Steuerung">
+        <button class="btn btn-primary btn-icon player-action-button" type="button" :title="playbackStore.isPaused ? 'Play' : 'Pause'" :aria-label="playbackStore.isPaused ? 'Play' : 'Pause'" @click="togglePause">
+          <span v-html="playbackStore.isPaused ? playIcon : pauseIcon"></span>
+        </button>
+        <button class="btn btn-icon player-action-button" type="button" title="Neu Starten" aria-label="Neu Starten" @click="restartFromBeginning">
+          <span v-html="restartIcon"></span>
+        </button>
+      </div>
+    </div>
+
+    <div v-if="showLoadingIndicator" class="player-loading-layer" aria-hidden="true">
+      <span class="player-loader"></span>
+    </div>
+
+    <div class="player-progress" aria-hidden="true">
+      <div class="player-progress-track">
+        <div class="player-progress-fill" :style="{ width: `${progressPercent.toFixed(2)}%` }"></div>
       </div>
     </div>
   </section>

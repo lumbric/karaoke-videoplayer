@@ -30,6 +30,31 @@ body {
   padding: 24px 28px 44px;
 }
 
+.top-fixed {
+  width: min(1320px, calc(100% - 44px));
+  background: rgba(255, 250, 252, 0.94);
+  border: 1px solid rgba(63, 59, 120, 0.2);
+  border-top: 0;
+  border-radius: 0 0 22px 22px;
+  box-shadow: 0 14px 30px rgba(63, 59, 120, 0.16);
+  padding: 16px 18px 18px;
+}
+
+.top-fixed::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -40px;
+  height: 40px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(247, 232, 238, 0.95), rgba(247, 232, 238, 0));
+}
+
+.catalog-region {
+  padding-top: 236px;
+}
+
 .header {
   justify-content: center;
   margin-bottom: 18px;
@@ -83,6 +108,7 @@ body {
   border: 1px solid rgba(63, 59, 120, 0.18);
   box-shadow: 0 8px 24px rgba(63, 59, 120, 0.08);
   border-radius: 18px;
+  margin-top: 2px;
 }
 
 .song-card:hover,
@@ -91,8 +117,7 @@ body {
 }
 
 .song-cover-frame {
-  background: #f8e3ea;
-  border-bottom: 1px solid rgba(63, 59, 120, 0.12);
+  background: #f2e8ed;
 }
 
 .song-title {
@@ -117,14 +142,14 @@ body {
 .stats-header,
 .stats-card,
 .stats-chart-card {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(63, 59, 120, 0.18);
+  background: rgba(20, 18, 36, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 18px;
-  box-shadow: 0 8px 20px rgba(63, 59, 120, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
 }
 
 .player-cover {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .player-meta,
@@ -133,7 +158,7 @@ body {
 .stats-card h3,
 .stats-card p,
 .stats-recent-list li {
-  color: #3f3b78;
+  color: #f3eff9;
 }
 
 .player-close,
@@ -141,6 +166,18 @@ body {
   background: #ffffff;
   color: #3f3b78;
   border: 1px solid rgba(63, 59, 120, 0.18);
+}
+
+.player-controls-dock {
+  bottom: 30px;
+}
+
+.player-progress-track {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.player-progress-fill {
+  background: linear-gradient(90deg, #e06c9d, #bca33d);
 }
 
 .player-close:hover,
@@ -188,6 +225,15 @@ body {
 @media (max-width: 768px) {
   .page {
     padding: 18px 18px 36px;
+  }
+
+  .top-fixed {
+    width: calc(100% - 20px);
+    padding: 12px;
+  }
+
+  .catalog-region {
+    padding-top: 248px;
   }
 
   .song-grid {

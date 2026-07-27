@@ -42,12 +42,29 @@ textarea {
   padding: 16px;
 }
 
+.top-fixed {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1200px, calc(100% - 32px));
+  z-index: 32;
+  background: var(--surface);
+  border: 1px solid #000;
+  border-top: 0;
+  padding: 12px 12px 14px;
+}
+
+.catalog-region {
+  padding-top: 172px;
+}
+
 .header {
   display: flex;
   gap: 16px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .brand {
@@ -73,7 +90,7 @@ textarea {
   display: grid;
   grid-template-columns: 1fr minmax(170px, 220px) auto;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .search,
@@ -167,30 +184,44 @@ textarea {
   align-items: flex-end;
   padding: clamp(14px, 2vw, 24px);
   background: transparent;
+  opacity: 1;
 }
 
 .player-glass.is-hidden {
+  opacity: 0;
   pointer-events: none;
 }
 
 .player-shell {
-  width: min(1180px, 100%);
+  width: max(300px, calc(45% - 100px));
   display: grid;
-  grid-template-columns: minmax(180px, 260px) 1fr auto;
-  gap: 18px;
+  grid-template-columns: minmax(140px, 210px) 1fr;
+  gap: 14px;
   align-items: center;
-  background: #fff;
-  border: 1px solid #000;
+  background: rgba(10, 10, 10, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(6px);
   overflow: hidden;
+}
+
+.player-controls-dock {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  z-index: 3;
 }
 
 .player-cover {
   width: 100%;
   height: 100%;
-  min-height: 240px;
+  min-height: 170px;
   object-fit: cover;
-  background: #fff;
-  border-right: 1px solid #000;
+  background: rgba(255, 255, 255, 0.12);
+  border-right: 1px solid rgba(255, 255, 255, 0.24);
 }
 
 .player-body {
@@ -206,14 +237,15 @@ textarea {
 
 .player-title {
   margin: 0;
-  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  font-size: clamp(1.3rem, 2.2vw, 2rem);
   min-width: 0;
+  color: #ffffff;
 }
 
 .player-meta,
 .player-status {
   margin: 0;
-  color: #000;
+  color: #f3f3f3;
 }
 
 .player-actions {
@@ -221,6 +253,50 @@ textarea {
   gap: 12px;
   align-items: center;
   padding-right: 18px;
+}
+
+.player-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+}
+
+.player-progress-track {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.35);
+  overflow: hidden;
+}
+
+.player-progress-fill {
+  height: 100%;
+  width: 0;
+  background: #fff;
+}
+
+.player-loading-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.player-loader {
+  width: 56px;
+  height: 56px;
+  border: 6px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 999px;
+  animation: player-spin 0.9s linear infinite;
+}
+
+@keyframes player-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .player-action-button {
@@ -383,8 +459,7 @@ textarea {
   aspect-ratio: 16 / 9;
   width: 100%;
   overflow: hidden;
-  background: #fff;
-  border-bottom: 1px solid #000;
+  background: #ececec;
 }
 
 .song-cover {
@@ -392,6 +467,11 @@ textarea {
   height: 100%;
   width: 100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.42s ease;
+}
+
+.song-cover.is-visible {
   opacity: 1;
 }
 
@@ -479,6 +559,15 @@ textarea {
 }
 
 @media (max-width: 760px) {
+  .top-fixed {
+    width: calc(100% - 16px);
+    padding: 10px;
+  }
+
+  .catalog-region {
+    padding-top: 214px;
+  }
+
   .controls {
     grid-template-columns: 1fr;
   }
@@ -490,6 +579,7 @@ textarea {
   .player-shell {
     grid-template-columns: 1fr;
     gap: 12px;
+    width: calc(100% - 24px);
   }
 
   .player-cover {
@@ -507,6 +597,16 @@ textarea {
   .player-actions {
     justify-content: flex-start;
     padding: 0 16px 16px;
+  }
+
+  .player-controls-dock {
+    bottom: 20px;
+  }
+
+  .player-progress {
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   .player-action-button {

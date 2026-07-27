@@ -27,6 +27,30 @@ body {
   padding: 20px 40px 40px;
 }
 
+.top-fixed {
+  width: min(1400px, calc(100% - 56px));
+  background: rgba(24, 22, 58, 0.94);
+  border: 0;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+  padding: 18px 20px 20px;
+}
+
+.top-fixed::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -44px;
+  height: 44px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(24, 22, 58, 0.62), rgba(24, 22, 58, 0));
+}
+
+.catalog-region {
+  padding-top: 244px;
+}
+
 .header {
   justify-content: center;
   margin-bottom: 18px;
@@ -53,7 +77,7 @@ body {
 .controls {
   grid-template-columns: 1fr minmax(170px, 220px) auto;
   gap: 14px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .search,
@@ -100,6 +124,10 @@ body {
 }
 
 .song-card {
+  margin-top: 2px;
+}
+
+.song-card {
   background: #cd6391;
   border: 0;
   border-radius: 15px;
@@ -112,7 +140,7 @@ body {
 }
 
 .song-cover-frame {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .song-body {
@@ -148,14 +176,14 @@ body {
 .stats-header,
 .stats-card,
 .stats-chart-card {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(11, 10, 28, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 15px;
-  box-shadow: none;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.35);
 }
 
 .player-cover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .player-meta,
@@ -172,6 +200,18 @@ body {
   background: rgba(68, 70, 127, 0.9);
   color: #ffffff;
   border: 0;
+}
+
+.player-controls-dock {
+  bottom: 30px;
+}
+
+.player-progress-track {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.player-progress-fill {
+  background: linear-gradient(90deg, #cd6391, #f5ad00);
 }
 
 .player-close:hover,
@@ -230,6 +270,15 @@ body {
 @media (max-width: 768px) {
   .page {
     padding: 18px 18px 36px;
+  }
+
+  .top-fixed {
+    width: calc(100% - 20px);
+    padding: 14px;
+  }
+
+  .catalog-region {
+    padding-top: 258px;
   }
 
   .controls {
