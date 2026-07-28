@@ -6,7 +6,7 @@
   "features": {
     "onlineFeatures": true,
     "onlineSearch": true,
-    "aiSuggestions": false
+    "aiSuggestions": true
   },
   "search": {
     "batchSize": 30,

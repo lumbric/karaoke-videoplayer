@@ -4,10 +4,12 @@ import { storeToRefs } from "pinia";
 import SongRequestForm from "./components/SongRequestForm.vue";
 import PlaybackModal from "./components/PlaybackModal.vue";
 import StatsPanel from "./components/StatsPanel.vue";
+import AiSuggestionModal from "./components/AiSuggestionModal.vue";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
 import { usePlaybackStore } from "./stores/playbackStore";
 import { useOnlineSearchStore } from "./stores/onlineSearchStore";
+import { useAiSuggestionStore } from "./stores/aiSuggestionStore";
 import { getThemeCoverFallbackPath, getThemeLogoFallbackPath, getThemeLogoPath } from "./services/config";
 import { extractYouTubeVideoId } from "./services/youtubeEmbed";
 import type { PlayEventProviderMeta, SongRecord } from "./types";
@@ -16,6 +18,7 @@ const configStore = useConfigStore();
 const catalogStore = useCatalogStore();
 const playbackStore = usePlaybackStore();
 const onlineSearchStore = useOnlineSearchStore();
+const aiSuggestionStore = useAiSuggestionStore();
 
 const { config, secret } = storeToRefs(configStore);
 const { visibleSongs, filteredSongs, availableGenres, loading, error, selectedGenres, query, hasMoreVisible } = storeToRefs(catalogStore);
@@ -39,6 +42,7 @@ const fallbackCover = computed(() => (config.value ? getThemeCoverFallbackPath(c
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
 const hasOfflineResults = computed(() => filteredSongs.value.length > 0);
 const hasOnlineResults = computed(() => onlineResults.value.length > 0);
+const aiSuggestionsEnabled = computed(() => config.value?.features.aiSuggestions && !!secret.value.openAiApiKey);
 const showOnlineResultsSection = computed(() =>
   onlineSearchActive.value &&
   query.value.trim().length > 0 &&
@@ -107,6 +111,13 @@ function openStats(): void {
 
 function closeStats(): void {
   statsOpen.value = false;
+  nextTick(() => {
+    searchInput.value?.focus();
+  });
+}
+
+function closeAiSuggestionModal(): void {
+  aiSuggestionStore.closeModal();
   nextTick(() => {
     searchInput.value?.focus();
   });
@@ -285,6 +296,18 @@ const spinnerIcon = `
             <span v-if="onlineLoading" class="button-spinner" v-html="spinnerIcon"></span>
             <span v-else v-html="globeIcon"></span>
           </button>
+          <button
+            v-if="aiSuggestionsEnabled"
+            class="btn btn-icon"
+            type="button"
+            title="KI-Vorschlag"
+            aria-label="KI-Vorschlag"
+            @click="aiSuggestionStore.openModal()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" fill="currentColor" />
+            </svg>
+          </button>
         </div>
       </section>
 
@@ -399,5 +422,6 @@ const spinnerIcon = `
     />
     <button class="btn stats-button" type="button" @click="openStats">Statistik</button>
     <StatsPanel v-if="statsOpen" @close="closeStats" />
+    <AiSuggestionModal v-if="aiSuggestionStore.modalOpen" @close="closeAiSuggestionModal" />
   </main>
 </template>
