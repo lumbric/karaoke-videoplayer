@@ -79,7 +79,7 @@ describe("App cover handling", () => {
 
     expect(image.attributes("src")).toContain("/themes/default/cover_fallback.svg");
 
-    await wrapper.get('input[placeholder="Suchen..."]').setValue("song");
+    await wrapper.get('input[placeholder="Songs suchen..."]').setValue("song");
 
     const imageAfter = wrapper.get("img.song-cover");
     expect(imageAfter.attributes("src")).toContain("/themes/default/cover_fallback.svg");

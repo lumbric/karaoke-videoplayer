@@ -307,7 +307,9 @@ watch(
     controlsVisible.value = true;
 
     if (isYouTubePlayback.value) {
-      await initializeYouTubePlayer();
+      await initializeYouTubePlayer().catch(() => {
+        // Initialization errors are handled by the player controller; prevent unhandled rejections.
+      });
     } else {
       destroyYouTubePlayer();
       await nextTick();
@@ -331,7 +333,9 @@ onMounted(() => {
   nextTick(() => {
     overlayElement.value?.focus();
     if (isYouTubePlayback.value) {
-      void initializeYouTubePlayer();
+      void initializeYouTubePlayer().catch(() => {
+        // Initialization errors are handled by the player controller; prevent unhandled rejections.
+      });
     } else {
       void videoElement.value?.play();
     }

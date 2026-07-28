@@ -38,16 +38,13 @@ export function extractYouTubeVideoId(url: string): string | null {
     return null;
   }
 
-  const patterns = [
-    /(?:youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/watch\?v=|youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/,
-    /^([a-zA-Z0-9_-]{11})$/
-  ];
+  const fromUrl = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?[^#]*&v=))([a-zA-Z0-9_-]+)/);
+  if (fromUrl?.[1]) {
+    return fromUrl[1];
+  }
 
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match?.[1]) {
-      return match[1];
-    }
+  if (/^[a-zA-Z0-9_-]+$/.test(url)) {
+    return url;
   }
 
   return null;

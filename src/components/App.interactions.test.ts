@@ -92,7 +92,7 @@ describe("App interactions", () => {
 
     expect(wrapper.findAll("button.song-card")).toHaveLength(2);
 
-    const search = wrapper.get('input[placeholder="Suchen..."]');
+    const search = wrapper.get('input[placeholder="Songs suchen..."]');
     await search.setValue("Two");
 
     expect(wrapper.findAll("button.song-card")).toHaveLength(1);

@@ -73,7 +73,7 @@ describe("searchYouTube", () => {
     );
     const url = fetchMock.mock.calls[0][0] as string;
     expect(url).toContain("key=KEY");
-    expect(url).toContain("q=karaoke%20test");
+    expect(url).toContain("q=karaoke+test");
     expect(url).toContain("type=video");
   });
 
