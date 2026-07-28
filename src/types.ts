@@ -32,14 +32,9 @@ export interface SongRecord {
 }
 
 export interface AppConfig {
-  app: {
-    title: string;
-  };
   theme: {
     name: string;
-    cssPath: string;
-    logoPath: string;
-    coverFallbackPath: string;
+    title: string;
   };
   features: {
     onlineSearch: boolean;

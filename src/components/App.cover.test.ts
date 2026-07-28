@@ -22,12 +22,9 @@ describe("App cover handling", () => {
 
     const configStore = useConfigStore();
     configStore.setConfig({
-      app: { title: "Test" },
       theme: {
         name: "default",
-        cssPath: "/themes/default.css",
-        logoPath: "/logo.png",
-        coverFallbackPath: "/themes/default-cover-fallback.svg"
+        title: "Test"
       },
       features: { onlineSearch: false, aiSuggestions: false },
       search: {
@@ -73,12 +70,12 @@ describe("App cover handling", () => {
     const image = wrapper.get("img.song-cover");
     await image.trigger("error");
 
-    expect(image.attributes("src")).toContain("/themes/default-cover-fallback.svg");
+    expect(image.attributes("src")).toContain("/themes/default/cover_fallback.svg");
 
     await wrapper.get('input[placeholder="Suchen..."]').setValue("song");
 
     const imageAfter = wrapper.get("img.song-cover");
-    expect(imageAfter.attributes("src")).toContain("/themes/default-cover-fallback.svg");
+    expect(imageAfter.attributes("src")).toContain("/themes/default/cover_fallback.svg");
   });
 
   it("shows a placeholder frame until the cover has loaded", async () => {

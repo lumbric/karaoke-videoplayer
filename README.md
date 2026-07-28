@@ -68,7 +68,6 @@ App startup requires public/config.json.
 Start from public/config.example.json and adjust values.
 
 Required top-level sections:
-- app
 - theme
 - features
 - search
@@ -77,10 +76,8 @@ Required top-level sections:
 - paths
 
 Important fields:
-- app.title
-- theme.cssPath
-- theme.logoPath
-- theme.coverFallbackPath
+- theme.name
+- theme.title
 - search.batchSize
 - search.maxDisplayCount
 - paths.songsJson
@@ -93,13 +90,17 @@ If config.json is missing or invalid, app startup intentionally fails with a vis
 
 Theme architecture:
 - base styles: public/themes/base.css
-- event/theme override: public/themes/default.css
+- event/theme override: public/themes/<theme-name>/theme.css
 
 To create a new theme:
-1. Create a new CSS override file under public/themes.
-2. Change color/font/accent values only where needed.
-3. Point theme.cssPath in config.json to your override.
-4. Set logoPath and coverFallbackPath in config.json.
+1. Create a folder public/themes/<theme-name>/.
+2. Add these required files in that folder:
+	- theme.css
+	- logo.svg
+	- cover_fallback.svg
+3. Change only the visual overrides you need in theme.css.
+4. Set theme.name in config.json to <theme-name>.
+5. Set the visible app header/browser title via theme.title.
 
 ## Song Data Format
 

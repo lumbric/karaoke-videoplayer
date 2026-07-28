@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
-import { loadRuntimeConfig } from "./services/config";
+import { getThemeCssPath, loadRuntimeConfig } from "./services/config";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
 
@@ -34,8 +34,8 @@ function applyRuntimeTheme(cssPath: string): void {
 async function bootstrap(): Promise<void> {
   try {
     const config = await loadRuntimeConfig();
-    document.title = config.app.title;
-    applyRuntimeTheme(config.theme.cssPath);
+    document.title = config.theme.title;
+    applyRuntimeTheme(getThemeCssPath(config));
 
     const app = createApp(App);
     const pinia = createPinia();

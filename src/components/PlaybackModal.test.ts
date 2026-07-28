@@ -33,7 +33,7 @@ describe("PlaybackModal", () => {
     const wrapper = mount(PlaybackModal, {
       props: {
         song,
-        fallbackCover: "/themes/default-cover-fallback.svg"
+        fallbackCover: "/themes/default/cover_fallback.svg"
       }
     });
 
@@ -49,7 +49,7 @@ describe("PlaybackModal", () => {
     const wrapper = mount(PlaybackModal, {
       props: {
         song,
-        fallbackCover: "/themes/default-cover-fallback.svg"
+        fallbackCover: "/themes/default/cover_fallback.svg"
       }
     });
 
@@ -67,7 +67,7 @@ describe("PlaybackModal", () => {
     const wrapper = mount(PlaybackModal, {
       props: {
         song,
-        fallbackCover: "/themes/default-cover-fallback.svg"
+        fallbackCover: "/themes/default/cover_fallback.svg"
       }
     });
 
@@ -80,7 +80,7 @@ describe("PlaybackModal", () => {
     const wrapper = mount(PlaybackModal, {
       props: {
         song,
-        fallbackCover: "/themes/default-cover-fallback.svg"
+        fallbackCover: "/themes/default/cover_fallback.svg"
       }
     });
 
@@ -98,7 +98,7 @@ describe("PlaybackModal", () => {
     const wrapper = mount(PlaybackModal, {
       props: {
         song,
-        fallbackCover: "/themes/default-cover-fallback.svg"
+        fallbackCover: "/themes/default/cover_fallback.svg"
       }
     });
 

@@ -1,12 +1,7 @@
 {
-  "app": {
-    "title": "Karaoke Song Player"
-  },
   "theme": {
     "name": "default",
-    "cssPath": "/themes/default.css",
-    "logoPath": "/poster2026.jpg",
-    "coverFallbackPath": "/themes/default-cover-fallback.svg"
+    "title": "Karaoke Song Player"
   },
   "features": {
     "onlineSearch": false,

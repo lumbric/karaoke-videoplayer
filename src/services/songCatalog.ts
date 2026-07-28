@@ -1,4 +1,5 @@
 import type { AppConfig, SongRecord, SongRecordRaw } from "../types";
+import { getThemeCoverFallbackPath } from "./config";
 import { normalizeForSearch } from "../utils/normalize";
 
 function normalizeGenres(genre: string | string[] | undefined): string[] {
@@ -55,7 +56,7 @@ function resolveCoverPath(raw: SongRecordRaw, config: AppConfig): string {
   }
 
   if (raw.has_cover === false) {
-    return config.theme.coverFallbackPath;
+    return getThemeCoverFallbackPath(config);
   }
 
   return `${config.paths.coversBase}/${raw.filename}.jpg`;

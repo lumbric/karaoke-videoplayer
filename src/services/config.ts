@@ -1,5 +1,21 @@
 import type { AppConfig } from "../types";
 
+function normalizeThemeName(name: string): string {
+  return name.trim().replace(/^\/+|\/+$/g, "");
+}
+
+export function getThemeCssPath(config: AppConfig): string {
+  return `/themes/${normalizeThemeName(config.theme.name)}/theme.css`;
+}
+
+export function getThemeLogoPath(config: AppConfig): string {
+  return `/themes/${normalizeThemeName(config.theme.name)}/logo.svg`;
+}
+
+export function getThemeCoverFallbackPath(config: AppConfig): string {
+  return `/themes/${normalizeThemeName(config.theme.name)}/cover_fallback.svg`;
+}
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object";
 }
@@ -41,9 +57,9 @@ export function parseConfig(raw: unknown): AppConfig {
     throw new Error("Ungueltige Konfiguration: Wurzelobjekt fehlt.");
   }
 
-  const { app, theme, features, search, providers, ai, paths } = raw;
+  const { theme, features, search, providers, ai, paths } = raw;
 
-  if (!isObject(app) || !isObject(theme) || !isObject(features) || !isObject(search) || !isObject(providers) || !isObject(ai) || !isObject(paths)) {
+  if (!isObject(theme) || !isObject(features) || !isObject(search) || !isObject(providers) || !isObject(ai) || !isObject(paths)) {
     throw new Error("Ungueltige Konfiguration: Ein oder mehrere Top-Level Abschnitte fehlen.");
   }
 
@@ -58,14 +74,9 @@ export function parseConfig(raw: unknown): AppConfig {
   }
 
   return {
-    app: {
-      title: ensureString(app.title, "app.title")
-    },
     theme: {
       name: ensureString(theme.name, "theme.name"),
-      cssPath: ensureString(theme.cssPath, "theme.cssPath"),
-      logoPath: ensureString(theme.logoPath, "theme.logoPath"),
-      coverFallbackPath: ensureString(theme.coverFallbackPath, "theme.coverFallbackPath")
+      title: ensureString(theme.title, "theme.title")
     },
     features: {
       onlineSearch: ensureBoolean(features.onlineSearch, "features.onlineSearch"),

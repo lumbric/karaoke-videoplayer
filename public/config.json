@@ -1,12 +1,7 @@
 {
-  "app": {
-    "title": "Karaoke Song Player"
-  },
   "theme": {
-    "name": "default",
-    "cssPath": "/themes/karaoke-ab-hof2025/theme.css",
-    "logoPath": "/themes/karaoke-ab-hof2025/logo.svg",
-    "coverFallbackPath": "/themes/karaoke-ab-hof2025/cover_fallback.svg"
+    "name": "karaoke-ab-hof2025",
+    "title": "Karaoke Song Player"
   },
   "features": {
     "onlineSearch": false,

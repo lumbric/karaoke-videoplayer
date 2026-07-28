@@ -18,12 +18,9 @@ class IntersectionObserverMock {
 function seedStores(): void {
   const configStore = useConfigStore();
   configStore.setConfig({
-    app: { title: "Karaoke Test" },
     theme: {
       name: "default",
-      cssPath: "/themes/default.css",
-      logoPath: "/logo.png",
-      coverFallbackPath: "/themes/default-cover-fallback.svg"
+      title: "Karaoke Test"
     },
     features: { onlineSearch: false, aiSuggestions: false },
     search: {

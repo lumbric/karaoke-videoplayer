@@ -7,6 +7,7 @@ import StatsPanel from "./components/StatsPanel.vue";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
 import { usePlaybackStore } from "./stores/playbackStore";
+import { getThemeCoverFallbackPath, getThemeLogoPath } from "./services/config";
 import type { SongRecord } from "./types";
 
 const configStore = useConfigStore();
@@ -25,8 +26,8 @@ const failedCoverIds = ref(new Set<string>());
 const loadedCoverIds = ref(new Set<string>());
 let observer: IntersectionObserver | null = null;
 
-const logoPath = computed(() => config.value?.theme.logoPath ?? "");
-const fallbackCover = computed(() => config.value?.theme.coverFallbackPath ?? "");
+const logoPath = computed(() => (config.value ? getThemeLogoPath(config.value) : ""));
+const fallbackCover = computed(() => (config.value ? getThemeCoverFallbackPath(config.value) : ""));
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
 
 function onSongClicked(song: SongRecord): void {
@@ -172,7 +173,7 @@ const resetIcon = "⟳";
       <header class="header">
         <div class="brand">
           <img v-if="logoPath" class="logo" :src="logoPath" alt="Logo" />
-          <h1 class="title">{{ config?.app.title }}</h1>
+          <h1 class="title">{{ config?.theme.title }}</h1>
         </div>
       </header>
 

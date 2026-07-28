@@ -253,7 +253,6 @@ Rules:
 
 ### 8.2 config.json (required fields)
 Minimum required top-level structure:
-- app
 - theme
 - features
 - search
@@ -262,11 +261,8 @@ Minimum required top-level structure:
 - paths
 
 Suggested shape:
-- app.title: string
 - theme.name: string
-- theme.cssPath: string
-- theme.logoPath: string
-- theme.coverFallbackPath: string
+- theme.title: string
 - features.onlineSearch: boolean
 - features.aiSuggestions: boolean
 - search.batchSize: number
@@ -419,7 +415,11 @@ This section captures explicit project decisions made during implementation and 
 - Default songs data source is `/data/songs.json`.
 - Default videos base path is `/songs`.
 - Default covers base path is `/covers`.
-- Theme fallback cover remains configured via `theme.coverFallbackPath`.
+- Theme assets are derived from `theme.name` and fixed filenames:
+  - CSS: `/themes/<theme.name>/theme.css`
+  - Logo: `/themes/<theme.name>/logo.svg`
+  - Fallback cover: `/themes/<theme.name>/cover_fallback.svg`
+- Visible app title is stored in `theme.title`.
 
 ### 21.2 Playback UI Behavior
 - Playback must be fullscreen.
