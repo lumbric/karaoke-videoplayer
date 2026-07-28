@@ -7,7 +7,7 @@ import StatsPanel from "./components/StatsPanel.vue";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
 import { usePlaybackStore } from "./stores/playbackStore";
-import { getThemeCoverFallbackPath, getThemeLogoPath } from "./services/config";
+import { getThemeCoverFallbackPath, getThemeLogoFallbackPath, getThemeLogoPath } from "./services/config";
 import type { SongRecord } from "./types";
 
 const configStore = useConfigStore();
@@ -27,6 +27,7 @@ const loadedCoverIds = ref(new Set<string>());
 let observer: IntersectionObserver | null = null;
 
 const logoPath = computed(() => (config.value ? getThemeLogoPath(config.value) : ""));
+const logoFallbackPath = computed(() => (config.value ? getThemeLogoFallbackPath(config.value) : ""));
 const fallbackCover = computed(() => (config.value ? getThemeCoverFallbackPath(config.value) : ""));
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
 
@@ -125,10 +126,12 @@ onBeforeUnmount(() => {
   observer?.disconnect();
 });
 
-function formatMeta(song: { artist?: string; filename: string; genres: string[] }): string {
-  const primary = song.artist?.trim() || song.filename;
-  const bits = [primary, song.genres.join(", ")].filter(Boolean);
-  return bits.join(" - ");
+function formatPrimaryMeta(song: { artist?: string; filename: string }): string {
+  return song.artist?.trim() || song.filename;
+}
+
+function formatAdditionalMeta(song: { genres: string[] }): string {
+  return song.genres.join(", ");
 }
 
 function getCoverSrc(song: SongRecord): string {
@@ -164,15 +167,27 @@ function onCoverError(songId: string, event: Event): void {
   }
 }
 
+function onLogoError(event: Event): void {
+  const target = event.target as HTMLImageElement | null;
+  if (target && logoFallbackPath.value && target.src !== logoFallbackPath.value) {
+    target.src = logoFallbackPath.value;
+  }
+}
+
 const resetIcon = "⟳";
 </script>
 
 <template>
   <main class="page">
+    <div class="cosmic-decoration" aria-hidden="true" style="top: 10%; left: 5%;">♪</div>
+    <div class="cosmic-decoration" aria-hidden="true" style="top: 20%; right: 8%;">★</div>
+    <div class="cosmic-decoration" aria-hidden="true" style="bottom: 15%; left: 10%;">♫</div>
+    <div class="cosmic-decoration" aria-hidden="true" style="bottom: 25%; right: 15%;">♬</div>
+
     <div class="top-fixed">
       <header class="header">
         <div class="brand">
-          <img v-if="logoPath" class="logo" :src="logoPath" alt="Logo" />
+          <img v-if="logoPath" class="logo" :src="logoPath" alt="Logo" @error="onLogoError" />
           <h1 class="title">{{ config?.theme.title }}</h1>
         </div>
       </header>
@@ -221,7 +236,8 @@ const resetIcon = "⟳";
           </div>
           <div class="song-body">
             <h2 class="song-title">{{ song.displayTitle }}</h2>
-            <p class="song-meta" :class="{ 'is-hidden': !showMetadataSnippet }">{{ formatMeta(song) }}</p>
+            <p class="song-meta">{{ formatPrimaryMeta(song) }}</p>
+            <p v-if="showMetadataSnippet && formatAdditionalMeta(song)" class="song-meta-extra">{{ formatAdditionalMeta(song) }}</p>
           </div>
         </button>
       </section>

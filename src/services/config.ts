@@ -9,6 +9,10 @@ export function getThemeCssPath(config: AppConfig): string {
 }
 
 export function getThemeLogoPath(config: AppConfig): string {
+  return `/themes/${normalizeThemeName(config.theme.name)}/logo.png`;
+}
+
+export function getThemeLogoFallbackPath(config: AppConfig): string {
   return `/themes/${normalizeThemeName(config.theme.name)}/logo.svg`;
 }
 

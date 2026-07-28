@@ -15,7 +15,7 @@ class IntersectionObserverMock {
   }
 }
 
-function seedStores(): void {
+function seedStores(showMetadataSnippet = true): void {
   const configStore = useConfigStore();
   configStore.setConfig({
     theme: {
@@ -28,7 +28,7 @@ function seedStores(): void {
       maxDisplayCount: 100,
       initialOrder: "alphabetical",
       randomSeed: 1,
-      showMetadataSnippet: true
+      showMetadataSnippet
     },
     providers: { invidious: { baseUrls: [] } },
     ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000 },
@@ -104,5 +104,26 @@ describe("App interactions", () => {
 
     expect(wrapper.findAll("button.song-card")).toHaveLength(1);
     expect(wrapper.text()).toContain("Two");
+  });
+
+  it("always shows artist line even when additional metadata is disabled", () => {
+    seedStores(false);
+    const wrapper = mount(App);
+
+    const primaryMeta = wrapper.findAll(".song-meta").map((entry) => entry.text());
+
+    expect(primaryMeta).toContain("Alpha");
+    expect(primaryMeta).toContain("Beta");
+    expect(wrapper.findAll(".song-meta-extra")).toHaveLength(0);
+  });
+
+  it("shows additional metadata in smaller row when enabled", () => {
+    seedStores(true);
+    const wrapper = mount(App);
+
+    const extraMeta = wrapper.findAll(".song-meta-extra").map((entry) => entry.text());
+
+    expect(extraMeta).toContain("pop");
+    expect(extraMeta).toContain("rock");
   });
 });

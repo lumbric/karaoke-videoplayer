@@ -27,7 +27,7 @@ describe("parseConfig", () => {
     });
 
     expect(getThemeCssPath(config)).toBe("/themes/default/theme.css");
-    expect(getThemeLogoPath(config)).toBe("/themes/default/logo.svg");
+    expect(getThemeLogoPath(config)).toBe("/themes/default/logo.png");
     expect(getThemeCoverFallbackPath(config)).toBe("/themes/default/cover_fallback.svg");
   });
 

@@ -477,8 +477,8 @@ textarea {
 
 .song-body {
   display: grid;
-  grid-template-rows: minmax(2.5rem, 2.5rem) minmax(2.2rem, 2.2rem);
-  gap: 7px;
+  grid-template-rows: minmax(2.5rem, 2.5rem) minmax(1.2rem, 1.2rem) auto;
+  gap: 5px;
   padding: 10px 12px 13px;
 }
 
@@ -496,16 +496,24 @@ textarea {
 .song-meta {
   margin: 0;
   color: #000;
-  font-size: 0.84rem;
-  line-height: 1.15;
+  font-size: 0.83rem;
+  line-height: 1.1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.song-meta-extra {
+  margin: 0;
+  color: #000;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  opacity: 0.8;
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-}
-
-.song-meta.is-hidden {
-  visibility: hidden;
 }
 
 .empty {

@@ -7,6 +7,7 @@ interface CatalogState {
   allSongs: SongRecord[];
   query: string;
   selectedGenres: string[];
+  initialOrder: AppConfig["search"]["initialOrder"];
   idleShuffleSeed: number;
   renderedCount: number;
   maxDisplayCount: number;
@@ -40,6 +41,7 @@ export const useCatalogStore = defineStore("catalog", {
     allSongs: [],
     query: "",
     selectedGenres: [],
+    initialOrder: "alphabetical",
     idleShuffleSeed: Date.now(),
     renderedCount: 0,
     maxDisplayCount: 200,
@@ -85,11 +87,15 @@ export const useCatalogStore = defineStore("catalog", {
       if (hasQuery) {
         ranked.sort((a, b) => b.score - a.score || a.index - b.index || compareSongsStable(a.song, b.song));
       } else {
-        ranked.sort((a, b) => {
-          const aRandom = seededRandom(songHash(a.song) + state.idleShuffleSeed + a.index * 17);
-          const bRandom = seededRandom(songHash(b.song) + state.idleShuffleSeed + b.index * 17);
-          return aRandom - bRandom || a.index - b.index || compareSongsStable(a.song, b.song);
-        });
+        if (state.initialOrder === "alphabetical") {
+          ranked.sort((a, b) => compareSongsStable(a.song, b.song));
+        } else {
+          ranked.sort((a, b) => {
+            const aRandom = seededRandom(songHash(a.song) + state.idleShuffleSeed + a.index * 17);
+            const bRandom = seededRandom(songHash(b.song) + state.idleShuffleSeed + b.index * 17);
+            return aRandom - bRandom || a.index - b.index || compareSongsStable(a.song, b.song);
+          });
+        }
       }
 
       return ranked.map((entry) => entry.song);
@@ -103,11 +109,16 @@ export const useCatalogStore = defineStore("catalog", {
   },
   actions: {
     reshuffleIdleOrder(): void {
+      if (this.initialOrder !== "random") {
+        return;
+      }
+
       this.idleShuffleSeed = Math.floor(Math.random() * 1_000_000_000);
     },
     async initialize(config: AppConfig): Promise<void> {
       this.loading = true;
       this.error = null;
+      this.initialOrder = config.search.initialOrder;
 
       this.batchSize = config.search.batchSize;
       this.maxDisplayCount = config.search.maxDisplayCount;
@@ -126,7 +137,7 @@ export const useCatalogStore = defineStore("catalog", {
       const hadQuery = this.query.trim().length > 0;
       const hasQuery = query.trim().length > 0;
       this.query = query;
-      if (hadQuery && !hasQuery) {
+      if (this.initialOrder === "random" && hadQuery && !hasQuery) {
         this.reshuffleIdleOrder();
       }
       this.renderedCount = this.batchSize;
@@ -138,7 +149,9 @@ export const useCatalogStore = defineStore("catalog", {
     clearFilters(): void {
       this.query = "";
       this.selectedGenres = [];
-      this.reshuffleIdleOrder();
+      if (this.initialOrder === "random") {
+        this.reshuffleIdleOrder();
+      }
       this.renderedCount = this.batchSize;
     },
     loadMore(): void {

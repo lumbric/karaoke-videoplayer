@@ -10,9 +10,9 @@
   "search": {
     "batchSize": 30,
     "maxDisplayCount": 240,
-    "initialOrder": "alphabetical",
+    "initialOrder": "random",
     "randomSeed": 42,
-    "showMetadataSnippet": true
+    "showMetadataSnippet": false
   },
   "providers": {
     "invidious": {
