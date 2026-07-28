@@ -7,16 +7,23 @@ import StatsPanel from "./components/StatsPanel.vue";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
 import { usePlaybackStore } from "./stores/playbackStore";
+import { useOnlineSearchStore } from "./stores/onlineSearchStore";
 import { getThemeCoverFallbackPath, getThemeLogoFallbackPath, getThemeLogoPath } from "./services/config";
-import type { SongRecord } from "./types";
+import { extractYouTubeVideoId } from "./services/youtubeEmbed";
+import type { PlayEventProviderMeta, SongRecord } from "./types";
 
 const configStore = useConfigStore();
 const catalogStore = useCatalogStore();
 const playbackStore = usePlaybackStore();
+const onlineSearchStore = useOnlineSearchStore();
 
-const { config } = storeToRefs(configStore);
+const { config, secret } = storeToRefs(configStore);
 const { visibleSongs, filteredSongs, availableGenres, loading, error, selectedGenres, query, hasMoreVisible } = storeToRefs(catalogStore);
 const { activeSong } = storeToRefs(playbackStore);
+const { results: onlineResults, loading: onlineLoading, error: onlineError } = storeToRefs(onlineSearchStore);
+const onlineSearchActive = computed(() =>
+  onlineSearchStore.onlineFeaturesEnabled && onlineSearchStore.enabled && onlineSearchStore.searchProvidersConfigured
+);
 
 const selectedGenre = ref<string>("");
 const statsOpen = ref(false);
@@ -30,9 +37,35 @@ const logoPath = computed(() => (config.value ? getThemeLogoPath(config.value) :
 const logoFallbackPath = computed(() => (config.value ? getThemeLogoFallbackPath(config.value) : ""));
 const fallbackCover = computed(() => (config.value ? getThemeCoverFallbackPath(config.value) : ""));
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
+const hasOfflineResults = computed(() => filteredSongs.value.length > 0);
+const hasOnlineResults = computed(() => onlineResults.value.length > 0);
+const showOnlineResultsSection = computed(() =>
+  onlineSearchActive.value &&
+  query.value.trim().length > 0 &&
+  (hasOnlineResults.value || onlineError.value !== null)
+);
+const showNoResultsPanel = computed(() =>
+  query.value.trim().length > 0 &&
+  !loading.value &&
+  !hasOfflineResults.value
+);
+const trimmedQuery = computed(() => query.value.trim());
 
-function onSongClicked(song: SongRecord): void {
-  playbackStore.openSong(song);
+function onSongClicked(song: SongRecord, source: "local" | "online" = "local"): void {
+  const provider = source === "online" ? buildOnlineProviderMeta(song) : undefined;
+  playbackStore.openSong(song, source, provider);
+}
+
+function buildOnlineProviderMeta(song: SongRecord): PlayEventProviderMeta | undefined {
+  const videoId = extractYouTubeVideoId(song.filePath);
+  if (!videoId) {
+    return undefined;
+  }
+
+  return {
+    id: videoId,
+    url: `https://www.youtube.com/embed/${videoId}`
+  };
 }
 
 function applyGenreFilter(): void {
@@ -44,8 +77,17 @@ function applyGenreFilter(): void {
   catalogStore.setGenres([selectedGenre.value]);
 }
 
+function triggerOnlineSearch(): void {
+  if (!config.value) {
+    return;
+  }
+
+  onlineSearchStore.search(query.value, config.value, secret.value);
+}
+
 function clearAll(): void {
   selectedGenre.value = "";
+  onlineSearchStore.clearResults();
   catalogStore.clearFilters();
   nextTick(() => {
     searchInput.value?.focus();
@@ -91,6 +133,10 @@ watch(loadSentinel, () => {
   setupObserver();
 });
 
+watch(query, () => {
+  onlineSearchStore.clearResults();
+});
+
 const onKeyDown = (event: KeyboardEvent): void => {
   const key = event.key.toLowerCase();
   if ((event.ctrlKey || event.metaKey) && key === "k") {
@@ -116,6 +162,11 @@ const onKeyDown = (event: KeyboardEvent): void => {
 };
 
 onMounted(() => {
+  if (config.value) {
+    const onlineFeaturesEnabled = config.value.features.onlineFeatures && navigator.onLine !== false;
+    onlineSearchStore.initialize(config.value, onlineFeaturesEnabled);
+  }
+
   setupObserver();
   nextTick(() => searchInput.value?.focus());
   window.addEventListener("keydown", onKeyDown);
@@ -175,6 +226,19 @@ function onLogoError(event: Event): void {
 }
 
 const resetIcon = "⟳";
+
+const globeIcon = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
+    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill="none" stroke="currentColor" stroke-width="2" />
+  </svg>
+`;
+
+const spinnerIcon = `
+  <svg class="spinner" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="40 60" />
+  </svg>
+`;
 </script>
 
 <template>
@@ -198,7 +262,7 @@ const resetIcon = "⟳";
           class="search"
           :value="query"
           type="search"
-          placeholder="Suchen..."
+          placeholder="Songs suchen..."
           @input="catalogStore.setQuery(($event.target as HTMLInputElement).value)"
         />
 
@@ -207,21 +271,41 @@ const resetIcon = "⟳";
           <option v-for="genre in availableGenres" :key="genre" :value="genre">{{ genre }}</option>
         </select>
 
-        <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll">{{ resetIcon }}</button>
+        <div class="control-buttons">
+          <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll">{{ resetIcon }}</button>
+          <button
+            v-if="onlineSearchActive"
+            class="btn btn-icon online-search-icon-button"
+            type="button"
+            title="Online suchen"
+            aria-label="Online suchen"
+            :disabled="onlineLoading || trimmedQuery.length === 0"
+            @click="triggerOnlineSearch"
+          >
+            <span v-if="onlineLoading" class="button-spinner" v-html="spinnerIcon"></span>
+            <span v-else v-html="globeIcon"></span>
+          </button>
+        </div>
       </section>
+
+      <div v-if="onlineSearchStore.onlineFeaturesEnabled && onlineSearchStore.enabled && !onlineSearchStore.searchProvidersConfigured" class="online-search-actions">
+        <p class="online-search-hint error">
+          Online-Suche ist aktiviert, aber es sind keine Search-Provider konfiguriert.
+        </p>
+      </div>
     </div>
 
     <div class="catalog-region">
       <p v-if="error" class="feedback error">{{ error }}</p>
       <p v-else-if="loading" class="feedback">Songs werden geladen...</p>
 
-      <section v-else-if="visibleSongs.length > 0" class="song-grid" aria-label="Songliste">
+      <section v-if="visibleSongs.length > 0" class="song-grid" aria-label="Songliste">
         <button
           v-for="song in visibleSongs"
           :key="song.id"
           class="song-card"
           type="button"
-          @click="onSongClicked(song)"
+          @click="onSongClicked(song, 'local')"
         >
           <div class="song-cover-frame" :class="{ 'is-loaded': isCoverLoaded(song.id) }" aria-hidden="true">
             <img
@@ -242,8 +326,64 @@ const resetIcon = "⟳";
         </button>
       </section>
 
-      <SongRequestForm v-else-if="query.trim().length > 0" />
-      <section v-else class="empty">
+      <section v-if="showOnlineResultsSection" class="online-results" aria-label="Online-Suchergebnisse">
+        <h3 v-if="hasOnlineResults" class="online-results-header">Online-Ergebnisse</h3>
+        <p v-if="onlineError" class="online-search-feedback error">{{ onlineError }}</p>
+
+        <div v-if="hasOnlineResults" class="song-grid">
+          <button
+            v-for="song in onlineResults"
+            :key="song.id"
+            class="song-card song-card-online"
+            type="button"
+            @click="onSongClicked(song, 'online')"
+          >
+            <div class="song-cover-frame" :class="{ 'is-loaded': isCoverLoaded(song.id) }" aria-hidden="true">
+              <img
+                class="song-cover"
+                :class="{ 'is-visible': isCoverLoaded(song.id) }"
+                :src="getCoverSrc(song)"
+                :alt="isCoverLoaded(song.id) ? `Cover ${song.displayTitle}` : ''"
+                loading="lazy"
+                @load="onCoverLoad(song.id)"
+                @error="onCoverError(song.id, $event)"
+              />
+            </div>
+            <div class="song-body">
+              <h2 class="song-title">{{ song.displayTitle }}</h2>
+              <p class="song-meta">{{ formatPrimaryMeta(song) }}</p>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <section v-if="showNoResultsPanel" class="no-results-panel">
+        <p class="no-results-message">
+          Keine Songs gefunden f&uuml;r "{{ trimmedQuery }}"
+        </p>
+
+        <div class="no-results-actions">
+          <button
+            v-if="onlineSearchActive"
+            class="btn btn-primary online-search-button"
+            type="button"
+            :disabled="onlineLoading"
+            @click="triggerOnlineSearch"
+          >
+            <span v-if="onlineLoading" class="button-icon" v-html="spinnerIcon"></span>
+            <span v-else class="button-icon" v-html="globeIcon"></span>
+            <span>Online suchen</span>
+          </button>
+          <p v-if="onlineError" class="online-search-feedback error">{{ onlineError }}</p>
+        </div>
+
+        <div class="song-request-section">
+          <p class="song-request-lead">Damit der Song bei der n&auml;chsten Veranstaltung verf&uuml;gbar ist.</p>
+          <SongRequestForm :prefill-title="trimmedQuery" />
+        </div>
+      </section>
+
+      <section v-else-if="!loading && visibleSongs.length === 0 && !showOnlineResultsSection" class="empty">
         <h3>Keine Songs verfuegbar</h3>
         <p>Bitte pruefe die Konfiguration und Songdaten.</p>
       </section>

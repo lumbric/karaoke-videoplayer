@@ -4,7 +4,8 @@
     "title": "Karaoke ab Hof"
   },
   "features": {
-    "onlineSearch": false,
+    "onlineFeatures": true,
+    "onlineSearch": true,
     "aiSuggestions": false
   },
   "search": {
@@ -15,9 +16,12 @@
     "showMetadataSnippet": false
   },
   "providers": {
-    "invidious": {
-      "baseUrls": []
-    }
+    "searchProviders": [
+      { "type": "youtube" }
+    ],
+    "videoProviders": [
+      { "type": "youtube" }
+    ]
   },
   "ai": {
     "model": "gpt-4o-mini",

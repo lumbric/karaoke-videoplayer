@@ -15,8 +15,24 @@ describe("SongRequestForm", () => {
 
     await wrapper.find('input[placeholder="Songtitel"]').setValue("Wonderwall");
     await wrapper.find('input[placeholder="Artist"]').setValue("Oasis");
+    await wrapper.find('input[placeholder="Dein Name"]').setValue("Alex");
     await wrapper.find("form").trigger("submit.prevent");
 
     expect(wrapper.text()).toContain("Songwunsch wurde gespeichert");
+  });
+
+  it("prefills the title when prefillTitle prop is provided", () => {
+    const wrapper = mount(SongRequestForm, {
+      props: { prefillTitle: "  Test Song  " }
+    });
+
+    const titleInput = wrapper.find('input[placeholder="Songtitel"]').element as HTMLInputElement;
+    expect(titleInput.value).toBe("Test Song");
+  });
+
+  it("renders the requestedBy name field", () => {
+    const wrapper = mount(SongRequestForm);
+
+    expect(wrapper.find('input[placeholder="Dein Name"]').exists()).toBe(true);
   });
 });

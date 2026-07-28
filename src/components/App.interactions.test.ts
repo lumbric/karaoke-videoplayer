@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import App from "../App.vue";
 import { useCatalogStore } from "../stores/catalogStore";
 import { useConfigStore } from "../stores/configStore";
+import { useOnlineSearchStore } from "../stores/onlineSearchStore";
 
 class IntersectionObserverMock {
   observe(): void {
@@ -22,7 +23,7 @@ function seedStores(showMetadataSnippet = true): void {
       name: "default",
       title: "Karaoke Test"
     },
-    features: { onlineSearch: false, aiSuggestions: false },
+    features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
     search: {
       batchSize: 20,
       maxDisplayCount: 100,
@@ -30,7 +31,10 @@ function seedStores(showMetadataSnippet = true): void {
       randomSeed: 1,
       showMetadataSnippet
     },
-    providers: { invidious: { baseUrls: [] } },
+    providers: {
+      searchProviders: [{ type: "invidious", baseUrls: [] }],
+      videoProviders: [{ type: "youtube" }]
+    },
     ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000 },
     paths: { songsJson: "/data/songs.json", videosBase: "/songs", coversBase: "/covers" }
   });
@@ -71,6 +75,9 @@ function seedStores(showMetadataSnippet = true): void {
   catalogStore.selectedGenres = [];
   catalogStore.loading = false;
   catalogStore.error = null;
+
+  const onlineSearchStore = useOnlineSearchStore();
+  onlineSearchStore.initialize(configStore.config!);
 }
 
 describe("App interactions", () => {

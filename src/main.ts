@@ -1,7 +1,8 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
-import { getThemeCssPath, loadRuntimeConfig } from "./services/config";
+import { getThemeCssPath, loadRuntimeConfig, validateProviderSecrets } from "./services/config";
+import { loadSecretConfig } from "./services/secretConfig";
 import { useConfigStore } from "./stores/configStore";
 import { useCatalogStore } from "./stores/catalogStore";
 
@@ -34,6 +35,9 @@ function applyRuntimeTheme(cssPath: string): void {
 async function bootstrap(): Promise<void> {
   try {
     const config = await loadRuntimeConfig();
+    const secret = await loadSecretConfig();
+    validateProviderSecrets(config, secret);
+
     document.title = config.theme.title;
     applyRuntimeTheme(getThemeCssPath(config));
 
@@ -46,6 +50,7 @@ async function bootstrap(): Promise<void> {
     const catalogStore = useCatalogStore(pinia);
 
     configStore.setConfig(config);
+    configStore.setSecret(secret);
     await catalogStore.initialize(config);
 
     app.mount("#app");

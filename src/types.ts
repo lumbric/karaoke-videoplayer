@@ -5,6 +5,20 @@ export interface PlayEventProviderMeta {
   url?: string;
 }
 
+export type SearchProviderType = "invidious" | "youtube";
+
+export interface SearchProviderConfig {
+  type: SearchProviderType;
+  baseUrls?: string[];
+}
+
+export type VideoProviderType = "youtube" | "invidious";
+
+export interface VideoProviderConfig {
+  type: VideoProviderType;
+  baseUrls?: string[];
+}
+
 export interface SongRecordRaw {
   id?: string;
   filename: string;
@@ -37,6 +51,7 @@ export interface AppConfig {
     title: string;
   };
   features: {
+    onlineFeatures: boolean;
     onlineSearch: boolean;
     aiSuggestions: boolean;
   };
@@ -48,9 +63,8 @@ export interface AppConfig {
     showMetadataSnippet: boolean;
   };
   providers: {
-    invidious: {
-      baseUrls: string[];
-    };
+    searchProviders: SearchProviderConfig[];
+    videoProviders: VideoProviderConfig[];
   };
   ai: {
     model: string;
@@ -67,6 +81,7 @@ export interface AppConfig {
 export interface SongSuggestion {
   title: string;
   artist: string;
+  requestedBy?: string;
   additionalInfo?: string;
   createdAt: string;
 }
@@ -85,4 +100,9 @@ export interface PlayEvent {
   playPercentage: number;
   source: SongSource;
   provider?: PlayEventProviderMeta;
+}
+
+export interface SecretConfig {
+  openAiApiKey?: string;
+  youtubeApiKey?: string;
 }

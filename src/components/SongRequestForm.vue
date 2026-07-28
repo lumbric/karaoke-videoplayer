@@ -1,15 +1,29 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import { saveSongSuggestion } from "../services/storage";
 
+const props = defineProps<{
+  prefillTitle?: string;
+}>();
+
 const form = reactive({
-  title: "",
+  title: props.prefillTitle?.trim() ?? "",
   artist: "",
+  requestedBy: "",
   additionalInfo: ""
 });
 
 const feedback = ref("");
 const feedbackType = ref<"ok" | "error">("ok");
+
+watch(
+  () => props.prefillTitle,
+  (newTitle) => {
+    if (newTitle?.trim() && !form.title) {
+      form.title = newTitle.trim();
+    }
+  }
+);
 
 function submit(): void {
   const title = form.title.trim();
@@ -24,6 +38,7 @@ function submit(): void {
   const result = saveSongSuggestion({
     title,
     artist,
+    requestedBy: form.requestedBy.trim() || undefined,
     additionalInfo: form.additionalInfo.trim() || undefined,
     createdAt: new Date().toISOString()
   });
@@ -39,18 +54,17 @@ function submit(): void {
 
   form.title = "";
   form.artist = "";
+  form.requestedBy = "";
   form.additionalInfo = "";
 }
 </script>
 
 <template>
-  <div class="empty">
-    <h3>Keine Treffer</h3>
-    <p>Du kannst stattdessen direkt einen Songwunsch eintragen.</p>
-
+  <div class="song-request-form">
     <form class="request-form" @submit.prevent="submit">
       <input v-model="form.title" required placeholder="Songtitel" />
       <input v-model="form.artist" required placeholder="Artist" />
+      <input v-model="form.requestedBy" placeholder="Dein Name" />
       <textarea v-model="form.additionalInfo" placeholder="Zusatzinfo (optional)" />
       <button class="btn btn-primary" type="submit">Wunsch speichern</button>
     </form>

@@ -5,6 +5,8 @@ videos.json
 update-song-data.log
 secret-config.js
 secret-config.local.json
+secret-config.json
+public/secret-config.json
 .env
 .env.*
 

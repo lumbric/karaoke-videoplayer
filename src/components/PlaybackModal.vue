@@ -2,6 +2,8 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { SongRecord } from "../types";
 import { usePlaybackStore } from "../stores/playbackStore";
+import { YouTubePlayerController } from "../services/youtubePlayer";
+import { extractYouTubeVideoId, isYouTubeSource } from "../services/youtubeEmbed";
 
 const props = defineProps<{
   song: SongRecord;
@@ -19,6 +21,8 @@ const isLoading = ref(true);
 const showLoadingIndicator = ref(false);
 const candidateIndex = ref(0);
 const controlsVisible = ref(true);
+const youtubeContainerId = ref(`youtube-player-${Math.random().toString(36).slice(2)}`);
+const youtubeController = ref<YouTubePlayerController | null>(null);
 let previousBodyOverflow = "";
 let previousDocumentOverflow = "";
 
@@ -34,6 +38,10 @@ const displayMeta = computed(() => {
 
 const activeVideoSource = computed(() => {
   return props.song.videoCandidates[candidateIndex.value] ?? props.song.filePath;
+});
+
+const isYouTubePlayback = computed(() => {
+  return playbackStore.source === "online" && isYouTubeSource(activeVideoSource.value);
 });
 
 const progressPercent = computed(() => {
@@ -119,18 +127,16 @@ function revealControls(): void {
   scheduleHideControls();
 }
 
-function syncProgress(): void {
-  if (!videoElement.value) {
-    return;
-  }
-
-  playbackStore.setPlaybackProgress(videoElement.value.currentTime, videoElement.value.duration || props.song.durationSeconds || 0);
+function syncProgress(currentTime: number, duration: number): void {
+  playbackStore.setPlaybackProgress(currentTime, duration || props.song.durationSeconds || 0);
 }
 
 function handleLoadedMetadata(): void {
   stopLoadingState();
   playbackStore.setPaused(false);
-  syncProgress();
+  if (videoElement.value) {
+    syncProgress(videoElement.value.currentTime, videoElement.value.duration);
+  }
 }
 
 function handleCanPlay(): void {
@@ -159,11 +165,15 @@ function handleError(): void {
 }
 
 function handleTimeUpdate(): void {
-  syncProgress();
+  if (videoElement.value) {
+    syncProgress(videoElement.value.currentTime, videoElement.value.duration);
+  }
 }
 
 function handleEnded(): void {
-  syncProgress();
+  if (videoElement.value) {
+    syncProgress(videoElement.value.currentTime, videoElement.value.duration);
+  }
   playbackStore.closePlayback(true);
   emit("close");
 }
@@ -174,6 +184,21 @@ function closePlayer(): void {
 }
 
 function togglePause(): void {
+  if (isYouTubePlayback.value) {
+    if (!youtubeController.value) {
+      return;
+    }
+
+    if (playbackStore.isPaused) {
+      youtubeController.value.play();
+      playbackStore.setPaused(false);
+    } else {
+      youtubeController.value.pause();
+      playbackStore.setPaused(true);
+    }
+    return;
+  }
+
   if (!videoElement.value) {
     return;
   }
@@ -189,12 +214,18 @@ function togglePause(): void {
 }
 
 function restartFromBeginning(): void {
+  if (isYouTubePlayback.value) {
+    youtubeController.value?.restart();
+    playbackStore.setPaused(false);
+    return;
+  }
+
   if (!videoElement.value) {
     return;
   }
 
   videoElement.value.currentTime = 0;
-  playbackStore.setPlaybackProgress(0, videoElement.value.duration || props.song.durationSeconds || 0);
+  syncProgress(0, videoElement.value.duration || props.song.durationSeconds || 0);
   void videoElement.value.play();
   playbackStore.setPaused(false);
 }
@@ -219,17 +250,73 @@ function unlockDocumentScroll(): void {
   document.documentElement.style.overflow = previousDocumentOverflow;
 }
 
+async function initializeYouTubePlayer(): Promise<void> {
+  const videoId = extractYouTubeVideoId(activeVideoSource.value);
+  if (!videoId) {
+    stopLoadingState();
+    return;
+  }
+
+  startLoadingState();
+  youtubeController.value?.destroy();
+  youtubeController.value = null;
+
+  await nextTick();
+
+  const controller = new YouTubePlayerController(youtubeContainerId.value, videoId, {
+    onReady: (duration) => {
+      stopLoadingState();
+      playbackStore.setPaused(false);
+      syncProgress(0, duration);
+    },
+    onStateChange: (state) => {
+      if (state === "playing") {
+        playbackStore.setPaused(false);
+      } else if (state === "paused") {
+        playbackStore.setPaused(true);
+      } else if (state === "ended") {
+        const currentTime = youtubeController.value?.getCurrentTime() ?? 0;
+        const duration = youtubeController.value?.getDuration() ?? 0;
+        syncProgress(currentTime, duration);
+        playbackStore.closePlayback(true);
+        emit("close");
+      }
+    },
+    onTimeUpdate: (currentTime, duration) => {
+      syncProgress(currentTime, duration);
+    },
+    onError: () => {
+      playbackStore.setPaused(true);
+    }
+  });
+
+  youtubeController.value = controller;
+  await controller.initialize();
+}
+
+function destroyYouTubePlayer(): void {
+  youtubeController.value?.destroy();
+  youtubeController.value = null;
+}
+
 watch(
   () => props.song,
   async () => {
     startLoadingState();
     candidateIndex.value = 0;
     controlsVisible.value = true;
-    await nextTick();
-    if (videoElement.value) {
-      videoElement.value.load();
-      void videoElement.value.play();
+
+    if (isYouTubePlayback.value) {
+      await initializeYouTubePlayer();
+    } else {
+      destroyYouTubePlayer();
+      await nextTick();
+      if (videoElement.value) {
+        videoElement.value.load();
+        void videoElement.value.play();
+      }
     }
+
     scheduleHideControls();
   }
 );
@@ -243,7 +330,11 @@ onMounted(() => {
   window.addEventListener("touchstart", onWindowActivity, { passive: true });
   nextTick(() => {
     overlayElement.value?.focus();
-    void videoElement.value?.play();
+    if (isYouTubePlayback.value) {
+      void initializeYouTubePlayer();
+    } else {
+      void videoElement.value?.play();
+    }
   });
   scheduleHideControls();
 });
@@ -252,6 +343,7 @@ onBeforeUnmount(() => {
   clearHideTimer();
   clearLoadingIndicatorTimer();
   unlockDocumentScroll();
+  destroyYouTubePlayer();
   window.removeEventListener("pointermove", onWindowActivity);
   window.removeEventListener("mousemove", onWindowActivity);
   window.removeEventListener("keydown", onWindowActivity);
@@ -274,6 +366,7 @@ onBeforeUnmount(() => {
     @focusin="handleActivity"
   >
     <video
+      v-if="!isYouTubePlayback"
       ref="videoElement"
       class="player-video"
       :src="activeVideoSource"
@@ -287,6 +380,13 @@ onBeforeUnmount(() => {
       @timeupdate="handleTimeUpdate"
       @error="handleError"
       @ended="handleEnded"
+    />
+
+    <div
+      v-if="isYouTubePlayback"
+      :id="youtubeContainerId"
+      class="player-video youtube-player-container"
+      aria-label="YouTube Video"
     />
 
     <div class="player-glass" :class="{ 'is-hidden': !controlsVisible }">

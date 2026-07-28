@@ -136,6 +136,25 @@ textarea {
   display: block;
 }
 
+.control-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.online-search-icon-button .button-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+}
+
+.online-search-icon-button .button-spinner svg {
+  width: 100%;
+  height: 100%;
+}
+
 .stats-button {
   position: fixed;
   right: 16px;
@@ -175,6 +194,15 @@ textarea {
   height: 100%;
   object-fit: cover;
   background: #000;
+}
+
+.youtube-player-container iframe,
+.youtube-player-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .player-glass {
@@ -564,6 +592,129 @@ textarea {
 
 .load-sentinel {
   height: 1px;
+}
+
+.online-search-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 0;
+}
+
+.online-search-button {
+  min-height: 44px;
+  padding: 0 18px;
+}
+
+.online-search-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.online-results-header {
+  margin: 12px 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.song-card-online {
+  border-style: dashed;
+}
+
+.song-card-online .song-cover-frame::after {
+  content: "YouTube";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 3px 6px;
+  pointer-events: none;
+}
+
+.online-search-feedback {
+  padding: 10px 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.online-search-feedback.error {
+  color: var(--danger);
+}
+
+.no-results-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid #000;
+}
+
+.no-results-message {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.no-results-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.online-search-button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+}
+
+.button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.button-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.spinner {
+  animation: spinner-rotate 1s linear infinite;
+}
+
+.spinner circle {
+  transform-origin: center;
+}
+
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.song-request-section {
+  display: grid;
+  gap: 10px;
+}
+
+.song-request-lead {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.song-request-form {
+  padding: 0;
 }
 
 @media (max-width: 760px) {

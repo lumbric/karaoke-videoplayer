@@ -5,6 +5,20 @@ import PlaybackModal from "./PlaybackModal.vue";
 import { usePlaybackStore } from "../stores/playbackStore";
 import type { SongRecord } from "../types";
 
+const youtubeSong: SongRecord = {
+  id: "invidious:youtube-id",
+  filename: "youtube-id",
+  title: "Online Karaoke Track",
+  artist: "Online Artist",
+  genres: ["Online"],
+  durationSeconds: 200,
+  filePath: "https://www.youtube.com/embed/youtube-id",
+  videoCandidates: ["https://www.youtube.com/embed/youtube-id"],
+  coverPath: "/covers/online.jpg",
+  displayTitle: "Online Karaoke Track",
+  searchIndex: "online karaoke track"
+};
+
 const song: SongRecord = {
   id: "song-1",
   filename: "Track",
@@ -104,5 +118,37 @@ describe("PlaybackModal", () => {
 
     expect(wrapper.find(".player-progress-track").exists()).toBe(true);
     expect(wrapper.find(".player-progress-label").exists()).toBe(false);
+  });
+
+  it("renders YouTube container for online YouTube sources", async () => {
+    const playbackStore = usePlaybackStore();
+    playbackStore.openSong(youtubeSong, "online", { id: "youtube-id", url: "https://www.youtube.com/embed/youtube-id" });
+
+    const mockPlayer = {
+      playVideo: vi.fn(),
+      pauseVideo: vi.fn(),
+      seekTo: vi.fn(),
+      getCurrentTime: vi.fn().mockReturnValue(0),
+      getDuration: vi.fn().mockReturnValue(200),
+      getPlayerState: vi.fn().mockReturnValue(1),
+      destroy: vi.fn()
+    };
+
+    (window as unknown as { YT: { Player: unknown; PlayerState: Record<string, number> } }).YT = {
+      Player: vi.fn().mockImplementation(() => mockPlayer),
+      PlayerState: { UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 }
+    };
+
+    const wrapper = mount(PlaybackModal, {
+      props: {
+        song: youtubeSong,
+        fallbackCover: "/themes/default/cover_fallback.svg"
+      }
+    });
+
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find("video").exists()).toBe(false);
+    expect(wrapper.find(".youtube-player-container").exists()).toBe(true);
   });
 });

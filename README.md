@@ -19,8 +19,17 @@ Phase A (offline core) is implemented with:
 - no-results song request form with localStorage persistence and duplicate prevention
 - unit and component test baseline for core modules
 
-Still out of scope for Phase A (planned next):
-- online search (Phase B)
+Phase B (online search + video) is implemented with:
+- configurable search providers (Invidious, YouTube)
+- configurable video providers (YouTube, Invidious)
+- Invidious search + YouTube iframe playback
+- automatic fallback to online search when no local results match
+- explicit "Online suchen" button
+- same-card rendering for online results
+- local stats logging for online plays with `source="online"`
+- fatal startup error if YouTube search is configured without a secret API key
+
+Still out of scope:
 - AI suggestions (Phase C)
 
 ## Install
@@ -84,7 +93,15 @@ Important fields:
 - paths.videosBase
 - paths.coversBase
 
+Provider configuration:
+- `providers.searchProviders`: array of `{ "type": "invidious" | "youtube", "baseUrls": string[] }`
+- `providers.videoProviders`: array of `{ "type": "youtube" | "invidious", "baseUrls": string[] }`
+- Set `features.onlineSearch: true` and add at least one search provider to enable online search.
+- Video provider `baseUrls` are currently only used by the Invidious video provider (not yet implemented).
+
 If config.json is missing or invalid, app startup intentionally fails with a visible error screen.
+
+If `providers.searchProviders` contains `{ "type": "youtube" }`, the app also requires `youtubeApiKey` in `secret-config.json` and will fail to start without it.
 
 ## Theme Guide
 
@@ -124,12 +141,63 @@ Sample fixture: public/data/songs.sample.json
 
 ## Local Secrets
 
-For future online and AI phases, keep secrets local and uncommitted.
+Create a `public/secret-config.json` file by copying `secret-config.example.json` from the project root into `public/`.
 
-Example file:
-- secret-config.example.json
+```bash
+cp secret-config.example.json public/secret-config.json
+```
 
-Do not commit real keys.
+Supported secrets:
+- `openAiApiKey`: required for Phase C AI suggestions
+- `youtubeApiKey`: required when `providers.searchProviders` includes `{ "type": "youtube" }`
+
+Do not commit real keys. `public/secret-config.json` is loaded at runtime and is ignored by git.
+
+## Online Search Notes
+
+Current implementation:
+- Search: configurable providers (`invidious` or `youtube`)
+- Playback: uses YouTube iframe embed with all optional UI disabled (`controls=0`, `rel=0`, `fs=0`, `disablekb=1`, etc.)
+- Manual online search: when no local results match, an "Online suchen" button appears; online search only runs when the user clicks it
+- Song request form: when no local results match, a form to request the song is shown; the title is prefilled with the search term
+
+### Global on/off switch
+- `features.onlineFeatures` disables **all** online features when set to `false`.
+- On startup the app checks `navigator.onLine`. If the device is offline at startup, online features are disabled automatically (no later checks, so short outages do not hide the UI).
+
+### Invidious search
+- Public Invidious instances are often blocked by **CORS** in the browser (the server does not send `Access-Control-Allow-Origin`).
+- They may also require CAPTCHA or return 5xx errors.
+- If you see CORS errors in the console, Invidious search cannot work from a pure frontend without a proxy.
+
+### YouTube Data API search
+- Stable and no CORS issues.
+- Requires a free `youtubeApiKey` in `public/secret-config.json`.
+- Default quota is ~100 searches/day. Request more in Google Cloud if needed.
+
+Example config to use YouTube search:
+
+```json
+{
+  "features": {
+    "onlineFeatures": true,
+    "onlineSearch": true,
+    "aiSuggestions": false
+  },
+  "providers": {
+    "searchProviders": [{ "type": "youtube" }],
+    "videoProviders": [{ "type": "youtube" }]
+  }
+}
+```
+
+Then create `public/secret-config.json`:
+
+```json
+{
+  "youtubeApiKey": "YOUR_YOUTUBE_DATA_API_KEY"
+}
+```
 
 ## Kiosk Notes
 

@@ -14,5 +14,7 @@ songs.json
 extra_metadata.json
 secret-config.js
 secret-config.local.json
+secret-config.json
+public/secret-config.json
 .env
 .env.*

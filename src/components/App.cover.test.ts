@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import App from "../App.vue";
 import { useCatalogStore } from "../stores/catalogStore";
 import { useConfigStore } from "../stores/configStore";
+import { useOnlineSearchStore } from "../stores/onlineSearchStore";
 
 class IntersectionObserverMock {
   observe(): void {
@@ -26,7 +27,7 @@ describe("App cover handling", () => {
         name: "default",
         title: "Test"
       },
-      features: { onlineSearch: false, aiSuggestions: false },
+      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
       search: {
         batchSize: 30,
         maxDisplayCount: 100,
@@ -34,7 +35,10 @@ describe("App cover handling", () => {
         randomSeed: 1,
         showMetadataSnippet: true
       },
-      providers: { invidious: { baseUrls: [] } },
+      providers: {
+        searchProviders: [{ type: "invidious", baseUrls: [] }],
+        videoProviders: [{ type: "youtube" }]
+      },
       ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000 },
       paths: {
         songsJson: "/data/songs.json",
@@ -62,6 +66,9 @@ describe("App cover handling", () => {
     catalogStore.renderedCount = 30;
     catalogStore.loading = false;
     catalogStore.error = null;
+
+    const onlineSearchStore = useOnlineSearchStore();
+    onlineSearchStore.initialize(configStore.config!);
   });
 
   it("keeps fallback cover after first image error across rerenders", async () => {

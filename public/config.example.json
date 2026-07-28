@@ -4,6 +4,7 @@
     "title": "Karaoke Song Player"
   },
   "features": {
+    "onlineFeatures": false,
     "onlineSearch": false,
     "aiSuggestions": false
   },
@@ -15,9 +16,12 @@
     "showMetadataSnippet": true
   },
   "providers": {
-    "invidious": {
-      "baseUrls": []
-    }
+    "searchProviders": [
+      { "type": "invidious", "baseUrls": [] }
+    ],
+    "videoProviders": [
+      { "type": "youtube" }
+    ]
   },
   "ai": {
     "model": "gpt-4o-mini",

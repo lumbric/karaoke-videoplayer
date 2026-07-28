@@ -1,4 +1,4 @@
-import type { AppConfig } from "../types";
+import type { AppConfig, SecretConfig, SearchProviderConfig, VideoProviderConfig } from "../types";
 
 function normalizeThemeName(name: string): string {
   return name.trim().replace(/^\/+|\/+$/g, "");
@@ -56,6 +56,44 @@ function ensureStringArray(value: unknown, path: string): string[] {
   return value;
 }
 
+function ensureSearchProvider(value: unknown, path: string): SearchProviderConfig {
+  if (!isObject(value)) {
+    throw new Error(`Ungueltige Konfiguration: ${path} muss ein Objekt sein.`);
+  }
+
+  const type = ensureString(value.type, `${path}.type`);
+  if (type !== "invidious" && type !== "youtube") {
+    throw new Error(`Ungueltige Konfiguration: ${path}.type muss "invidious" oder "youtube" sein.`);
+  }
+
+  const baseUrls = value.baseUrls !== undefined ? ensureStringArray(value.baseUrls, `${path}.baseUrls`) : undefined;
+
+  return { type, baseUrls };
+}
+
+function ensureVideoProvider(value: unknown, path: string): VideoProviderConfig {
+  if (!isObject(value)) {
+    throw new Error(`Ungueltige Konfiguration: ${path} muss ein Objekt sein.`);
+  }
+
+  const type = ensureString(value.type, `${path}.type`);
+  if (type !== "youtube" && type !== "invidious") {
+    throw new Error(`Ungueltige Konfiguration: ${path}.type muss "youtube" oder "invidious" sein.`);
+  }
+
+  const baseUrls = value.baseUrls !== undefined ? ensureStringArray(value.baseUrls, `${path}.baseUrls`) : undefined;
+
+  return { type, baseUrls };
+}
+
+function ensureProviderArray<T>(value: unknown, path: string, ensureItem: (item: unknown, itemPath: string) => T): T[] {
+  if (!Array.isArray(value)) {
+    throw new Error(`Ungueltige Konfiguration: ${path} muss ein Array sein.`);
+  }
+
+  return value.map((item, index) => ensureItem(item, `${path}[${index}]`));
+}
+
 export function parseConfig(raw: unknown): AppConfig {
   if (!isObject(raw)) {
     throw new Error("Ungueltige Konfiguration: Wurzelobjekt fehlt.");
@@ -67,10 +105,8 @@ export function parseConfig(raw: unknown): AppConfig {
     throw new Error("Ungueltige Konfiguration: Ein oder mehrere Top-Level Abschnitte fehlen.");
   }
 
-  const invidious = providers.invidious;
-  if (!isObject(invidious)) {
-    throw new Error("Ungueltige Konfiguration: providers.invidious fehlt.");
-  }
+  const searchProviders = ensureProviderArray(providers.searchProviders, "providers.searchProviders", ensureSearchProvider);
+  const videoProviders = ensureProviderArray(providers.videoProviders, "providers.videoProviders", ensureVideoProvider);
 
   const initialOrder = ensureString(search.initialOrder, "search.initialOrder");
   if (initialOrder !== "alphabetical" && initialOrder !== "random") {
@@ -83,6 +119,7 @@ export function parseConfig(raw: unknown): AppConfig {
       title: ensureString(theme.title, "theme.title")
     },
     features: {
+      onlineFeatures: ensureBoolean(features.onlineFeatures, "features.onlineFeatures"),
       onlineSearch: ensureBoolean(features.onlineSearch, "features.onlineSearch"),
       aiSuggestions: ensureBoolean(features.aiSuggestions, "features.aiSuggestions")
     },
@@ -94,9 +131,8 @@ export function parseConfig(raw: unknown): AppConfig {
       showMetadataSnippet: ensureBoolean(search.showMetadataSnippet, "search.showMetadataSnippet")
     },
     providers: {
-      invidious: {
-        baseUrls: ensureStringArray(invidious.baseUrls, "providers.invidious.baseUrls")
-      }
+      searchProviders,
+      videoProviders
     },
     ai: {
       model: ensureString(ai.model, "ai.model"),
@@ -131,4 +167,11 @@ export async function loadRuntimeConfig(fetchImpl: typeof fetch = fetch): Promis
   }
 
   return parseConfig(json);
+}
+
+export function validateProviderSecrets(config: AppConfig, secret: SecretConfig): void {
+  const needsYoutubeApiKey = config.providers.searchProviders.some((provider) => provider.type === "youtube");
+  if (needsYoutubeApiKey && !secret.youtubeApiKey) {
+    throw new Error("Ungueltige Konfiguration: YouTube als Search-Provider konfiguriert, aber youtubeApiKey in secret-config.json fehlt.");
+  }
 }
