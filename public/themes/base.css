@@ -800,8 +800,8 @@ textarea {
 }
 
 .ai-shell {
-  width: min(680px, 100%);
-  max-height: min(680px, calc(100vh - 32px));
+  width: min(840px, 100%);
+  max-height: min(720px, calc(100vh - 32px));
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -867,7 +867,7 @@ textarea {
   gap: 16px;
   padding: 32px 16px;
   color: var(--muted);
-  max-width: 540px;
+  max-width: 720px;
   margin: auto;
 }
 
