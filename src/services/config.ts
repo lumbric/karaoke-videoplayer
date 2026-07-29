@@ -1,4 +1,4 @@
-import type { AppConfig, SecretConfig, SearchProviderConfig, VideoProviderConfig } from "../types";
+import type { AppConfig, SecretConfig, SearchProviderConfig, VideoProviderConfig, ThemeConfig } from "../types";
 
 function normalizeThemeName(name: string): string {
   return name.trim().replace(/^\/+|\/+$/g, "");
@@ -18,6 +18,55 @@ export function getThemeLogoFallbackPath(config: AppConfig): string {
 
 export function getThemeCoverFallbackPath(config: AppConfig): string {
   return `/themes/${normalizeThemeName(config.theme.name)}/cover_fallback.svg`;
+}
+
+export function getThemeConfigPath(themeName: string): string {
+  return `/themes/${normalizeThemeName(themeName)}/theme.config.json`;
+}
+
+export function getThemeAiLogoPath(themeName: string): string {
+  return `/themes/${normalizeThemeName(themeName)}/ai-logo.png`;
+}
+
+const DEFAULT_THEME_CONFIG: ThemeConfig = {
+  ai: {
+    title: "Automatische Songvorschlaege"
+  }
+};
+
+export function resolveThemeConfig(themeConfig: ThemeConfig | null): ThemeConfig {
+  if (!themeConfig) {
+    return DEFAULT_THEME_CONFIG;
+  }
+
+  return {
+    ai: {
+      title: themeConfig.ai?.title ?? DEFAULT_THEME_CONFIG.ai!.title,
+      logoPath: themeConfig.ai?.logoPath
+    }
+  };
+}
+
+export async function loadThemeConfig(themeName: string, fetchImpl: typeof fetch = fetch): Promise<ThemeConfig | null> {
+  const path = getThemeConfigPath(themeName);
+
+  let response: Response;
+  try {
+    response = await fetchImpl(path, { cache: "no-store" });
+  } catch {
+    return null;
+  }
+
+  if (!response.ok) {
+    return null;
+  }
+
+  try {
+    const json = (await response.json()) as ThemeConfig;
+    return json;
+  } catch {
+    return null;
+  }
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {

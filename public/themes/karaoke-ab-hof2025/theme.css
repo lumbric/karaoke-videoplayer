@@ -791,3 +791,42 @@ body {
     font-size: 0.8rem;
   }
 }
+
+.ai-logo {
+  width: 160px;
+  height: 160px;
+}
+
+.ai-shell {
+  border: none;
+  box-shadow: 0 8px 32px rgba(205, 99, 145, 0.3), 0 0 0 2px rgba(205, 99, 145, 0.3);
+}
+
+.ai-header {
+  border-bottom: none;
+}
+
+.ai-input-area {
+  border-top: none;
+}
+
+.ai-message-bubble {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ai-message.user .ai-message-bubble {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.ai-message.assistant .ai-message-bubble {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ai-suggestion-card {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ai-suggestion-card:hover,
+.ai-suggestion-card:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}

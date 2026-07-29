@@ -92,12 +92,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="ai-overlay" role="dialog" aria-modal="true" aria-label="KI Song-Vorschlaege" tabindex="-1" @keydown="onKeyDown">
+  <section class="ai-overlay" role="dialog" aria-modal="true" :aria-label="configStore.aiTitle" tabindex="-1" @keydown="onKeyDown">
     <div class="ai-shell">
       <header class="ai-header">
-        <h2 class="ai-title">KI Song-Vorschlag</h2>
+        <div class="ai-header-brand">
+          <h2 class="ai-title">{{ configStore.aiTitle }}</h2>
+        </div>
         <div class="ai-header-actions">
-          <button v-if="messages.length > 0" class="btn" type="button" @click="clearChat">Neu</button>
+          <button v-if="messages.length > 0" class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearChat">⟳</button>
           <button class="btn btn-icon" type="button" title="Schliessen" aria-label="Schliessen" @click="closeModal">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
@@ -107,9 +109,12 @@ onBeforeUnmount(() => {
       </header>
 
       <div ref="chatArea" class="ai-chat">
-        <div v-if="messages.length === 0 && !loading" class="ai-welcome">
-          <p>Beschreibe, wonach dir gerade zum Singen ist – nach Stimmung, Genre, Artist oder einfach einem Gefuehl.</p>
-          <p class="ai-welcome-examples">Beispiele: "Ich will was Energisches aus den 80ern" · "Etwas zum Mitsingen fuer die Menge" · "Ruhige Ballade von einer Frau gesungen"</p>
+        <div class="ai-welcome">
+          <img v-if="configStore.aiLogoPath" class="ai-logo" :src="configStore.aiLogoPath" alt="" />
+          <div class="ai-welcome-body">
+            <p>Beschreibe, wonach dir gerade zum Singen ist – nach Stimmung, Genre, Artist oder einfach einem Gefuehl.</p>
+            <p class="ai-welcome-examples">Beispiele: "Ich will was Energisches aus den 80ern" · "Etwas zum Mitsingen fuer die Menge" · "Ruhige Ballade von einer Frau gesungen"</p>
+          </div>
         </div>
 
         <div v-for="msg in messages" :key="msg.id" class="ai-message" :class="msg.role">

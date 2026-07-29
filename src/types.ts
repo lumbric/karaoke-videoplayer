@@ -106,3 +106,10 @@ export interface SecretConfig {
   openAiApiKey?: string;
   youtubeApiKey?: string;
 }
+
+export interface ThemeConfig {
+  ai?: {
+    title?: string;
+    logoPath?: string;
+  };
+}

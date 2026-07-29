@@ -300,8 +300,8 @@ const spinnerIcon = `
             v-if="aiSuggestionsEnabled"
             class="btn btn-icon"
             type="button"
-            title="KI-Vorschlag"
-            aria-label="KI-Vorschlag"
+            :title="configStore.aiTitle"
+            :aria-label="configStore.aiTitle"
             @click="aiSuggestionStore.openModal()"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
