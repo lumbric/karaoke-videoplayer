@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../App.vue";
 import { useCatalogStore } from "../stores/catalogStore";
 import { useConfigStore } from "../stores/configStore";
@@ -16,14 +16,14 @@ class IntersectionObserverMock {
   }
 }
 
-function seedStores(showMetadataSnippet = true): void {
+function seedStores(showMetadataSnippet = true, onlineSearchEnabled = false): void {
   const configStore = useConfigStore();
   configStore.setConfig({
     theme: {
       name: "default",
       title: "Karaoke Test"
     },
-    features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
+    features: { onlineFeatures: onlineSearchEnabled, onlineSearch: onlineSearchEnabled, aiSuggestions: false },
     search: {
       batchSize: 20,
       maxDisplayCount: 100,
@@ -132,5 +132,45 @@ describe("App interactions", () => {
 
     expect(extraMeta).toContain("pop");
     expect(extraMeta).toContain("rock");
+  });
+
+  it("replaces offline hits with online results after clicking the online search button", async () => {
+    seedStores(true, true);
+
+    const onlineSearchStore = useOnlineSearchStore();
+    vi.spyOn(onlineSearchStore, "search").mockImplementation(async (query: string) => {
+      onlineSearchStore.query = query.trim();
+      onlineSearchStore.results = [
+        {
+          id: "online-1",
+          filename: "Online One",
+          title: "Online One",
+          artist: "Remote",
+          genres: ["online"],
+          durationSeconds: 180,
+          filePath: "https://www.youtube.com/embed/online-1",
+          videoCandidates: ["https://www.youtube.com/embed/online-1"],
+          coverPath: "/covers/online-1.jpg",
+          displayTitle: "Online One",
+          searchIndex: "online one remote"
+        }
+      ];
+      onlineSearchStore.loading = false;
+      onlineSearchStore.error = null;
+    });
+
+    const wrapper = mount(App);
+
+    expect(wrapper.findAll("button.song-card")).toHaveLength(2);
+
+    await wrapper.get('input[placeholder="Songs suchen..."]').setValue("Two");
+    await wrapper.get('button[aria-label="Online suchen"]').trigger("click");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(wrapper.findAll("button.song-card")).toHaveLength(1);
+    expect(wrapper.text()).toContain("Online-Ergebnisse");
+    expect(wrapper.text()).toContain("Online One");
+    expect(wrapper.text()).not.toContain("Alpha");
+    expect(wrapper.text()).not.toContain("Beta");
   });
 });

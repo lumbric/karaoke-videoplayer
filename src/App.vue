@@ -32,6 +32,7 @@ const onlineSearchActive = computed(() =>
 const selectedGenre = ref<string>("");
 const statsOpen = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
+const showOfflineResults = ref(true);
 const songRequestModalOpen = ref(false);
 const loadSentinel = ref<HTMLDivElement | null>(null);
 const failedCoverIds = ref(new Set<string>());
@@ -44,11 +45,19 @@ const fallbackCover = computed(() => (config.value ? getThemeCoverFallbackPath(c
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
 const hasOfflineResults = computed(() => filteredSongs.value.length > 0);
 const hasOnlineResults = computed(() => onlineResults.value.length > 0);
-const aiSuggestionsEnabled = computed(() => config.value?.features.aiSuggestions && !!secret.value.openAiApiKey);
+const aiSuggestionsEnabled = computed(() => !!config.value?.features.aiSuggestions && !!secret.value.openAiApiKey);
 const showOnlineResultsSection = computed(() =>
   onlineSearchActive.value &&
   query.value.trim().length > 0 &&
-  (hasOnlineResults.value || onlineError.value !== null)
+  (!showOfflineResults.value || hasOnlineResults.value || onlineError.value !== null)
+);
+const showOnlineSearchEmptyState = computed(() =>
+  onlineSearchActive.value &&
+  !showOfflineResults.value &&
+  query.value.trim().length > 0 &&
+  !onlineLoading.value &&
+  !hasOnlineResults.value &&
+  onlineError.value === null
 );
 const showNoResultsPanel = computed(() =>
   query.value.trim().length > 0 &&
@@ -86,16 +95,18 @@ function applyGenreFilter(): void {
   catalogStore.setGenres([selectedGenre.value]);
 }
 
-function triggerOnlineSearch(): void {
+async function triggerOnlineSearch(): Promise<void> {
   if (!config.value) {
     return;
   }
 
-  onlineSearchStore.search(query.value, config.value, secret.value);
+  showOfflineResults.value = false;
+  await onlineSearchStore.search(query.value, config.value, secret.value);
 }
 
 function clearAll(): void {
   selectedGenre.value = "";
+  showOfflineResults.value = true;
   onlineSearchStore.clearResults();
   catalogStore.clearFilters();
   nextTick(() => {
@@ -161,6 +172,7 @@ watch(loadSentinel, () => {
 });
 
 watch(query, () => {
+  showOfflineResults.value = true;
   onlineSearchStore.clearResults();
 });
 
@@ -342,7 +354,7 @@ const spinnerIcon = `
       <p v-if="error" class="feedback error">{{ error }}</p>
       <p v-else-if="loading" class="feedback">Songs werden geladen...</p>
 
-      <section v-if="visibleSongs.length > 0" class="song-grid" aria-label="Songliste">
+      <section v-if="showOfflineResults && visibleSongs.length > 0" class="song-grid" aria-label="Songliste">
         <button
           v-for="song in visibleSongs"
           :key="song.id"
@@ -370,8 +382,10 @@ const spinnerIcon = `
       </section>
 
       <section v-if="showOnlineResultsSection" class="online-results" aria-label="Online-Suchergebnisse">
+        <p v-if="onlineLoading" class="online-search-feedback">Online-Suche laeuft...</p>
         <h3 v-if="hasOnlineResults" class="online-results-header">Online-Ergebnisse</h3>
         <p v-if="onlineError" class="online-search-feedback error">{{ onlineError }}</p>
+        <p v-else-if="showOnlineSearchEmptyState" class="online-search-feedback">Keine Online-Ergebnisse gefunden.</p>
 
         <div v-if="hasOnlineResults" class="song-grid">
           <button
