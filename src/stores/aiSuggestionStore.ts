@@ -3,6 +3,7 @@ import type { AppConfig, SecretConfig, SongRecord } from "../types";
 import { fetchAiSuggestions, type AiSuggestionResponse, type AiSuggestionItem } from "../services/openaiSuggestions";
 import { searchOnline } from "../services/onlineSearch";
 import { normalizeForSearch } from "../utils/normalize";
+import { getSearchScore } from "../utils/fuzzy";
 
 export interface ChatSuggestionResult {
   title: string;
@@ -32,18 +33,34 @@ function generateId(): string {
   return `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function matchAgainstCatalog(title: string, artist: string, catalog: SongRecord[]): SongRecord | undefined {
-  const aiQuery = normalizeForSearch(`${artist} ${title}`);
-  if (!aiQuery) return undefined;
-  
-  for (const song of catalog) {
-    const catalogQuery = normalizeForSearch(song.searchIndex);
-    if (aiQuery === catalogQuery) {
-      return song;
+function matchAgainstCatalog(title: string, artist: string, catalog: SongRecord[], sendCatalog: boolean): SongRecord | undefined {
+  if (sendCatalog) {
+    // Exact matching when catalog was sent to AI
+    const aiQuery = normalizeForSearch(`${artist} ${title}`);
+    if (!aiQuery) return undefined;
+    
+    for (const song of catalog) {
+      const catalogQuery = normalizeForSearch(song.searchIndex);
+      if (aiQuery === catalogQuery) {
+        return song;
+      }
     }
+    
+    return undefined;
+  } else {
+    // Fuzzy matching when catalog was NOT sent to AI
+    const query = `${title} ${artist}`;
+    let best: { song: SongRecord; score: number } | undefined;
+
+    for (const song of catalog) {
+      const score = getSearchScore(query, song.searchIndex, song.searchTokens);
+      if (score > 70 && (!best || score > best.score)) {
+        best = { song, score };
+      }
+    }
+
+    return best?.song;
   }
-  
-  return undefined;
 }
 
 export const useAiSuggestionStore = defineStore("aiSuggestion", {
@@ -152,7 +169,7 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
       const unmatchedItems: AiSuggestionItem[] = [];
 
       suggestions.forEach((item, index) => {
-        const matched = matchAgainstCatalog(item.title, item.artist, catalog);
+        const matched = matchAgainstCatalog(item.title, item.artist, catalog, config.ai.sendCatalog);
         if (matched) {
           results.push({
             title: item.title,

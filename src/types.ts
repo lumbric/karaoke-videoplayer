@@ -71,6 +71,7 @@ export interface AppConfig {
     model: string;
     maxSuggestions: number;
     timeoutMs: number;
+    sendCatalog: boolean;
   };
   paths: {
     songsJson: string;

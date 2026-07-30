@@ -186,7 +186,8 @@ export function parseConfig(raw: unknown): AppConfig {
     ai: {
       model: ensureString(ai.model, "ai.model"),
       maxSuggestions: Math.max(1, Math.floor(ensureNumber(ai.maxSuggestions, "ai.maxSuggestions"))),
-      timeoutMs: Math.max(250, Math.floor(ensureNumber(ai.timeoutMs, "ai.timeoutMs")))
+      timeoutMs: Math.max(250, Math.floor(ensureNumber(ai.timeoutMs, "ai.timeoutMs"))),
+      sendCatalog: ai.sendCatalog !== undefined ? ensureBoolean(ai.sendCatalog, "ai.sendCatalog") : true
     },
     paths: {
       songsJson: ensureString(paths.songsJson, "paths.songsJson"),

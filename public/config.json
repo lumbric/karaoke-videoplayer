@@ -24,9 +24,10 @@
     ]
   },
   "ai": {
-    "model": "gpt-4o-mini",
+    "model": "gpt-4o",
     "maxSuggestions": 5,
-    "timeoutMs": 8000
+    "timeoutMs": 20000,
+    "sendCatalog": false
   },
   "paths": {
     "songsJson": "/data/songs.json",

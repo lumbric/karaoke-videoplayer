@@ -39,7 +39,7 @@ describe("App cover handling", () => {
         searchProviders: [{ type: "invidious", baseUrls: [] }],
         videoProviders: [{ type: "youtube" }]
       },
-      ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000 },
+      ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000, sendCatalog: true },
       paths: {
         songsJson: "/data/songs.json",
         videosBase: "/songs",
