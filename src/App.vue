@@ -182,6 +182,10 @@ const onKeyDown = (event: KeyboardEvent): void => {
       return;
     }
 
+    if (aiSuggestionStore.modalOpen || songRequestModalOpen.value) {
+      return;
+    }
+
     if (query.value || selectedGenres.value.length > 0) {
       clearAll();
     }

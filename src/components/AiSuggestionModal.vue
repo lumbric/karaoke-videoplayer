@@ -58,6 +58,7 @@ function onKeyDown(event: KeyboardEvent): void {
     void sendMessage();
   }
   if (event.key === "Escape") {
+    event.stopPropagation();
     closeModal();
   }
 }

@@ -12,6 +12,7 @@ const emit = defineEmits<{
 
 function onKeyDown(event: KeyboardEvent): void {
   if (event.key === "Escape") {
+    event.stopPropagation();
     closeModal();
   }
 }
@@ -21,11 +22,11 @@ function closeModal(): void {
 }
 
 onMounted(() => {
-  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keydown", onKeyDown, true);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener("keydown", onKeyDown);
+  window.removeEventListener("keydown", onKeyDown, true);
 });
 </script>
 
