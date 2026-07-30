@@ -356,9 +356,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section
+    <section
     ref="overlayElement"
     class="player-overlay"
+    :class="{ 'cursor-hidden': !controlsVisible }"
     role="dialog"
     aria-modal="true"
     :aria-label="`Wiedergabe von ${song.displayTitle}`"

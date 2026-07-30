@@ -187,6 +187,10 @@ textarea {
   background: #000;
 }
 
+.player-overlay.cursor-hidden {
+  cursor: none;
+}
+
 .player-video {
   position: absolute;
   inset: 0;
@@ -217,7 +221,6 @@ textarea {
 
 .player-glass.is-hidden {
   opacity: 0;
-  pointer-events: none;
 }
 
 .player-shell {
