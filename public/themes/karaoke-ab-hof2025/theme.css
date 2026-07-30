@@ -120,13 +120,14 @@ body {
   padding: 1em 1.5em;
   font-size: 1.2em;
   border: 0;
-  border-radius: 25px;
+  border-radius: 15px;
   background: #ffffff;
   color: #4e4e4e;
   text-align: center;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   transition: transform 0.1s ease, box-shadow 0.2s ease;
   outline: none;
+  height:52px;
 }
 
 .search::placeholder {
@@ -159,6 +160,7 @@ body {
 }
 
 .genre-select {
+  width: 10em;
   padding: 0 18px;
   min-height: 52px;
 }
