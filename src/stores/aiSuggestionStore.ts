@@ -37,7 +37,7 @@ function matchAgainstCatalog(title: string, artist: string, catalog: SongRecord[
   let best: { song: SongRecord; score: number } | undefined;
 
   for (const song of catalog) {
-    const score = getSearchScore(query, song.searchIndex);
+    const score = getSearchScore(query, song.searchIndex, song.searchTokens);
     if (score > 0 && (!best || score > best.score)) {
       best = { song, score };
     }

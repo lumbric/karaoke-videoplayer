@@ -1,4 +1,5 @@
 import type { PlayEventProviderMeta, SearchProviderConfig, SongRecord } from "../types";
+import { tokenizeNormalized } from "../utils/normalize";
 
 export interface InvidiousSearchResult {
   type?: string;
@@ -65,7 +66,8 @@ export function mapInvidiousResultToSong(result: InvidiousSearchResult): SongRec
     videoCandidates: [videoUrl],
     coverPath: coverUrl || "",
     displayTitle,
-    searchIndex: `${displayTitle} ${artist ?? ""} ${videoId}`.toLowerCase()
+    searchIndex: artist ? `${artist} ${displayTitle}` : displayTitle,
+    searchTokens: tokenizeNormalized(artist ? `${artist} ${displayTitle}` : displayTitle)
   };
 }
 

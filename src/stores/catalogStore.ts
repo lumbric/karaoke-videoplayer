@@ -75,7 +75,7 @@ export const useCatalogStore = defineStore("catalog", {
             return { song, score: 0, index };
           }
 
-          const score = getSearchScore(state.query, song.searchIndex);
+          const score = getSearchScore(state.query, song.searchIndex, song.searchTokens);
           if (score < 0) {
             return null;
           }

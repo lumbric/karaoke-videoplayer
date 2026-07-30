@@ -1,4 +1,5 @@
 import type { PlayEventProviderMeta, SearchProviderConfig, SongRecord } from "../types";
+import { tokenizeNormalized } from "../utils/normalize";
 
 export interface YouTubeSearchResult {
   id?: { videoId?: string };
@@ -57,7 +58,8 @@ export function mapYouTubeResultToSong(result: YouTubeSearchResult): SongRecord 
     videoCandidates: [videoUrl],
     coverPath: coverUrl,
     displayTitle: title,
-    searchIndex: `${title} ${artist ?? ""} ${videoId}`.toLowerCase()
+    searchIndex: artist ? `${artist} ${title}` : title,
+    searchTokens: tokenizeNormalized(artist ? `${artist} ${title}` : title)
   };
 }
 

@@ -43,6 +43,7 @@ export interface SongRecord {
   coverPath: string;
   displayTitle: string;
   searchIndex: string;
+  searchTokens?: string[];
 }
 
 export interface AppConfig {

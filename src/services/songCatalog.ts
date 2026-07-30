@@ -1,6 +1,6 @@
 import type { AppConfig, SongRecord, SongRecordRaw } from "../types";
 import { getThemeCoverFallbackPath } from "./config";
-import { normalizeForSearch } from "../utils/normalize";
+import { tokenizeNormalized } from "../utils/normalize";
 
 function normalizeGenres(genre: string | string[] | undefined): string[] {
   if (!genre) {
@@ -62,15 +62,15 @@ function resolveCoverPath(raw: SongRecordRaw, config: AppConfig): string {
   return `${config.paths.coversBase}/${raw.filename}.jpg`;
 }
 
-function buildSearchIndex(raw: SongRecordRaw, displayTitle: string, genres: string[]): string {
-  const components = [
-    displayTitle,
-    raw.artist ?? "",
-    raw.filename,
-    genres.join(" ")
-  ];
+function buildSearchSource(raw: SongRecordRaw, displayTitle: string): string {
+  const artist = raw.artist?.trim();
+  const title = raw.title?.trim();
 
-  return normalizeForSearch(components.join(" "));
+  if (artist && title) {
+    return `${artist} ${title}`;
+  }
+
+  return raw.filename.trim() || displayTitle;
 }
 
 function seededRandom(value: number): number {
@@ -95,6 +95,7 @@ export function applyInitialOrder(items: SongRecord[], order: AppConfig["search"
 export function mapSongRaw(raw: SongRecordRaw, config: AppConfig): SongRecord {
   const genres = normalizeGenres(raw.genre);
   const displayTitle = deriveDisplayTitle(raw);
+  const searchSource = buildSearchSource(raw, displayTitle);
 
   return {
     id: raw.id ?? raw.filename,
@@ -107,7 +108,8 @@ export function mapSongRaw(raw: SongRecordRaw, config: AppConfig): SongRecord {
     videoCandidates: buildVideoCandidates(raw, config),
     coverPath: resolveCoverPath(raw, config),
     displayTitle,
-    searchIndex: buildSearchIndex(raw, displayTitle, genres)
+    searchIndex: searchSource,
+    searchTokens: tokenizeNormalized(searchSource)
   };
 }
 
