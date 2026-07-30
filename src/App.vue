@@ -69,6 +69,10 @@ const showNoResultsPanel = computed(() =>
 const trimmedQuery = computed(() => query.value.trim());
 const isOnline = computed(() => navigator.onLine);
 
+function resetScrollPosition(): void {
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
 function onSongClicked(song: SongRecord, source: "local" | "online" = "local"): void {
   const provider = source === "online" ? buildOnlineProviderMeta(song) : undefined;
   playbackStore.openSong(song, source, provider);
@@ -101,12 +105,14 @@ async function triggerOnlineSearch(): Promise<void> {
   }
 
   showOfflineResults.value = false;
+  resetScrollPosition();
   await onlineSearchStore.search(query.value, config.value, secret.value);
 }
 
 function clearAll(): void {
   selectedGenre.value = "";
   showOfflineResults.value = true;
+  resetScrollPosition();
   onlineSearchStore.clearResults();
   catalogStore.clearFilters();
   nextTick(() => {
@@ -173,6 +179,7 @@ watch(loadSentinel, () => {
 
 watch(query, () => {
   showOfflineResults.value = true;
+  resetScrollPosition();
   onlineSearchStore.clearResults();
 });
 

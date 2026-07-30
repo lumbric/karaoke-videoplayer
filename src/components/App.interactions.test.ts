@@ -87,6 +87,21 @@ describe("App interactions", () => {
     seedStores();
   });
 
+  it("resets the scroll position when searching or clearing filters", async () => {
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+    const wrapper = mount(App);
+
+    await wrapper.get('input[placeholder="Songs suchen..."]').setValue("Two");
+    expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
+
+    scrollToSpy.mockClear();
+
+    await wrapper.get('button[aria-label="Reset"]').trigger("click");
+    expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
+
+    scrollToSpy.mockRestore();
+  });
+
   it("filters songs by search input and resets via reset button", async () => {
     const wrapper = mount(App);
 
@@ -138,6 +153,7 @@ describe("App interactions", () => {
     seedStores(true, true);
 
     const onlineSearchStore = useOnlineSearchStore();
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     vi.spyOn(onlineSearchStore, "search").mockImplementation(async (query: string) => {
       onlineSearchStore.query = query.trim();
       onlineSearchStore.results = [
@@ -172,5 +188,8 @@ describe("App interactions", () => {
     expect(wrapper.text()).toContain("Online One");
     expect(wrapper.text()).not.toContain("Alpha");
     expect(wrapper.text()).not.toContain("Beta");
+    expect(scrollToSpy).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
+
+    scrollToSpy.mockRestore();
   });
 });
