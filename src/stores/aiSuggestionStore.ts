@@ -35,7 +35,7 @@ function generateId(): string {
   return `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function matchAgainstCatalog(title: string, artist: string, catalog: SongRecord[], sendCatalog: boolean): SongRecord | undefined {
+export function matchAgainstCatalog(title: string, artist: string, catalog: SongRecord[], sendCatalog: boolean): SongRecord | undefined {
   if (sendCatalog) {
     // Exact matching when catalog was sent to AI
     const aiQuery = normalizeForSearch(`${artist} ${title}`);
