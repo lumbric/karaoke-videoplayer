@@ -917,15 +917,19 @@ textarea {
   min-width: 0;
 }
 
-.ai-welcome p {
-  margin: 0 0 12px;
-  font-size: 0.95rem;
-  line-height: 1.5;
+.ai-welcome-main {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text);
 }
 
-.ai-welcome-examples {
-  font-size: 0.82rem;
-  opacity: 0.72;
+.ai-welcome-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 .ai-message {
@@ -1025,11 +1029,6 @@ textarea {
   background: rgba(128, 128, 128, 0.16);
 }
 
-.ai-suggestion-card.is-online {
-  border: 1px solid var(--text);
-  border-style: dashed;
-}
-
 .ai-suggestion-card.is-not-found {
   opacity: 0.45;
   cursor: default;
@@ -1065,20 +1064,17 @@ textarea {
 
 .ai-suggestion-badge {
   display: inline-block;
-  font-size: 0.7rem;
-  padding: 2px 8px;
-  border: 1px solid var(--text);
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  border: 1px solid var(--muted);
   border-radius: var(--radius);
   width: fit-content;
-  color: var(--text);
+  color: var(--muted);
+  opacity: 0.7;
 }
 
 .ai-suggestion-badge.online {
-  border-style: dashed;
-}
-
-.ai-suggestion-badge.not_found {
-  opacity: 0.45;
+  border-style: solid;
 }
 
 .ai-input-area {

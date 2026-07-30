@@ -18,6 +18,7 @@ export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   text: string;
+  displayedText: string;
   suggestions?: ChatSuggestionResult[];
 }
 
@@ -27,6 +28,7 @@ interface AiSuggestionState {
   loading: boolean;
   error: string | null;
   activeAbortController: AbortController | null;
+  typingAnimationId: number | null;
 }
 
 function generateId(): string {
@@ -69,7 +71,8 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
     modalOpen: false,
     loading: false,
     error: null,
-    activeAbortController: null
+    activeAbortController: null,
+    typingAnimationId: null
   }),
   getters: {
     hasMessages: (state) => state.messages.length > 0
@@ -82,6 +85,7 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
     closeModal(): void {
       this.modalOpen = false;
       this.cancelActiveRequest();
+      this.stopTypingAnimation();
     },
     cancelActiveRequest(): void {
       if (this.activeAbortController) {
@@ -90,8 +94,41 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
       }
     },
     clearMessages(): void {
+      this.stopTypingAnimation();
       this.messages = [];
       this.error = null;
+    },
+    startTypingAnimation(messageId: string): void {
+      this.stopTypingAnimation();
+      
+      const message = this.messages.find((m) => m.id === messageId);
+      if (!message) return;
+      
+      const fullText = message.text;
+      let currentIndex = 0;
+      const charsPerTick = 2;
+      const tickInterval = 30;
+      
+      const animate = () => {
+        if (currentIndex >= fullText.length) {
+          message.displayedText = fullText;
+          this.typingAnimationId = null;
+          return;
+        }
+        
+        currentIndex = Math.min(currentIndex + charsPerTick, fullText.length);
+        message.displayedText = fullText.slice(0, currentIndex);
+        
+        this.typingAnimationId = window.setTimeout(animate, tickInterval);
+      };
+      
+      animate();
+    },
+    stopTypingAnimation(): void {
+      if (this.typingAnimationId !== null) {
+        clearTimeout(this.typingAnimationId);
+        this.typingAnimationId = null;
+      }
     },
     async sendMessage(userText: string, catalog: SongRecord[], config: AppConfig, secret: SecretConfig): Promise<void> {
       const trimmedText = userText.trim();
@@ -109,7 +146,8 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
       const userMessage: ChatMessage = {
         id: generateId(),
         role: "user",
-        text: trimmedText
+        text: trimmedText,
+        displayedText: trimmedText
       };
       this.messages.push(userMessage);
       this.loading = true;
@@ -144,9 +182,11 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
           id: generateId(),
           role: "assistant",
           text: response.message,
+          displayedText: "",
           suggestions: resolvedSuggestions
         };
         this.messages.push(assistantMessage);
+        this.startTypingAnimation(assistantMessage.id);
       } catch (error) {
         if (controller.signal.aborted) return;
         this.error = error instanceof Error ? error.message : String(error);

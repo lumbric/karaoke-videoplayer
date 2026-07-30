@@ -45,7 +45,12 @@ const fallbackCover = computed(() => (config.value ? getThemeCoverFallbackPath(c
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
 const hasOfflineResults = computed(() => filteredSongs.value.length > 0);
 const hasOnlineResults = computed(() => onlineResults.value.length > 0);
-const aiSuggestionsEnabled = computed(() => !!config.value?.features.aiSuggestions && !!secret.value.openAiApiKey);
+const aiSuggestionsEnabled = computed(() => 
+  !!config.value?.features.aiSuggestions && 
+  !!secret.value.openAiApiKey &&
+  onlineSearchStore.onlineFeaturesEnabled &&
+  isOnline.value
+);
 const showOnlineResultsSection = computed(() =>
   onlineSearchActive.value &&
   query.value.trim().length > 0 &&
@@ -122,6 +127,7 @@ function clearAll(): void {
 
 function closePlayer(): void {
   playbackStore.closePlayback(false);
+  aiSuggestionStore.clearMessages();
   nextTick(() => {
     searchInput.value?.focus();
   });
@@ -181,6 +187,7 @@ watch(query, () => {
   showOfflineResults.value = true;
   resetScrollPosition();
   onlineSearchStore.clearResults();
+  aiSuggestionStore.clearMessages();
 });
 
 const onKeyDown = (event: KeyboardEvent): void => {

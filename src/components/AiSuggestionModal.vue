@@ -113,14 +113,14 @@ onBeforeUnmount(() => {
         <div class="ai-welcome">
           <img v-if="configStore.aiLogoPath" class="ai-logo" :src="configStore.aiLogoPath" alt="" />
           <div class="ai-welcome-body">
-            <p>Beschreibe, wonach dir gerade zum Singen ist – nach Stimmung, Genre, Artist oder einfach einem Gefuehl.</p>
-            <p class="ai-welcome-examples">Beispiele: "Ich will was Energisches aus den 80ern" · "Etwas zum Mitsingen fuer die Menge" · "Ruhige Ballade von einer Frau gesungen"</p>
+            <p class="ai-welcome-main">Was würdest du gerne singen?</p>
+            <p class="ai-welcome-sub">Beschreibe wie du dich fühlst oder wonach du suchst.</p>
           </div>
         </div>
 
         <div v-for="msg in messages" :key="msg.id" class="ai-message" :class="msg.role">
           <div class="ai-message-bubble">
-            <p class="ai-message-text">{{ msg.text }}</p>
+            <p class="ai-message-text">{{ msg.role === 'assistant' ? msg.displayedText : msg.text }}</p>
           </div>
 
           <div v-if="msg.suggestions && msg.suggestions.length > 0" class="ai-suggestions">
@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
               v-for="(suggestion, sIndex) in msg.suggestions"
               :key="sIndex"
               class="ai-suggestion-card"
-              :class="{ 'is-online': suggestion.status === 'online', 'is-not-found': suggestion.status === 'not_found' }"
+              :class="{ 'is-not-found': suggestion.status === 'not_found' }"
               type="button"
               :disabled="suggestion.status === 'not_found'"
               @click="handleSuggestionClick(suggestion)"
@@ -138,8 +138,8 @@ onBeforeUnmount(() => {
                 <span class="ai-suggestion-artist">{{ suggestion.artist }}</span>
               </div>
               <p class="ai-suggestion-reason">{{ suggestion.reason }}</p>
-              <span class="ai-suggestion-badge" :class="suggestion.status">
-                {{ suggestion.status === 'local' ? 'Lokal' : suggestion.status === 'online' ? 'YouTube' : 'Nicht verfuegbar' }}
+              <span v-if="suggestion.status === 'online'" class="ai-suggestion-badge online">
+                Online
               </span>
             </button>
           </div>
