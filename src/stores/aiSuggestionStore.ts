@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import type { AppConfig, SecretConfig, SongRecord } from "../types";
 import { fetchAiSuggestions, type AiSuggestionResponse, type AiSuggestionItem } from "../services/openaiSuggestions";
 import { searchOnline } from "../services/onlineSearch";
-import { getSearchScore } from "../utils/fuzzy";
+import { normalizeForSearch } from "../utils/normalize";
 
 export interface ChatSuggestionResult {
   title: string;
@@ -33,17 +33,17 @@ function generateId(): string {
 }
 
 function matchAgainstCatalog(title: string, artist: string, catalog: SongRecord[]): SongRecord | undefined {
-  const query = `${title} ${artist}`;
-  let best: { song: SongRecord; score: number } | undefined;
-
+  const aiQuery = normalizeForSearch(`${artist} ${title}`);
+  if (!aiQuery) return undefined;
+  
   for (const song of catalog) {
-    const score = getSearchScore(query, song.searchIndex, song.searchTokens);
-    if (score > 0 && (!best || score > best.score)) {
-      best = { song, score };
+    const catalogQuery = normalizeForSearch(song.searchIndex);
+    if (aiQuery === catalogQuery) {
+      return song;
     }
   }
-
-  return best?.song;
+  
+  return undefined;
 }
 
 export const useAiSuggestionStore = defineStore("aiSuggestion", {
@@ -79,6 +79,11 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
     async sendMessage(userText: string, catalog: SongRecord[], config: AppConfig, secret: SecretConfig): Promise<void> {
       const trimmedText = userText.trim();
       if (!trimmedText || this.loading) return;
+      
+      if (trimmedText.length > 500) {
+        this.error = "Nachricht ist zu lang (max. 500 Zeichen).";
+        return;
+      }
 
       this.cancelActiveRequest();
       const controller = new AbortController();
