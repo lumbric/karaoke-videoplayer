@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import SongRequestForm from "./components/SongRequestForm.vue";
+import NoResultsPanel from "./components/NoResultsPanel.vue";
+import SongRequestModal from "./components/SongRequestModal.vue";
 import PlaybackModal from "./components/PlaybackModal.vue";
 import StatsPanel from "./components/StatsPanel.vue";
 import AiSuggestionModal from "./components/AiSuggestionModal.vue";
@@ -31,6 +32,7 @@ const onlineSearchActive = computed(() =>
 const selectedGenre = ref<string>("");
 const statsOpen = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
+const songRequestModalOpen = ref(false);
 const loadSentinel = ref<HTMLDivElement | null>(null);
 const failedCoverIds = ref(new Set<string>());
 const loadedCoverIds = ref(new Set<string>());
@@ -51,9 +53,12 @@ const showOnlineResultsSection = computed(() =>
 const showNoResultsPanel = computed(() =>
   query.value.trim().length > 0 &&
   !loading.value &&
-  !hasOfflineResults.value
+  !hasOfflineResults.value &&
+  !onlineLoading.value &&
+  !hasOnlineResults.value
 );
 const trimmedQuery = computed(() => query.value.trim());
+const isOnline = computed(() => navigator.onLine);
 
 function onSongClicked(song: SongRecord, source: "local" | "online" = "local"): void {
   const provider = source === "online" ? buildOnlineProviderMeta(song) : undefined;
@@ -118,6 +123,17 @@ function closeStats(): void {
 
 function closeAiSuggestionModal(): void {
   aiSuggestionStore.closeModal();
+  nextTick(() => {
+    searchInput.value?.focus();
+  });
+}
+
+function openSongRequestModal(): void {
+  songRequestModalOpen.value = true;
+}
+
+function closeSongRequestModal(): void {
+  songRequestModalOpen.value = false;
   nextTick(() => {
     searchInput.value?.focus();
   });
@@ -380,31 +396,18 @@ const spinnerIcon = `
         </div>
       </section>
 
-      <section v-if="showNoResultsPanel" class="no-results-panel">
-        <p class="no-results-message">
-          Keine Songs gefunden f&uuml;r "{{ trimmedQuery }}"
-        </p>
-
-        <div class="no-results-actions">
-          <button
-            v-if="onlineSearchActive"
-            class="btn btn-primary online-search-button"
-            type="button"
-            :disabled="onlineLoading"
-            @click="triggerOnlineSearch"
-          >
-            <span v-if="onlineLoading" class="button-icon" v-html="spinnerIcon"></span>
-            <span v-else class="button-icon" v-html="globeIcon"></span>
-            <span>Online suchen</span>
-          </button>
-          <p v-if="onlineError" class="online-search-feedback error">{{ onlineError }}</p>
-        </div>
-
-        <div class="song-request-section">
-          <p class="song-request-lead">Damit der Song bei der n&auml;chsten Veranstaltung verf&uuml;gbar ist.</p>
-          <SongRequestForm :prefill-title="trimmedQuery" />
-        </div>
-      </section>
+      <NoResultsPanel
+        v-if="showNoResultsPanel"
+        :query="trimmedQuery"
+        :online-search-active="onlineSearchActive"
+        :online-loading="onlineLoading"
+        :online-error="onlineError"
+        :ai-suggestions-enabled="aiSuggestionsEnabled"
+        :is-online="isOnline"
+        @online-search="triggerOnlineSearch"
+        @open-ai="aiSuggestionStore.openModal()"
+        @open-song-request="openSongRequestModal"
+      />
 
       <section v-else-if="!loading && visibleSongs.length === 0 && !showOnlineResultsSection" class="empty">
         <h3>Keine Songs verfuegbar</h3>
@@ -423,5 +426,6 @@ const spinnerIcon = `
     <button class="btn stats-button" type="button" @click="openStats">Statistik</button>
     <StatsPanel v-if="statsOpen" @close="closeStats" />
     <AiSuggestionModal v-if="aiSuggestionStore.modalOpen" @close="closeAiSuggestionModal" />
+    <SongRequestModal v-if="songRequestModalOpen" :prefill-title="trimmedQuery" @close="closeSongRequestModal" />
   </main>
 </template>

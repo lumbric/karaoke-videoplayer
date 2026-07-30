@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from "vue";
+import { reactive, ref } from "vue";
 import { saveSongSuggestion } from "../services/storage";
 
 const props = defineProps<{
@@ -15,15 +15,6 @@ const form = reactive({
 
 const feedback = ref("");
 const feedbackType = ref<"ok" | "error">("ok");
-
-watch(
-  () => props.prefillTitle,
-  (newTitle) => {
-    if (newTitle?.trim() && !form.title) {
-      form.title = newTitle.trim();
-    }
-  }
-);
 
 function submit(): void {
   const title = form.title.trim();

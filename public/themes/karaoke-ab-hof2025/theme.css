@@ -829,3 +829,39 @@ body {
 .ai-suggestion-card:focus-visible {
   background: rgba(255, 255, 255, 0.12);
 }
+
+.no-results-panel {
+  background: #cd6391;
+  border: 0;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(205, 99, 145, 0.3);
+}
+
+.no-results-message {
+  color: #ffffff;
+}
+
+.no-results-icon-label {
+  color: #ffffff;
+}
+
+.no-results-icon-button {
+  background: #44467f;
+  border: 0;
+  border-radius: 15px;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  transition: all 0.3s ease;
+}
+
+.no-results-icon-button:hover,
+.no-results-icon-button:focus-visible {
+  background: #cd6391;
+  color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(205, 99, 145, 0.45);
+}
+
+.no-results-icon-button:disabled {
+  opacity: 0.45;
+}
