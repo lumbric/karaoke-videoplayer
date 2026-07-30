@@ -668,7 +668,7 @@ textarea {
 .no-results-icon-row {
   display: flex;
   justify-content: center;
-  gap: 48px;
+  gap: 28px;
   flex-wrap: wrap;
 }
 
@@ -676,7 +676,8 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
+  min-width: 140px;
 }
 
 .no-results-icon-button {
@@ -723,7 +724,7 @@ textarea {
   font-weight: 600;
   line-height: 1.25;
   text-align: center;
-  max-width: 160px;
+  max-width: 140px;
 }
 
 .button-icon {
