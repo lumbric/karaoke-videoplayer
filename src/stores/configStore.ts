@@ -16,7 +16,7 @@ export const useConfigStore = defineStore("config", {
   }),
   getters: {
     isReady: (state) => state.config !== null,
-    aiTitle: (state) => state.themeConfig.ai?.title ?? "Automatische Songvorschlaege",
+    aiTitle: (state) => state.themeConfig.ai?.title ?? "Automatische Songvorschläge",
     aiLogoPath: (state) => state.themeConfig.ai?.logoPath
   },
   actions: {

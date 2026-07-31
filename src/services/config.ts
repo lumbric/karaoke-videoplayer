@@ -31,7 +31,7 @@ export function getThemeAiLogoPath(themeName: string): string {
 
 const DEFAULT_THEME_CONFIG: ThemeConfig = {
   ai: {
-    title: "Automatische Songvorschlaege"
+    title: "Automatische Songvorschläge"
   }
 };
 
@@ -76,7 +76,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function ensureString(value: unknown, path: string): string {
   if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error(`Ungueltige Konfiguration: ${path} muss ein nicht-leerer String sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path} muss ein nicht-leerer String sein.`);
   }
 
   return value;
@@ -84,7 +84,7 @@ function ensureString(value: unknown, path: string): string {
 
 function ensureBoolean(value: unknown, path: string): boolean {
   if (typeof value !== "boolean") {
-    throw new Error(`Ungueltige Konfiguration: ${path} muss true oder false sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path} muss true oder false sein.`);
   }
 
   return value;
@@ -92,7 +92,7 @@ function ensureBoolean(value: unknown, path: string): boolean {
 
 function ensureNumber(value: unknown, path: string): number {
   if (typeof value !== "number" || Number.isNaN(value)) {
-    throw new Error(`Ungueltige Konfiguration: ${path} muss eine Zahl sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path} muss eine Zahl sein.`);
   }
 
   return value;
@@ -100,7 +100,7 @@ function ensureNumber(value: unknown, path: string): number {
 
 function ensureStringArray(value: unknown, path: string): string[] {
   if (!Array.isArray(value) || value.some((entry) => typeof entry !== "string")) {
-    throw new Error(`Ungueltige Konfiguration: ${path} muss ein String-Array sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path} muss ein String-Array sein.`);
   }
 
   return value;
@@ -108,12 +108,12 @@ function ensureStringArray(value: unknown, path: string): string[] {
 
 function ensureSearchProvider(value: unknown, path: string): SearchProviderConfig {
   if (!isObject(value)) {
-    throw new Error(`Ungueltige Konfiguration: ${path} muss ein Objekt sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path} muss ein Objekt sein.`);
   }
 
   const type = ensureString(value.type, `${path}.type`);
   if (type !== "invidious" && type !== "youtube") {
-    throw new Error(`Ungueltige Konfiguration: ${path}.type muss "invidious" oder "youtube" sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path}.type muss "invidious" oder "youtube" sein.`);
   }
 
   const baseUrls = value.baseUrls !== undefined ? ensureStringArray(value.baseUrls, `${path}.baseUrls`) : undefined;
@@ -123,12 +123,12 @@ function ensureSearchProvider(value: unknown, path: string): SearchProviderConfi
 
 function ensureVideoProvider(value: unknown, path: string): VideoProviderConfig {
   if (!isObject(value)) {
-    throw new Error(`Ungueltige Konfiguration: ${path} muss ein Objekt sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path} muss ein Objekt sein.`);
   }
 
   const type = ensureString(value.type, `${path}.type`);
   if (type !== "youtube" && type !== "invidious") {
-    throw new Error(`Ungueltige Konfiguration: ${path}.type muss "youtube" oder "invidious" sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path}.type muss "youtube" oder "invidious" sein.`);
   }
 
   const baseUrls = value.baseUrls !== undefined ? ensureStringArray(value.baseUrls, `${path}.baseUrls`) : undefined;
@@ -138,7 +138,7 @@ function ensureVideoProvider(value: unknown, path: string): VideoProviderConfig 
 
 function ensureProviderArray<T>(value: unknown, path: string, ensureItem: (item: unknown, itemPath: string) => T): T[] {
   if (!Array.isArray(value)) {
-    throw new Error(`Ungueltige Konfiguration: ${path} muss ein Array sein.`);
+    throw new Error(`Ungültige Konfiguration: ${path} muss ein Array sein.`);
   }
 
   return value.map((item, index) => ensureItem(item, `${path}[${index}]`));
@@ -146,13 +146,13 @@ function ensureProviderArray<T>(value: unknown, path: string, ensureItem: (item:
 
 export function parseConfig(raw: unknown): AppConfig {
   if (!isObject(raw)) {
-    throw new Error("Ungueltige Konfiguration: Wurzelobjekt fehlt.");
+    throw new Error("Ungültige Konfiguration: Wurzelobjekt fehlt.");
   }
 
   const { theme, features, search, providers, ai, paths } = raw;
 
   if (!isObject(theme) || !isObject(features) || !isObject(search) || !isObject(providers) || !isObject(ai) || !isObject(paths)) {
-    throw new Error("Ungueltige Konfiguration: Ein oder mehrere Top-Level Abschnitte fehlen.");
+    throw new Error("Ungültige Konfiguration: Ein oder mehrere Top-Level Abschnitte fehlen.");
   }
 
   const searchProviders = ensureProviderArray(providers.searchProviders, "providers.searchProviders", ensureSearchProvider);
@@ -160,7 +160,7 @@ export function parseConfig(raw: unknown): AppConfig {
 
   const initialOrder = ensureString(search.initialOrder, "search.initialOrder");
   if (initialOrder !== "alphabetical" && initialOrder !== "random") {
-    throw new Error("Ungueltige Konfiguration: search.initialOrder muss alphabetical oder random sein.");
+    throw new Error("Ungültige Konfiguration: search.initialOrder muss alphabetical oder random sein.");
   }
 
   return {
@@ -214,7 +214,7 @@ export async function loadRuntimeConfig(fetchImpl: typeof fetch = fetch): Promis
   try {
     json = await response.json();
   } catch {
-    throw new Error("Konfiguration ist kein gueltiges JSON.");
+    throw new Error("Konfiguration ist kein gültiges JSON.");
   }
 
   return parseConfig(json);
@@ -223,6 +223,6 @@ export async function loadRuntimeConfig(fetchImpl: typeof fetch = fetch): Promis
 export function validateProviderSecrets(config: AppConfig, secret: SecretConfig): void {
   const needsYoutubeApiKey = config.providers.searchProviders.some((provider) => provider.type === "youtube");
   if (needsYoutubeApiKey && !secret.youtubeApiKey) {
-    throw new Error("Ungueltige Konfiguration: YouTube als Search-Provider konfiguriert, aber youtubeApiKey in secret-config.json fehlt.");
+    throw new Error("Ungültige Konfiguration: YouTube als Search-Provider konfiguriert, aber youtubeApiKey in secret-config.json fehlt.");
   }
 }

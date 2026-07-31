@@ -114,7 +114,7 @@ function createHourlyChart(): void {
     data: {
       labels,
       datasets: [{
-        label: "Aktivitaet",
+        label: "Aktivität",
         data,
         borderColor: "rgba(245, 173, 0, 1)",
         backgroundColor: "rgba(245, 173, 0, 0.2)",
@@ -250,7 +250,7 @@ onBeforeUnmount(() => {
         <div class="stats-actions">
           <button class="btn" type="button" @click="refreshData">Neu laden</button>
           <button class="btn" type="button" @click="exportStats">Export JSON</button>
-          <button class="btn btn-icon" type="button" title="Schliessen" aria-label="Schliessen" @click="closePanel">X</button>
+          <button class="btn btn-icon" type="button" title="Schließen" aria-label="Schließen" @click="closePanel">X</button>
         </div>
       </header>
 
@@ -285,7 +285,7 @@ onBeforeUnmount(() => {
         </article>
 
         <article class="stats-card stats-chart-card">
-          <h3>Aktivitaet nach Stunde</h3>
+          <h3>Aktivität nach Stunde</h3>
           <div class="stats-chart-wrap">
             <canvas ref="hourlyCanvas" />
           </div>
@@ -315,7 +315,7 @@ onBeforeUnmount(() => {
               <strong>{{ event.title }}</strong>
               <span>{{ event.playPercentage }}%</span>
             </li>
-            <li v-if="summary.recentActivity.length === 0">Keine Aktivitaet</li>
+            <li v-if="summary.recentActivity.length === 0">Keine Aktivität</li>
           </ul>
         </article>
       </section>

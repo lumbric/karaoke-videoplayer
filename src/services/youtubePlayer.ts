@@ -49,7 +49,7 @@ export function loadYouTubeIframeApi(): Promise<void> {
   }
 
   if (typeof window === "undefined") {
-    return Promise.reject(new Error("YouTube API nicht im Browser verfuegbar."));
+    return Promise.reject(new Error("YouTube API nicht im Browser verfügbar."));
   }
 
   if (window.YT?.Player) {

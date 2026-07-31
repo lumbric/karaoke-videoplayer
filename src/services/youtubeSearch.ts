@@ -112,7 +112,7 @@ export async function searchYouTube(options: YouTubeSearchOptions): Promise<Song
   } catch (error) {
     window.clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
-      throw new Error("YouTube API Zeitueberschreitung.");
+      throw new Error("YouTube API Zeitüberschreitung.");
     }
 
     throw error;

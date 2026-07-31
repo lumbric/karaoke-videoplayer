@@ -65,7 +65,7 @@ describe("StatsPanel", () => {
     loadPlayedLogMock.mockReturnValue([]);
 
     const wrapper = mount(StatsPanel);
-    await wrapper.find('button[aria-label="Schliessen"]').trigger("click");
+    await wrapper.find('button[aria-label="Schließen"]').trigger("click");
 
     expect(wrapper.emitted("close")).toBeTruthy();
   });

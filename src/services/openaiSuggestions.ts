@@ -124,7 +124,7 @@ OUTPUT FORMAT (valid JSON only):
 
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
-        throw new Error("Ungueltiger OpenAI API-Key.");
+        throw new Error("Ungültiger OpenAI API-Key.");
       }
       if (response.status === 429) {
         throw new Error("OpenAI API: Zu viele Anfragen. Bitte warte einen Moment.");
@@ -140,7 +140,7 @@ OUTPUT FORMAT (valid JSON only):
 
     const parsed = JSON.parse(content) as AiSuggestionResponse;
     if (!parsed.message || !Array.isArray(parsed.suggestions)) {
-      throw new Error("OpenAI: Ungueltiges Antwortformat.");
+      throw new Error("OpenAI: Ungültiges Antwortformat.");
     }
 
     parsed.suggestions = parsed.suggestions.slice(0, maxSuggestions);
@@ -149,7 +149,7 @@ OUTPUT FORMAT (valid JSON only):
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
-      throw new Error("KI-Anfrage abgebrochen oder Zeitueberschreitung.");
+      throw new Error("KI-Anfrage abgebrochen oder Zeitüberschreitung.");
     }
     throw error;
   }

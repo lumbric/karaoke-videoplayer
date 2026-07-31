@@ -114,7 +114,7 @@ export async function searchInvidious(options: InvidiousSearchOptions): Promise<
 
       const data = (await response.json()) as unknown;
       if (!isValidResponse(data)) {
-        errors.push(`${baseUrl}: Ungueltige Antwort`);
+        errors.push(`${baseUrl}: Ungültige Antwort`);
         continue;
       }
 
@@ -130,7 +130,7 @@ export async function searchInvidious(options: InvidiousSearchOptions): Promise<
       return mapped;
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        errors.push(`${baseUrl}: Zeitueberschreitung`);
+        errors.push(`${baseUrl}: Zeitüberschreitung`);
       } else {
         errors.push(`${baseUrl}: ${error instanceof Error ? error.message : String(error)}`);
       }

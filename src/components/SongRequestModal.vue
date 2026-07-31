@@ -38,7 +38,7 @@ onBeforeUnmount(() => {
           <h2 class="ai-title">Liedwunsch einreichen</h2>
         </div>
         <div class="ai-header-actions">
-          <button class="btn btn-icon" type="button" title="Schliessen" aria-label="Schliessen" @click="closeModal">
+          <button class="btn btn-icon" type="button" title="Schließen" aria-label="Schließen" @click="closeModal">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
             </svg>

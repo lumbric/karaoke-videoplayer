@@ -17,7 +17,7 @@ function renderFatalError(message: string): void {
   mountNode.innerHTML = `
     <section class="error-box" role="alert">
       <h1>Start fehlgeschlagen</h1>
-      <p>Die Datei config.json fehlt oder ist ungueltig.</p>
+      <p>Die Datei config.json fehlt oder ist ungültig.</p>
       <p><strong>Details:</strong> ${message}</p>
     </section>
   `;

@@ -396,7 +396,7 @@ const spinnerIcon = `
       </section>
 
       <section v-if="showOnlineResultsSection" class="online-results" aria-label="Online-Suchergebnisse">
-        <p v-if="onlineLoading" class="online-search-feedback">Online-Suche laeuft...</p>
+        <p v-if="onlineLoading" class="online-search-feedback">Online-Suche läuft...</p>
         <h3 v-if="hasOnlineResults" class="online-results-header">Online-Ergebnisse</h3>
         <p v-if="onlineError" class="online-search-feedback error">{{ onlineError }}</p>
         <p v-else-if="showOnlineSearchEmptyState" class="online-search-feedback">Keine Online-Ergebnisse gefunden.</p>
@@ -442,7 +442,7 @@ const spinnerIcon = `
       />
 
       <section v-else-if="!loading && visibleSongs.length === 0 && !showOnlineResultsSection" class="empty">
-        <h3>Keine Songs verfuegbar</h3>
+        <h3>Keine Songs verfügbar</h3>
         <p>Bitte pruefe die Konfiguration und Songdaten.</p>
       </section>
 
