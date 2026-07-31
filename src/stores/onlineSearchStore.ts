@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import type { AppConfig, SecretConfig, SongRecord } from "../types";
 import { searchOnline } from "../services/onlineSearch";
-import { appendSearchEvent } from "../services/storage";
 
 interface OnlineSearchState {
   query: string;
@@ -81,22 +80,10 @@ export const useOnlineSearchStore = defineStore("onlineSearch", {
 
         if (!controller.signal.aborted) {
           this.results = songs;
-          appendSearchEvent({
-            query: trimmedQuery,
-            timestamp: new Date().toISOString(),
-            source: "online",
-            resultCount: songs.length
-          });
         }
       } catch (error) {
         if (!controller.signal.aborted) {
           this.error = error instanceof Error ? error.message : String(error);
-          appendSearchEvent({
-            query: trimmedQuery,
-            timestamp: new Date().toISOString(),
-            source: "online",
-            resultCount: 0
-          });
         }
       } finally {
         if (!controller.signal.aborted) {

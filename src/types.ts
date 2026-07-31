@@ -122,11 +122,18 @@ export interface ThemeConfig {
 
 export type SearchSource = "local" | "online" | "ai";
 
-export interface SearchEvent {
-  query: string;
-  timestamp: string;
-  source: SearchSource;
-  resultCount: number;
+export type SearchOutcome = "abandoned" | "played_song" | "switched_activity";
+
+export interface SearchSession {
+  sessionId: string;
+  startedAt: string;
+  endedAt: string;
+  queries: string[];
+  outcome: SearchOutcome;
+  songPlayed?: {
+    title: string;
+    source: "local" | "online";
+  };
 }
 
 export interface AiChatSuggestion {
@@ -135,9 +142,15 @@ export interface AiChatSuggestion {
   status: "local" | "online" | "not_found";
 }
 
+export interface AiChatMessage {
+  role: "user" | "assistant";
+  text: string;
+  suggestions?: AiChatSuggestion[];
+}
+
 export interface AiChatEvent {
-  timestamp: string;
-  userMessage: string;
-  assistantMessage: string;
-  suggestions: AiChatSuggestion[];
+  id: string;
+  startedAt: string;
+  endedAt?: string;
+  messages: AiChatMessage[];
 }

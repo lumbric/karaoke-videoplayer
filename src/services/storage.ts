@@ -1,8 +1,8 @@
-import type { AiChatEvent, PlayEvent, SearchEvent, SongSuggestion } from "../types";
+import type { AiChatEvent, PlayEvent, SearchSession, SongSuggestion } from "../types";
 
 const SONG_REQUESTS_KEY = "songRequests";
 const PLAYED_LOG_KEY = "playedLog";
-const SEARCH_LOG_KEY = "searchLog";
+const SEARCH_SESSIONS_KEY = "searchSessions";
 const AI_CHAT_LOG_KEY = "aiChatLog";
 
 function parseJsonArray<T>(raw: string | null): T[] {
@@ -49,22 +49,32 @@ export function saveSongSuggestion(entry: SongSuggestion): { ok: true } | { ok: 
   return { ok: true };
 }
 
-export function loadSearchLog(): SearchEvent[] {
-  return parseJsonArray<SearchEvent>(localStorage.getItem(SEARCH_LOG_KEY));
+export function loadSearchSessions(): SearchSession[] {
+  return parseJsonArray<SearchSession>(localStorage.getItem(SEARCH_SESSIONS_KEY));
 }
 
-export function appendSearchEvent(entry: SearchEvent): void {
-  const current = loadSearchLog();
-  current.push(entry);
-  localStorage.setItem(SEARCH_LOG_KEY, JSON.stringify(current));
+export function saveSearchSession(session: SearchSession): void {
+  const current = loadSearchSessions();
+  const existingIndex = current.findIndex((s) => s.sessionId === session.sessionId);
+  if (existingIndex >= 0) {
+    current[existingIndex] = session;
+  } else {
+    current.push(session);
+  }
+  localStorage.setItem(SEARCH_SESSIONS_KEY, JSON.stringify(current));
 }
 
 export function loadAiChatLog(): AiChatEvent[] {
   return parseJsonArray<AiChatEvent>(localStorage.getItem(AI_CHAT_LOG_KEY));
 }
 
-export function appendAiChatEvent(entry: AiChatEvent): void {
+export function saveAiChatSession(session: AiChatEvent): void {
   const current = loadAiChatLog();
-  current.push(entry);
+  const existingIndex = current.findIndex((e) => e.id === session.id);
+  if (existingIndex >= 0) {
+    current[existingIndex] = session;
+  } else {
+    current.push(session);
+  }
   localStorage.setItem(AI_CHAT_LOG_KEY, JSON.stringify(current));
 }

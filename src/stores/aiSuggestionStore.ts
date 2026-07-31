@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
-import type { AppConfig, SecretConfig, SongRecord } from "../types";
+import type { AiChatMessage, AiChatSuggestion, AppConfig, SecretConfig, SongRecord } from "../types";
 import { fetchAiSuggestions, type AiSuggestionResponse, type AiSuggestionItem } from "../services/openaiSuggestions";
 import { searchOnline } from "../services/onlineSearch";
 import { normalizeForSearch } from "../utils/normalize";
 import { getSearchScore } from "../utils/fuzzy";
-import { appendAiChatEvent } from "../services/storage";
+import { saveAiChatSession } from "../services/storage";
 
 export interface ChatSuggestionResult {
   title: string;
@@ -30,6 +30,8 @@ interface AiSuggestionState {
   error: string | null;
   activeAbortController: AbortController | null;
   typingAnimationId: number | null;
+  currentSessionId: string | null;
+  currentSessionStartedAt: string | null;
 }
 
 function generateId(): string {
@@ -73,7 +75,9 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
     loading: false,
     error: null,
     activeAbortController: null,
-    typingAnimationId: null
+    typingAnimationId: null,
+    currentSessionId: null,
+    currentSessionStartedAt: null
   }),
   getters: {
     hasMessages: (state) => state.messages.length > 0
@@ -87,6 +91,7 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
       this.modalOpen = false;
       this.cancelActiveRequest();
       this.stopTypingAnimation();
+      this.finalizeCurrentSession();
     },
     cancelActiveRequest(): void {
       if (this.activeAbortController) {
@@ -96,6 +101,7 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
     },
     clearMessages(): void {
       this.stopTypingAnimation();
+      this.finalizeCurrentSession();
       this.messages = [];
       this.error = null;
     },
@@ -130,6 +136,46 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
         clearTimeout(this.typingAnimationId);
         this.typingAnimationId = null;
       }
+    },
+    ensureSession(): void {
+      if (!this.currentSessionId) {
+        this.currentSessionId = generateId();
+        this.currentSessionStartedAt = new Date().toISOString();
+      }
+    },
+    buildSessionMessages(): AiChatMessage[] {
+      return this.messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => {
+          const msg: AiChatMessage = { role: m.role, text: m.text };
+          if (m.suggestions) {
+            msg.suggestions = m.suggestions.map((s): AiChatSuggestion => ({
+              title: s.title,
+              artist: s.artist,
+              status: s.status
+            }));
+          }
+          return msg;
+        });
+    },
+    persistCurrentSession(): void {
+      if (!this.currentSessionId || !this.currentSessionStartedAt) return;
+      saveAiChatSession({
+        id: this.currentSessionId,
+        startedAt: this.currentSessionStartedAt,
+        messages: this.buildSessionMessages()
+      });
+    },
+    finalizeCurrentSession(): void {
+      if (!this.currentSessionId || !this.currentSessionStartedAt) return;
+      saveAiChatSession({
+        id: this.currentSessionId,
+        startedAt: this.currentSessionStartedAt,
+        endedAt: new Date().toISOString(),
+        messages: this.buildSessionMessages()
+      });
+      this.currentSessionId = null;
+      this.currentSessionStartedAt = null;
     },
     async sendMessage(userText: string, catalog: SongRecord[], config: AppConfig, secret: SecretConfig): Promise<void> {
       const trimmedText = userText.trim();
@@ -189,16 +235,8 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
         this.messages.push(assistantMessage);
         this.startTypingAnimation(assistantMessage.id);
 
-        appendAiChatEvent({
-          timestamp: new Date().toISOString(),
-          userMessage: trimmedText,
-          assistantMessage: response.message,
-          suggestions: resolvedSuggestions.map((s) => ({
-            title: s.title,
-            artist: s.artist,
-            status: s.status
-          }))
-        });
+        this.ensureSession();
+        this.persistCurrentSession();
       } catch (error) {
         if (controller.signal.aborted) return;
         this.error = error instanceof Error ? error.message : String(error);

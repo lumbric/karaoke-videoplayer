@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadSongSuggestions, saveSongSuggestion, appendSearchEvent, loadSearchLog, appendAiChatEvent, loadAiChatLog } from "./storage";
+import { loadSongSuggestions, saveSongSuggestion, saveSearchSession, loadSearchSessions, saveAiChatSession, loadAiChatLog } from "./storage";
 
 describe("song suggestion storage", () => {
   it("stores and loads suggestions", () => {
@@ -32,60 +32,75 @@ describe("song suggestion storage", () => {
   });
 });
 
-describe("search event storage", () => {
-  it("stores and loads search events", () => {
-    appendSearchEvent({
-      query: "test search",
-      timestamp: "2026-01-01T12:00:00.000Z",
-      source: "local",
-      resultCount: 5
+describe("search session storage", () => {
+  it("stores and loads search sessions", () => {
+    saveSearchSession({
+      sessionId: "session-1",
+      startedAt: "2026-01-01T12:00:00.000Z",
+      endedAt: "2026-01-01T12:02:00.000Z",
+      queries: ["hello", "hello world"],
+      outcome: "abandoned"
     });
 
-    const loaded = loadSearchLog();
+    const loaded = loadSearchSessions();
     expect(loaded).toHaveLength(1);
-    expect(loaded[0]?.query).toBe("test search");
-    expect(loaded[0]?.source).toBe("local");
-    expect(loaded[0]?.resultCount).toBe(5);
+    expect(loaded[0]?.sessionId).toBe("session-1");
+    expect(loaded[0]?.queries).toHaveLength(2);
+    expect(loaded[0]?.outcome).toBe("abandoned");
   });
 
-  it("stores multiple search events", () => {
-    appendSearchEvent({
-      query: "first",
-      timestamp: "2026-01-01T12:00:00.000Z",
-      source: "local",
-      resultCount: 3
+  it("updates existing session by sessionId", () => {
+    saveSearchSession({
+      sessionId: "session-2",
+      startedAt: "2026-01-01T12:00:00.000Z",
+      endedAt: "2026-01-01T12:01:00.000Z",
+      queries: ["test"],
+      outcome: "abandoned"
     });
 
-    appendSearchEvent({
-      query: "second",
-      timestamp: "2026-01-01T12:01:00.000Z",
-      source: "online",
-      resultCount: 0
+    saveSearchSession({
+      sessionId: "session-2",
+      startedAt: "2026-01-01T12:00:00.000Z",
+      endedAt: "2026-01-01T12:02:00.000Z",
+      queries: ["test", "test query"],
+      outcome: "played_song",
+      songPlayed: { title: "Test Song", source: "local" }
     });
 
-    const loaded = loadSearchLog();
-    expect(loaded).toHaveLength(2);
-    expect(loaded[1]?.query).toBe("second");
-    expect(loaded[1]?.resultCount).toBe(0);
+    const loaded = loadSearchSessions();
+    const session = loaded.find((s) => s.sessionId === "session-2");
+    expect(session).toBeDefined();
+    expect(session?.queries).toHaveLength(2);
+    expect(session?.outcome).toBe("played_song");
+    expect(session?.songPlayed?.title).toBe("Test Song");
   });
 });
 
 describe("ai chat event storage", () => {
   it("stores and loads ai chat events", () => {
-    appendAiChatEvent({
-      timestamp: "2026-01-01T12:00:00.000Z",
-      userMessage: "What should I sing?",
-      assistantMessage: "How about these songs?",
-      suggestions: [
-        { title: "Song A", artist: "Artist A", status: "local" },
-        { title: "Song B", artist: "Artist B", status: "not_found" }
+    saveAiChatSession({
+      id: "test-session-1",
+      startedAt: "2026-01-01T12:00:00.000Z",
+      endedAt: "2026-01-01T12:05:00.000Z",
+      messages: [
+        { role: "user", text: "What should I sing?" },
+        {
+          role: "assistant",
+          text: "How about these songs?",
+          suggestions: [
+            { title: "Song A", artist: "Artist A", status: "local" },
+            { title: "Song B", artist: "Artist B", status: "not_found" }
+          ]
+        }
       ]
     });
 
     const loaded = loadAiChatLog();
     expect(loaded).toHaveLength(1);
-    expect(loaded[0]?.userMessage).toBe("What should I sing?");
-    expect(loaded[0]?.suggestions).toHaveLength(2);
-    expect(loaded[0]?.suggestions[0]?.status).toBe("local");
+    expect(loaded[0]?.id).toBe("test-session-1");
+    expect(loaded[0]?.messages).toHaveLength(2);
+    expect(loaded[0]?.messages[0]?.role).toBe("user");
+    expect(loaded[0]?.messages[1]?.suggestions).toHaveLength(2);
+    expect(loaded[0]?.messages[1]?.suggestions?.[0]?.status).toBe("local");
   });
 });

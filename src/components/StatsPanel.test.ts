@@ -1,11 +1,11 @@
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import StatsPanel from "./StatsPanel.vue";
-import { loadPlayedLog, loadSearchLog, loadAiChatLog, loadSongSuggestions } from "../services/storage";
+import { loadPlayedLog, loadSearchSessions, loadAiChatLog, loadSongSuggestions } from "../services/storage";
 
 vi.mock("../services/storage", () => ({
   loadPlayedLog: vi.fn(),
-  loadSearchLog: vi.fn(),
+  loadSearchSessions: vi.fn(),
   loadAiChatLog: vi.fn(),
   loadSongSuggestions: vi.fn()
 }));
@@ -25,17 +25,17 @@ vi.mock("chart.js/auto", () => {
 });
 
 const loadPlayedLogMock = vi.mocked(loadPlayedLog);
-const loadSearchLogMock = vi.mocked(loadSearchLog);
+const loadSearchSessionsMock = vi.mocked(loadSearchSessions);
 const loadAiChatLogMock = vi.mocked(loadAiChatLog);
 const loadSongSuggestionsMock = vi.mocked(loadSongSuggestions);
 
 describe("StatsPanel", () => {
   beforeEach(() => {
     loadPlayedLogMock.mockReset();
-    loadSearchLogMock.mockReset();
+    loadSearchSessionsMock.mockReset();
     loadAiChatLogMock.mockReset();
     loadSongSuggestionsMock.mockReset();
-    loadSearchLogMock.mockReturnValue([]);
+    loadSearchSessionsMock.mockReturnValue([]);
     loadAiChatLogMock.mockReturnValue([]);
     loadSongSuggestionsMock.mockReturnValue([]);
   });

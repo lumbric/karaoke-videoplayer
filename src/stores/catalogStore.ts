@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
-import type { AppConfig, SongRecord } from "../types";
+import type { AppConfig, SearchOutcome, SearchSession, SongRecord } from "../types";
 import { loadSongCatalog } from "../services/songCatalog";
 import { getSearchScore } from "../utils/fuzzy";
-import { appendSearchEvent } from "../services/storage";
+import { saveSearchSession } from "../services/storage";
 
 interface CatalogState {
   allSongs: SongRecord[];
@@ -15,7 +15,11 @@ interface CatalogState {
   batchSize: number;
   loading: boolean;
   error: string | null;
-  searchLogTimer: ReturnType<typeof setTimeout> | null;
+  currentSearchSession: {
+    sessionId: string;
+    startedAt: string;
+    queries: string[];
+  } | null;
 }
 
 function compareSongsStable(a: SongRecord, b: SongRecord): number {
@@ -38,6 +42,10 @@ function songHash(song: SongRecord): number {
   return Math.abs(hash);
 }
 
+function generateSessionId(): string {
+  return `search-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export const useCatalogStore = defineStore("catalog", {
   state: (): CatalogState => ({
     allSongs: [],
@@ -50,7 +58,7 @@ export const useCatalogStore = defineStore("catalog", {
     batchSize: 30,
     loading: false,
     error: null,
-    searchLogTimer: null
+    currentSearchSession: null
   }),
   getters: {
     availableGenres: (state): string[] => {
@@ -139,34 +147,62 @@ export const useCatalogStore = defineStore("catalog", {
     setQuery(query: string): void {
       const hadQuery = this.query.trim().length > 0;
       const hasQuery = query.trim().length > 0;
+      const oldQuery = this.query.trim();
+      const newQuery = query.trim();
+
       this.query = query;
       if (this.initialOrder === "random" && hadQuery && !hasQuery) {
         this.reshuffleIdleOrder();
       }
       this.renderedCount = this.batchSize;
 
-      if (this.searchLogTimer) {
-        clearTimeout(this.searchLogTimer);
-      }
-
       if (hasQuery) {
-        this.searchLogTimer = setTimeout(() => {
-          const resultCount = this.filteredSongs.length;
-          appendSearchEvent({
-            query: this.query.trim(),
-            timestamp: new Date().toISOString(),
-            source: "local",
-            resultCount
-          });
-          this.searchLogTimer = null;
-        }, 1000);
+        const isExtension = oldQuery.length > 0 && newQuery.startsWith(oldQuery);
+
+        if (!isExtension || !this.currentSearchSession) {
+          if (!this.currentSearchSession) {
+            this.currentSearchSession = {
+              sessionId: generateSessionId(),
+              startedAt: new Date().toISOString(),
+              queries: []
+            };
+          }
+          this.currentSearchSession.queries.push(newQuery);
+        }
       }
+    },
+    endSearchSession(outcome: SearchOutcome, songPlayed?: { title: string; source: "local" | "online" }): void {
+      if (!this.currentSearchSession) return;
+
+      const session: SearchSession = {
+        sessionId: this.currentSearchSession.sessionId,
+        startedAt: this.currentSearchSession.startedAt,
+        endedAt: new Date().toISOString(),
+        queries: [...this.currentSearchSession.queries],
+        outcome,
+        songPlayed
+      };
+
+      saveSearchSession(session);
+      this.currentSearchSession = null;
+    },
+    addQueryToCurrentSession(query: string): void {
+      if (!this.currentSearchSession) {
+        this.currentSearchSession = {
+          sessionId: generateSessionId(),
+          startedAt: new Date().toISOString(),
+          queries: []
+        };
+      }
+      this.currentSearchSession.queries.push(query);
     },
     setGenres(genres: string[]): void {
       this.selectedGenres = genres;
       this.renderedCount = this.batchSize;
     },
     clearFilters(): void {
+      this.endSearchSession("abandoned");
+
       this.query = "";
       this.selectedGenres = [];
       if (this.initialOrder === "random") {

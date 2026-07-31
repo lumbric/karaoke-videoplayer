@@ -83,6 +83,11 @@ function onSongClicked(song: SongRecord, source: "local" | "online" = "local"): 
   const hasActiveQuery = trimmedQuery.value.length > 0;
   const foundVia = source === "online" && hasActiveQuery ? "online_search" : hasActiveQuery ? "local_search" : "browse";
   const searchTerm = hasActiveQuery ? trimmedQuery.value : undefined;
+
+  if (hasActiveQuery) {
+    catalogStore.endSearchSession("played_song", { title: song.displayTitle, source });
+  }
+
   playbackStore.openSong(song, source, provider, foundVia, searchTerm);
 }
 
@@ -114,6 +119,11 @@ async function triggerOnlineSearch(): Promise<void> {
 
   showOfflineResults.value = false;
   resetScrollPosition();
+
+  if (trimmedQuery.value.length > 0) {
+    catalogStore.addQueryToCurrentSession(`online:${trimmedQuery.value}`);
+  }
+
   await onlineSearchStore.search(query.value, config.value, secret.value);
 }
 
@@ -154,7 +164,13 @@ function closeAiSuggestionModal(): void {
   });
 }
 
+function openAiSuggestionModal(): void {
+  catalogStore.endSearchSession("switched_activity");
+  aiSuggestionStore.openModal();
+}
+
 function openSongRequestModal(): void {
+  catalogStore.endSearchSession("switched_activity");
   songRequestModalOpen.value = true;
 }
 
@@ -351,7 +367,7 @@ const spinnerIcon = `
             type="button"
             :title="configStore.aiTitle"
             :aria-label="configStore.aiTitle"
-            @click="aiSuggestionStore.openModal()"
+            @click="openAiSuggestionModal"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" fill="currentColor" />
@@ -440,7 +456,7 @@ const spinnerIcon = `
         :ai-suggestions-enabled="aiSuggestionsEnabled"
         :is-online="isOnline"
         @online-search="triggerOnlineSearch"
-        @open-ai="aiSuggestionStore.openModal()"
+        @open-ai="openAiSuggestionModal"
         @open-song-request="openSongRequestModal"
       />
 
