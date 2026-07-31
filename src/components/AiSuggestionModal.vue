@@ -68,7 +68,9 @@ function handleSuggestionClick(suggestion: ChatSuggestionResult): void {
   if (!song) return;
 
   const source: "online" | "local" = suggestion.status === "online" ? "online" : "local";
-  playbackStore.openSong(song, source);
+  const lastUserMessage = messages.value.filter((m) => m.role === "user").pop();
+  const searchTerm = lastUserMessage?.text;
+  playbackStore.openSong(song, source, undefined, "ai_suggestion", searchTerm);
   closeModal();
 }
 

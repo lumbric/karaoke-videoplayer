@@ -1,10 +1,13 @@
 import { mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import StatsPanel from "./StatsPanel.vue";
-import { loadPlayedLog } from "../services/storage";
+import { loadPlayedLog, loadSearchLog, loadAiChatLog, loadSongSuggestions } from "../services/storage";
 
 vi.mock("../services/storage", () => ({
-  loadPlayedLog: vi.fn()
+  loadPlayedLog: vi.fn(),
+  loadSearchLog: vi.fn(),
+  loadAiChatLog: vi.fn(),
+  loadSongSuggestions: vi.fn()
 }));
 
 vi.mock("chart.js/auto", () => {
@@ -22,10 +25,19 @@ vi.mock("chart.js/auto", () => {
 });
 
 const loadPlayedLogMock = vi.mocked(loadPlayedLog);
+const loadSearchLogMock = vi.mocked(loadSearchLog);
+const loadAiChatLogMock = vi.mocked(loadAiChatLog);
+const loadSongSuggestionsMock = vi.mocked(loadSongSuggestions);
 
 describe("StatsPanel", () => {
   beforeEach(() => {
     loadPlayedLogMock.mockReset();
+    loadSearchLogMock.mockReset();
+    loadAiChatLogMock.mockReset();
+    loadSongSuggestionsMock.mockReset();
+    loadSearchLogMock.mockReturnValue([]);
+    loadAiChatLogMock.mockReturnValue([]);
+    loadSongSuggestionsMock.mockReturnValue([]);
   });
 
   it("renders summary from played log", async () => {

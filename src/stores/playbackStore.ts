@@ -1,11 +1,13 @@
 import { defineStore } from "pinia";
-import type { PlayEventProviderMeta, SongRecord, SongSource } from "../types";
+import type { PlayEventProviderMeta, SearchMethod, SongRecord, SongSource } from "../types";
 import { appendPlayEvent } from "../services/storage";
 
 interface PlaybackState {
   activeSong: SongRecord | null;
   source: SongSource;
   provider?: PlayEventProviderMeta;
+  foundVia?: SearchMethod;
+  searchTerm?: string;
   isOpen: boolean;
   isPaused: boolean;
   currentTimeSeconds: number;
@@ -25,6 +27,8 @@ export const usePlaybackStore = defineStore("playback", {
     activeSong: null,
     source: "local",
     provider: undefined,
+    foundVia: undefined,
+    searchTerm: undefined,
     isOpen: false,
     isPaused: false,
     currentTimeSeconds: 0,
@@ -42,10 +46,12 @@ export const usePlaybackStore = defineStore("playback", {
     }
   },
   actions: {
-    openSong(song: SongRecord, source: SongSource = "local", provider?: PlayEventProviderMeta): void {
+    openSong(song: SongRecord, source: SongSource = "local", provider?: PlayEventProviderMeta, foundVia?: SearchMethod, searchTerm?: string): void {
       this.activeSong = song;
       this.source = source;
       this.provider = provider;
+      this.foundVia = foundVia;
+      this.searchTerm = searchTerm;
       this.isOpen = true;
       this.isPaused = false;
       this.currentTimeSeconds = 0;
@@ -76,11 +82,15 @@ export const usePlaybackStore = defineStore("playback", {
         completed,
         playPercentage: percentage,
         source: this.source,
-        provider: this.provider
+        provider: this.provider,
+        foundVia: this.foundVia,
+        searchTerm: this.searchTerm
       });
 
       this.activeSong = null;
       this.provider = undefined;
+      this.foundVia = undefined;
+      this.searchTerm = undefined;
       this.isOpen = false;
       this.isPaused = false;
       this.currentTimeSeconds = 0;

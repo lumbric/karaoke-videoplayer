@@ -1,7 +1,9 @@
-import type { PlayEvent, SongSuggestion } from "../types";
+import type { AiChatEvent, PlayEvent, SearchEvent, SongSuggestion } from "../types";
 
 const SONG_REQUESTS_KEY = "songRequests";
 const PLAYED_LOG_KEY = "playedLog";
+const SEARCH_LOG_KEY = "searchLog";
+const AI_CHAT_LOG_KEY = "aiChatLog";
 
 function parseJsonArray<T>(raw: string | null): T[] {
   if (!raw) {
@@ -45,4 +47,24 @@ export function saveSongSuggestion(entry: SongSuggestion): { ok: true } | { ok: 
   localStorage.setItem(SONG_REQUESTS_KEY, JSON.stringify(current));
 
   return { ok: true };
+}
+
+export function loadSearchLog(): SearchEvent[] {
+  return parseJsonArray<SearchEvent>(localStorage.getItem(SEARCH_LOG_KEY));
+}
+
+export function appendSearchEvent(entry: SearchEvent): void {
+  const current = loadSearchLog();
+  current.push(entry);
+  localStorage.setItem(SEARCH_LOG_KEY, JSON.stringify(current));
+}
+
+export function loadAiChatLog(): AiChatEvent[] {
+  return parseJsonArray<AiChatEvent>(localStorage.getItem(AI_CHAT_LOG_KEY));
+}
+
+export function appendAiChatEvent(entry: AiChatEvent): void {
+  const current = loadAiChatLog();
+  current.push(entry);
+  localStorage.setItem(AI_CHAT_LOG_KEY, JSON.stringify(current));
 }

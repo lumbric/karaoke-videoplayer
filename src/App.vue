@@ -80,7 +80,10 @@ function resetScrollPosition(): void {
 
 function onSongClicked(song: SongRecord, source: "local" | "online" = "local"): void {
   const provider = source === "online" ? buildOnlineProviderMeta(song) : undefined;
-  playbackStore.openSong(song, source, provider);
+  const hasActiveQuery = trimmedQuery.value.length > 0;
+  const foundVia = source === "online" && hasActiveQuery ? "online_search" : hasActiveQuery ? "local_search" : "browse";
+  const searchTerm = hasActiveQuery ? trimmedQuery.value : undefined;
+  playbackStore.openSong(song, source, provider, foundVia, searchTerm);
 }
 
 function buildOnlineProviderMeta(song: SongRecord): PlayEventProviderMeta | undefined {

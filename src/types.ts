@@ -1,5 +1,7 @@
 export type SongSource = "local" | "online";
 
+export type SearchMethod = "local_search" | "online_search" | "ai_suggestion" | "browse";
+
 export interface PlayEventProviderMeta {
   id?: string;
   url?: string;
@@ -102,6 +104,8 @@ export interface PlayEvent {
   playPercentage: number;
   source: SongSource;
   provider?: PlayEventProviderMeta;
+  foundVia?: SearchMethod;
+  searchTerm?: string;
 }
 
 export interface SecretConfig {
@@ -114,4 +118,26 @@ export interface ThemeConfig {
     title?: string;
     logoPath?: string;
   };
+}
+
+export type SearchSource = "local" | "online" | "ai";
+
+export interface SearchEvent {
+  query: string;
+  timestamp: string;
+  source: SearchSource;
+  resultCount: number;
+}
+
+export interface AiChatSuggestion {
+  title: string;
+  artist: string;
+  status: "local" | "online" | "not_found";
+}
+
+export interface AiChatEvent {
+  timestamp: string;
+  userMessage: string;
+  assistantMessage: string;
+  suggestions: AiChatSuggestion[];
 }

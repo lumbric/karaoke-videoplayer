@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Chart, type ChartConfiguration } from "chart.js/auto";
-import { loadPlayedLog } from "../services/storage";
+import { loadPlayedLog, loadSearchLog, loadAiChatLog, loadSongSuggestions } from "../services/storage";
 import { aggregatePlayEvents, formatDuration } from "../services/stats";
 
 const emit = defineEmits<{
@@ -17,6 +17,9 @@ const hourlyChart = ref<Chart | null>(null);
 const completionChart = ref<Chart | null>(null);
 const playTimeChart = ref<Chart | null>(null);
 const playedLog = ref(loadPlayedLog());
+const searchLog = ref(loadSearchLog());
+const aiChatLog = ref(loadAiChatLog());
+const songRequests = ref(loadSongSuggestions());
 
 const summary = computed(() => aggregatePlayEvents(playedLog.value));
 
@@ -26,23 +29,53 @@ function closePanel(): void {
 
 function refreshData(): void {
   playedLog.value = loadPlayedLog();
+  searchLog.value = loadSearchLog();
+  aiChatLog.value = loadAiChatLog();
+  songRequests.value = loadSongSuggestions();
 }
 
 function toDataUri(data: string): string {
   return `data:application/json;charset=utf-8,${encodeURIComponent(data)}`;
 }
 
-function exportStats(): void {
-  const payload = JSON.stringify({
-    exportedAt: new Date().toISOString(),
-    summary: summary.value,
-    playedLog: playedLog.value
-  }, null, 2);
-
+function downloadJson(data: unknown, filename: string): void {
+  const payload = JSON.stringify(data, null, 2);
   const link = document.createElement("a");
   link.href = toDataUri(payload);
-  link.download = `karaoke-stats-${new Date().toISOString().slice(0, 10)}.json`;
+  link.download = filename;
   link.click();
+}
+
+function exportStats(): void {
+  downloadJson({
+    exportedAt: new Date().toISOString(),
+    summary: summary.value,
+    playedLog: playedLog.value,
+    searchLog: searchLog.value,
+    aiChatLog: aiChatLog.value,
+    songRequests: songRequests.value
+  }, `karaoke-stats-${new Date().toISOString().slice(0, 10)}.json`);
+}
+
+function exportSearchLog(): void {
+  downloadJson({
+    exportedAt: new Date().toISOString(),
+    searchLog: searchLog.value
+  }, `karaoke-searches-${new Date().toISOString().slice(0, 10)}.json`);
+}
+
+function exportAiChatLog(): void {
+  downloadJson({
+    exportedAt: new Date().toISOString(),
+    aiChatLog: aiChatLog.value
+  }, `karaoke-ai-chats-${new Date().toISOString().slice(0, 10)}.json`);
+}
+
+function exportSongRequests(): void {
+  downloadJson({
+    exportedAt: new Date().toISOString(),
+    songRequests: songRequests.value
+  }, `karaoke-song-requests-${new Date().toISOString().slice(0, 10)}.json`);
 }
 
 function formatTimestamp(value: string): string {
@@ -249,7 +282,10 @@ onBeforeUnmount(() => {
         <h2 class="stats-title">Statistik</h2>
         <div class="stats-actions">
           <button class="btn" type="button" @click="refreshData">Neu laden</button>
-          <button class="btn" type="button" @click="exportStats">Export JSON</button>
+          <button class="btn" type="button" @click="exportStats">Export alle Daten</button>
+          <button class="btn" type="button" @click="exportSearchLog">Export Suchen</button>
+          <button class="btn" type="button" @click="exportAiChatLog">Export AI Chats</button>
+          <button class="btn" type="button" @click="exportSongRequests">Export Liedwünsche</button>
           <button class="btn btn-icon" type="button" title="Schließen" aria-label="Schließen" @click="closePanel">X</button>
         </div>
       </header>

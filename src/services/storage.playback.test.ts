@@ -18,4 +18,24 @@ describe("playback log storage", () => {
     expect(entries[0]?.title).toBe("Bohemian Rhapsody");
     expect(entries[0]?.playedSeconds).toBe(120);
   });
+
+  it("stores play events with foundVia and searchTerm", () => {
+    appendPlayEvent({
+      title: "Song from Search",
+      timestamp: "2026-07-24T12:05:00.000Z",
+      playedSeconds: 180,
+      totalDuration: 200,
+      completed: true,
+      playPercentage: 90,
+      source: "online",
+      foundVia: "online_search",
+      searchTerm: "test query"
+    });
+
+    const entries = loadPlayedLog();
+    const lastEntry = entries[entries.length - 1];
+    expect(lastEntry?.title).toBe("Song from Search");
+    expect(lastEntry?.foundVia).toBe("online_search");
+    expect(lastEntry?.searchTerm).toBe("test query");
+  });
 });

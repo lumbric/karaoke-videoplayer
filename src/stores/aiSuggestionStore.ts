@@ -4,6 +4,7 @@ import { fetchAiSuggestions, type AiSuggestionResponse, type AiSuggestionItem } 
 import { searchOnline } from "../services/onlineSearch";
 import { normalizeForSearch } from "../utils/normalize";
 import { getSearchScore } from "../utils/fuzzy";
+import { appendAiChatEvent } from "../services/storage";
 
 export interface ChatSuggestionResult {
   title: string;
@@ -187,6 +188,17 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
         };
         this.messages.push(assistantMessage);
         this.startTypingAnimation(assistantMessage.id);
+
+        appendAiChatEvent({
+          timestamp: new Date().toISOString(),
+          userMessage: trimmedText,
+          assistantMessage: response.message,
+          suggestions: resolvedSuggestions.map((s) => ({
+            title: s.title,
+            artist: s.artist,
+            status: s.status
+          }))
+        });
       } catch (error) {
         if (controller.signal.aborted) return;
         this.error = error instanceof Error ? error.message : String(error);

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import type { AppConfig, SongRecord } from "../types";
 import { loadSongCatalog } from "../services/songCatalog";
 import { getSearchScore } from "../utils/fuzzy";
+import { appendSearchEvent } from "../services/storage";
 
 interface CatalogState {
   allSongs: SongRecord[];
@@ -14,6 +15,7 @@ interface CatalogState {
   batchSize: number;
   loading: boolean;
   error: string | null;
+  searchLogTimer: ReturnType<typeof setTimeout> | null;
 }
 
 function compareSongsStable(a: SongRecord, b: SongRecord): number {
@@ -47,7 +49,8 @@ export const useCatalogStore = defineStore("catalog", {
     maxDisplayCount: 200,
     batchSize: 30,
     loading: false,
-    error: null
+    error: null,
+    searchLogTimer: null
   }),
   getters: {
     availableGenres: (state): string[] => {
@@ -141,6 +144,23 @@ export const useCatalogStore = defineStore("catalog", {
         this.reshuffleIdleOrder();
       }
       this.renderedCount = this.batchSize;
+
+      if (this.searchLogTimer) {
+        clearTimeout(this.searchLogTimer);
+      }
+
+      if (hasQuery) {
+        this.searchLogTimer = setTimeout(() => {
+          const resultCount = this.filteredSongs.length;
+          appendSearchEvent({
+            query: this.query.trim(),
+            timestamp: new Date().toISOString(),
+            source: "local",
+            resultCount
+          });
+          this.searchLogTimer = null;
+        }, 1000);
+      }
     },
     setGenres(genres: string[]): void {
       this.selectedGenres = genres;
