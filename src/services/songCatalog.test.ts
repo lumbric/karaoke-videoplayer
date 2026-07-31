@@ -17,7 +17,7 @@ const config: AppConfig = {
     videoProviders: []
   },
   ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000, sendCatalog: true },
-  paths: { songsJson: "/data/songs.json", videosBase: "/songs", coversBase: "/covers" }
+  paths: { songsJson: "data/songs.json", videosBase: "songs", coversBase: "covers" }
 };
 
 describe("mapSongRaw", () => {

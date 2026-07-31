@@ -1,31 +1,32 @@
 import type { AppConfig, SecretConfig, SearchProviderConfig, VideoProviderConfig, ThemeConfig } from "../types";
+import { resolveUrl } from "../utils/basePath";
 
 function normalizeThemeName(name: string): string {
   return name.trim().replace(/^\/+|\/+$/g, "");
 }
 
 export function getThemeCssPath(config: AppConfig): string {
-  return `/themes/${normalizeThemeName(config.theme.name)}/theme.css`;
+  return resolveUrl(`/themes/${normalizeThemeName(config.theme.name)}/theme.css`);
 }
 
 export function getThemeLogoPath(config: AppConfig): string {
-  return `/themes/${normalizeThemeName(config.theme.name)}/logo.png`;
+  return resolveUrl(`/themes/${normalizeThemeName(config.theme.name)}/logo.png`);
 }
 
 export function getThemeLogoFallbackPath(config: AppConfig): string {
-  return `/themes/${normalizeThemeName(config.theme.name)}/logo.svg`;
+  return resolveUrl(`/themes/${normalizeThemeName(config.theme.name)}/logo.svg`);
 }
 
 export function getThemeCoverFallbackPath(config: AppConfig): string {
-  return `/themes/${normalizeThemeName(config.theme.name)}/cover_fallback.svg`;
+  return resolveUrl(`/themes/${normalizeThemeName(config.theme.name)}/cover_fallback.svg`);
 }
 
 export function getThemeConfigPath(themeName: string): string {
-  return `/themes/${normalizeThemeName(themeName)}/theme.config.json`;
+  return resolveUrl(`/themes/${normalizeThemeName(themeName)}/theme.config.json`);
 }
 
 export function getThemeAiLogoPath(themeName: string): string {
-  return `/themes/${normalizeThemeName(themeName)}/ai-logo.png`;
+  return resolveUrl(`/themes/${normalizeThemeName(themeName)}/ai-logo.png`);
 }
 
 const DEFAULT_THEME_CONFIG: ThemeConfig = {
@@ -42,7 +43,7 @@ export function resolveThemeConfig(themeConfig: ThemeConfig | null): ThemeConfig
   return {
     ai: {
       title: themeConfig.ai?.title ?? DEFAULT_THEME_CONFIG.ai!.title,
-      logoPath: themeConfig.ai?.logoPath
+      logoPath: themeConfig.ai?.logoPath ? resolveUrl(themeConfig.ai.logoPath) : undefined
     }
   };
 }
@@ -190,9 +191,9 @@ export function parseConfig(raw: unknown): AppConfig {
       sendCatalog: ai.sendCatalog !== undefined ? ensureBoolean(ai.sendCatalog, "ai.sendCatalog") : true
     },
     paths: {
-      songsJson: ensureString(paths.songsJson, "paths.songsJson"),
-      videosBase: ensureString(paths.videosBase, "paths.videosBase"),
-      coversBase: ensureString(paths.coversBase, "paths.coversBase")
+      songsJson: resolveUrl(ensureString(paths.songsJson, "paths.songsJson")),
+      videosBase: resolveUrl(ensureString(paths.videosBase, "paths.videosBase")),
+      coversBase: resolveUrl(ensureString(paths.coversBase, "paths.coversBase"))
     }
   };
 }
@@ -200,7 +201,7 @@ export function parseConfig(raw: unknown): AppConfig {
 export async function loadRuntimeConfig(fetchImpl: typeof fetch = fetch): Promise<AppConfig> {
   let response: Response;
   try {
-    response = await fetchImpl("/config.json", { cache: "no-store" });
+    response = await fetchImpl(resolveUrl("/config.json"), { cache: "no-store" });
   } catch (error) {
     throw new Error(`Konfiguration konnte nicht geladen werden: ${String(error)}`);
   }

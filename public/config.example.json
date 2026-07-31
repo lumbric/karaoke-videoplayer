@@ -30,8 +30,8 @@
     "sendCatalog": true
   },
   "paths": {
-    "songsJson": "/data/songs.json",
-    "videosBase": "/songs",
-    "coversBase": "/covers"
+    "songsJson": "data/songs.json",
+    "videosBase": "songs",
+    "coversBase": "covers"
   }
 }

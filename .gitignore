@@ -23,6 +23,6 @@ test-results/
 
 poster2026.jpg
 public/data/songs.json
-public/songs
-public/songs/
-public/songs-LOCAL/
+new-songs/
+new-covers/
+songs_LOCAL/

@@ -14,7 +14,7 @@ describe("parseConfig", () => {
       search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
     });
 
     expect(config.theme.title).toBe("Test");
@@ -29,7 +29,7 @@ describe("parseConfig", () => {
       search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000 },
-      paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
     });
 
     expect(config.ai.sendCatalog).toBe(true);
@@ -42,7 +42,7 @@ describe("parseConfig", () => {
       search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: false },
-      paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
     });
 
     expect(config.ai.sendCatalog).toBe(false);
@@ -55,12 +55,12 @@ describe("parseConfig", () => {
       search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
     });
 
-    expect(getThemeCssPath(config)).toBe("/themes/default/theme.css");
-    expect(getThemeLogoPath(config)).toBe("/themes/default/logo.png");
-    expect(getThemeCoverFallbackPath(config)).toBe("/themes/default/cover_fallback.svg");
+    expect(getThemeCssPath(config)).toContain("/themes/default/theme.css");
+    expect(getThemeLogoPath(config)).toContain("/themes/default/logo.png");
+    expect(getThemeCoverFallbackPath(config)).toContain("/themes/default/cover_fallback.svg");
   });
 
   it("throws for invalid initialOrder", () => {
@@ -71,7 +71,7 @@ describe("parseConfig", () => {
         search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "desc", randomSeed: 2, showMetadataSnippet: true },
         providers: baseProviders,
         ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-        paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+        paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
       });
     }).toThrow("search.initialOrder");
   });
@@ -87,7 +87,7 @@ describe("parseConfig", () => {
           videoProviders: [{ type: "youtube" }]
         },
         ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-        paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+        paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
       });
     }).toThrow("searchProviders[0].type");
   });
@@ -103,7 +103,7 @@ describe("parseConfig", () => {
           videoProviders: [{ type: "unknown" }]
         },
         ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-        paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+        paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
       });
     }).toThrow("videoProviders[0].type");
   });
@@ -122,14 +122,14 @@ describe("loadRuntimeConfig", () => {
           videoProviders: [{ type: "youtube" }]
         },
         ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-        paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+        paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
       })
     });
 
     const config = await loadRuntimeConfig(fetchMock as unknown as typeof fetch);
     expect(config.search.initialOrder).toBe("random");
     expect(config.providers.searchProviders[0].type).toBe("invidious");
-    expect(fetchMock).toHaveBeenCalledWith("/config.json", { cache: "no-store" });
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("config.json"), { cache: "no-store" });
   });
 });
 
@@ -144,7 +144,7 @@ describe("validateProviderSecrets", () => {
         videoProviders: [{ type: "youtube" }]
       },
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
     });
 
     expect(() => validateProviderSecrets(config, {})).not.toThrow();
@@ -160,7 +160,7 @@ describe("validateProviderSecrets", () => {
         videoProviders: [{ type: "youtube" }]
       },
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
     });
 
     expect(() => validateProviderSecrets(config, {})).toThrow("youtubeApiKey");
@@ -176,7 +176,7 @@ describe("validateProviderSecrets", () => {
         videoProviders: [{ type: "youtube" }]
       },
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "/songs.json", videosBase: "/videos", coversBase: "/covers" }
+      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
     });
 
     expect(() => validateProviderSecrets(config, { youtubeApiKey: "KEY" })).not.toThrow();

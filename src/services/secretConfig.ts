@@ -1,9 +1,10 @@
 import type { SecretConfig } from "../types";
+import { resolveUrl } from "../utils/basePath";
 
 export async function loadSecretConfig(fetchImpl: typeof fetch = fetch): Promise<SecretConfig> {
   let response: Response;
   try {
-    response = await fetchImpl("/secret-config.json", { cache: "no-store" });
+    response = await fetchImpl(resolveUrl("/secret-config.json"), { cache: "no-store" });
   } catch (error) {
     // Secret config is optional unless required by provider validation.
     // A missing file is treated as empty secrets.

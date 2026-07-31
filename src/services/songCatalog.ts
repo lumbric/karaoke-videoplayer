@@ -1,6 +1,7 @@
 import type { AppConfig, SongRecord, SongRecordRaw } from "../types";
 import { getThemeCoverFallbackPath } from "./config";
 import { tokenizeNormalized } from "../utils/normalize";
+import { resolveUrl } from "../utils/basePath";
 
 function normalizeGenres(genre: string | string[] | undefined): string[] {
   if (!genre) {
@@ -38,7 +39,7 @@ function buildVideoCandidates(raw: SongRecordRaw, config: AppConfig): string[] {
 
   const filename = raw.filename.trim();
   const hasExtension = /\.[a-z0-9]+$/i.test(filename);
-  const bases = uniquePaths([config.paths.videosBase, "/songs", "/videos"]);
+  const bases = uniquePaths([config.paths.videosBase, resolveUrl("/songs"), resolveUrl("/videos")]);
   const names = hasExtension ? [filename] : [`${filename}.mp4`, `${filename}.webm`, `${filename}.m4v`];
 
   return uniquePaths(
