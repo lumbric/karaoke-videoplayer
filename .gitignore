@@ -1,28 +1,20 @@
-videos/
-covers
-extra_metadata.json
-videos.json
+/videos/
+/covers/
+
 update-song-data.log
-secret-config.js
-secret-config.local.json
-secret-config.json
-public/secret-config.json
+
+/public/secret-config.json
+/public/data/songs.json
+/public/
+
 .env
 .env.*
 
+# All kind of notes and untracked archive
+/archive
 
-archive
-extra-download-songs
-stats_kultur-ab-hof-2024
-
-node_modules/
-dist/
-coverage/
-playwright-report/
-test-results/
-
-poster2026.jpg
-public/data/songs.json
-new-songs/
-new-covers/
-songs_LOCAL/
+/node_modules/
+/dist/
+/coverage/
+/playwright-report/
+/test-results/
