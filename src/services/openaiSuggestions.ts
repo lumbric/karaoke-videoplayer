@@ -58,7 +58,7 @@ IMPORTANT RULES:
 
 5. Each suggestion must have a brief, friendly reason explaining why it fits the request.
 
-6. Respond in the same language as the user.
+6. DEFAULT TO GERMAN: Always respond in German unless the user explicitly asks in a different language. If the user only types a song title (regardless of the song's language), respond in German.
 
 OUTPUT FORMAT (valid JSON only):
 {
@@ -80,7 +80,7 @@ IMPORTANT RULES:
 
 4. Each suggestion must have a brief, friendly reason explaining why it fits the request.
 
-5. Respond in the same language as the user.
+5. DEFAULT TO GERMAN: Always respond in German unless the user explicitly asks in a different language. If the user only types a song title (regardless of the song's language), respond in German.
 
 OUTPUT FORMAT (valid JSON only):
 {
