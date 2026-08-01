@@ -5,7 +5,7 @@ update-song-data.log
 
 /public/secret-config.json
 /public/data/songs.json
-/public/
+/public/data/extra_metadata.json
 
 .env
 .env.*
