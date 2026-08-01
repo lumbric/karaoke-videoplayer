@@ -1,208 +1,269 @@
-# Karaoke Song Player
+# Karaoke ab Hof 🎤
 
-Frontend-only SPA for kiosk karaoke usage. Built with Vue 3, Vite, TypeScript, Pinia, and localStorage persistence.
+[![License: WTFPL](https://img.shields.io/badge/License-WTFPL-brightgreen.svg)](http://www.wtfpl.net/about/)
 
-## Current Status
+A local web-based karaoke video player application originally built for the festival ["Kultur ab Hof"](https://kulturabhof.at/).
 
-Phase A (offline core) is implemented with:
-- runtime config loading from config.json before app mount
-- fatal startup error for missing/invalid config
-- base + override theme loading
-- local song catalog loading and mapping
-- search-as-you-type with normalization, typo tolerance, and Greek transliteration
-- genre filter and reset flow
-- batched endless list rendering
-- fullscreen playback with close, pause/resume, restart controls
-- auto-hide playback controls on inactivity
-- local play-event logging
-- statistics dashboard, charts, advanced lists, and JSON export
-- no-results song request form with localStorage persistence and duplicate prevention
-- unit and component test baseline for core modules
+![Screenshot](screenshot.png)
 
-Phase B (online search + video) is implemented with:
-- configurable search providers (Invidious, YouTube)
-- configurable video providers (YouTube, Invidious)
-- Invidious search + YouTube iframe playback
-- automatic fallback to online search when no local results match
-- explicit "Online suchen" button
-- same-card rendering for online results
-- local stats logging for online plays with `source="online"`
-- fatal startup error if YouTube search is configured without a secret API key
+![Screenshot Statistics](screenshot_stats01.png)
 
-Still out of scope:
-- AI suggestions (Phase C)
+![Screenshot Statistics (another one)](screenshot_stats02.png)
 
-## Install
 
-Requirements:
-- Node.js 20+
-- npm 10+
+> **⚠️ AI-Generated Code Warning**
+> This project was created as toy project using AI assistance (GitHub Copilot). While functional, the code is not thoroughly reviewed by a human. However, it seems to work good enough and for the purpose the risk is quite low.
 
-Commands:
-- npm install
-- npm run dev
-- npm run build
-- npm run preview
+## What it is
 
-## Docker
+- A web application to browse and play a local collection of karaoke videos
+- Fast search-as-you-type filtering by artist name or song title
+- Full-window video player experience (ideal for kiosk mode)
+- Built-in statistics: play counts, completion rates, and interactive charts
+- Responsive design optimized for large screens but works on smaller devices too
 
-Minimal container setup is included via Docker Compose.
+**Why offline?** This app was designed for the "Kultur ab Hof" festival where internet connectivity is limited or unavailable. Instead of relying on YouTube or streaming services, it uses a local collection of karaoke videos that work completely offline.
 
-- Dev server (HTTP):
-	- docker compose up app
-	- open http://localhost:5173
-- Build in container:
-	- docker compose run --rm build
-- Unit/component tests in container:
-	- docker compose run --rm test
+## How to Use
 
-Exposed ports:
-- 5173 for Vite dev server
-- 4173 reserved for Vite preview if you run it manually in the container
-
-Notes:
-- Docker context ignores archive data and local secrets via .dockerignore.
-- songs.json and extra_metadata.json are excluded from Docker context and should stay uncommitted.
-
-## Tests
-
-- npm test
-- npm run test:watch
-- npm run test:e2e
-
-## Runtime Config
-
-App startup requires public/config.json.
-
-Start from public/config.example.json and adjust values.
-
-Required top-level sections:
-- theme
-- features
-- search
-- providers
-- ai
-- paths
-
-Important fields:
-- theme.name
-- theme.title
-- search.batchSize
-- search.maxDisplayCount
-- paths.songsJson
-- paths.videosBase
-- paths.coversBase
-
-Provider configuration:
-- `providers.searchProviders`: array of `{ "type": "invidious" | "youtube", "baseUrls": string[] }`
-- `providers.videoProviders`: array of `{ "type": "youtube" | "invidious", "baseUrls": string[] }`
-- Set `features.onlineSearch: true` and add at least one search provider to enable online search.
-- Video provider `baseUrls` are currently only used by the Invidious video provider (not yet implemented).
-
-If config.json is missing or invalid, app startup intentionally fails with a visible error screen.
-
-If `providers.searchProviders` contains `{ "type": "youtube" }`, the app also requires `youtubeApiKey` in `secret-config.json` and will fail to start without it.
-
-## Theme Guide
-
-Theme architecture:
-- base styles: public/themes/base.css
-- event/theme override: public/themes/<theme-name>/theme.css
-
-To create a new theme:
-1. Create a folder public/themes/<theme-name>/.
-2. Add these required files in that folder:
-	- theme.css
-	- logo.svg
-	- cover_fallback.svg
-3. Change only the visual overrides you need in theme.css.
-4. Set theme.name in config.json to <theme-name>.
-5. Set the visible app header/browser title via theme.title.
-
-## Song Data Format
-
-Config field paths.songsJson points to your song file.
-
-Each entry supports:
-- filename (required)
-- id, title, artist (optional)
-- genre as string or string[] (optional)
-- duration_seconds (optional)
-- file and cover path overrides (optional)
-- has_cover (optional)
-
-Rules used by app:
-- missing file -> paths.videosBase + filename + .mp4
-- missing cover -> paths.coversBase + filename + .jpg
-- has_cover=false -> theme cover fallback
-- missing title -> derived from filename
-
-Sample fixture: public/data/songs.sample.json
-
-## Local Secrets
-
-Create a `public/secret-config.json` file by copying `secret-config.example.json` from the project root into `public/`.
+1. Collect karaoke video files (you can use [yt-dlp](https://github.com/yt-dlp/yt-dlp) to download from YouTube)
+2. Generate JSON metadata and download cover art using the script `update-song-data.py`
+3. Start a local web server and open the app in your browser
 
 ```bash
-cp secret-config.example.json public/secret-config.json
+# 1. Clone the repository
+git clone https://github.com/lumbric/karaoke-videoplayer/
+cd karaoke-videoplayer
+
+# 2. Create videos folder and add your MP4 files
+mkdir videos
+
+# Put your MP4 karaoke videos in the "videos" folder, file names will be used for metadata search queries
+
+# To download videos you can do so using yt-dlp
+# pip install yt-dlp
+# for url in $(cat song-urls.txt); do yt-dlp --format mp4 "$url"; done
+
+# 3. Generate metadata and covers (requires ffprobe and spotdl; see notes below)
+script/update-song-data.py
+# For offline mode (only filename + duration):
+# script/update-song-data.py --no-internet
+
+# 4. Start a web server of your choice
+# This step can be omitted if you enable direct file access in your browser (see below).
+python3 -m http.server 8000
+
+# 5. Open your browser and navigate to:
+# http://localhost:8000
 ```
 
-Supported secrets:
-- `openAiApiKey`: required for Phase C AI suggestions
-- `youtubeApiKey`: required when `providers.searchProviders` includes `{ "type": "youtube" }`
+### Themes / different layouts
 
-Do not commit real keys. `public/secret-config.json` is loaded at runtime and is ignored by git.
+How to Switch Themes:
 
-## Online Search Notes
+To change the theme, edit `THEME_NAME` in `theme-config.js`:
 
-Current implementation:
-- Search: configurable providers (`invidious` or `youtube`)
-- Playback: uses YouTube iframe embed with all optional UI disabled (`controls=0`, `rel=0`, `fs=0`, `disablekb=1`, etc.)
-- Manual online search: when no local results match, an "Online suchen" button appears; online search only runs when the user clicks it
-- Song request form: when no local results match, a form to request the song is shown; the title is prefilled with the search term
+````
+const THEME_CONFIG = {
+  // Change these lines to customize your app:
+  THEME_NAME: 'karaoke-ab-hof',  // Available: 'karaoke-ab-hof', 'dark-theme', 'neon-theme'
+  TITLE: 'Your Custom Title',    // The title displayed in the header and browser tab
+  // ... rest of config
+};
+````
 
-### Global on/off switch
-- `features.onlineFeatures` disables **all** online features when set to `false`.
-- On startup the app checks `navigator.onLine`. If the device is offline at startup, online features are disabled automatically (no later checks, so short outages do not hide the UI).
+### Quick start with kiosk mode
 
-### Invidious search
-- Public Invidious instances are often blocked by **CORS** in the browser (the server does not send `Access-Control-Allow-Origin`).
-- They may also require CAPTCHA or return 5xx errors.
-- If you see CORS errors in the console, Invidious search cannot work from a pure frontend without a proxy.
+Use the included script to automatically start a web server and open the browser in kiosk mode:
 
-### YouTube Data API search
-- Stable and no CORS issues.
-- Requires a free `youtubeApiKey` in `public/secret-config.json`.
-- Default quota is ~100 searches/day. Request more in Google Cloud if needed.
+```bash
+chmod +x scripts/start.sh
+scripts/start.sh
+```
 
-Example config to use YouTube search:
+**Note:** Users can still exit kiosk mode using keyboard shortcuts (Alt+F4, Alt+Tab).
+
+
+### Use a web server or allow local file access
+
+Modern browsers block direct file access for security reasons (CORS policy). When you open an HTML file directly using the `file://` protocol, the browser may block loading local videos and JSON files.
+
+**Two ways to run the app:**
+
+1. **Local web server (recommended):**
+   ```bash
+   python3 -m http.server 8000
+   # Then visit: http://localhost:8000
+   ```
+
+2. **Direct file access (requires browser configuration):**
+   - **Chromium/Chrome:** Launch with `--allow-file-access-from-files` flag
+   - **Firefox:** Set `about:config` → `security.fileuri.strict_origin_policy` = `false`
+
+The web server approach is recommended as it's safer and avoids CORS complications.
+
+
+## How it works
+
+The app is a single HTML file (`index.html`) that loads a JSON file (`videos.json`) containing your song library. Each entry provides metadata for search (artist/title), duration (for statistics), and cover art information.
+
+Statistics are stored locally in your browser's localStorage and reflect activity on the current device/browser only. Use the "Export Data" button on the stats page to download a JSON backup of your viewing history.
+
+## The update script
+
+**update-song-data.py** is a Python helper script that:
+
+- Scans the `videos/` folder for video files and writes `videos.json` and `extra_metadata.json`
+- Retrieves rich metadata (artist, title, genres) and downloads cover art via `spotdl` when internet is available
+- Extracts video duration using `ffprobe` (part of ffmpeg)
+- Can resume operation if interrupted (progress is saved regularly to disk)
+
+### Requirements for full functionality:
+- **Python 3.8+** with the `requests` package (`pip install requests`)
+- **ffmpeg/ffprobe** installed and available on PATH
+- **spotdl CLI** installed (`pip install spotdl` or `pipx install spotdl`)
+
+### Usage:
+```bash
+# Full mode (with internet): fetch metadata and covers
+script/update-song-data.py
+
+# Offline mode: only add filenames and durations
+script/update-song-data.py --no-internet
+
+# Verbose output for debugging
+script/update-song-data.py -v
+```
+
+
+## How it works
+
+The app is a single HTML file (`index.html`) that loads a JSON file (`videos.json`) listing available songs. Each entry provides metadata for search (artist/title), duration (used for stats), and cover art.
+
+Statistics are stored locally in your browser (localStorage) and reflect activity on the current device/browser only. Use the “Export Data” button on the stats page to download a JSON snapshot.
+
+## Scripts
+
+**update-song-data.py:**
+
+- Scans `videos/` for video files, writes `videos.json` and `extra_metadata.json`.
+- Retrieves metadata (artist, title, genres) and cover art via `spotdl` when internet is available.
+- Extracts video duration via `ffprobe` (part of ffmpeg).
+
+You can always abort the script and resume operation as JSON files are reguarly dumped to the disk and re-loaded when the script is started again.
+
+If you do not have internet access, you can use the script to simply add the file names to the videos.json file without querying for cover art and artist/song title.
+
+Requirements to use all features:
+- Python 3.8+ with `requests` (`pip install requests`), note that 
+- ffmpeg/ffprobe installed and on PATH
+- spotdl CLI installed (`pipx install spotdl` or `pip install spotdl`)
+
+## File Structure
+
+```
+karaoke-videoplayer/
+├── videos/                     # Your MP4 karaoke videos
+├── covers/                     # Cover images (auto-downloaded by the script)
+├── scripts
+│   ├── rename-video-files.sh   # clean file names after downloading them from Youtube
+│   ├── start.sh                # Starts a local server + browser in kiosk mode
+│   └── update-song-data.py     # Generates/updates videos.json, fetches covers/metadata
+├── static/                     # App assets (font, fallback cover, chart.js)
+├── index.html                  # The application
+├── extra_metadata.json         # Extra info from spotdl (not used by the web app)
+└── videos.json                 # Video metadata (auto-generated)
+```
+
+### Files
+
+**videos.json (required):**
+
+List of your songs. Only `filename` and `duration_seconds` are required by the app. If no `artist`/`title` are provided, the filename (without extension) will be displayed.
+
+By default, the app assumes these paths:
+  - Video file: `videos/{filename}.mp4`
+  - Cover image: `covers/{filename}.jpg`
+
+To override default paths (e.g., different file extensions), use these optional fields:
+  - `file`: full/relative path to the video file
+  - `cover`: full/relative path to the cover image
+
+Example:
 
 ```json
-{
-  "features": {
-    "onlineFeatures": true,
-    "onlineSearch": true,
-    "aiSuggestions": false
+[
+  {
+    "filename": "Die Ärzte - Schrei nach Liebe",
+    "duration_seconds": 273.25,
+    "artist": "Die Ärzte",
+    "title": "Schrei nach Liebe",
+    "genre": [
+      "neue deutsche welle",
+      "german pop"
+    ],
+    "has_cover": true,
+    "processed_at": "2025-08-08T10:36:55Z"
   },
-  "providers": {
-    "searchProviders": [{ "type": "youtube" }],
-    "videoProviders": [{ "type": "youtube" }]
+  {
+    "filename": "Green Day - Basket Case (karaoke)",
+    "duration_seconds": 186.5,
+    "artist": "Ameritz - Karaoke",
+    "title": "Basket Case (In the Style of Green Day) [Karaoke Version]",
+    "has_cover": true,
+    "processed_at": "2025-08-08T10:36:55Z"
   }
-}
+]
 ```
 
-Then create `public/secret-config.json`:
+**extra_metadata.json (optional):**
+Generated by `update-song-data.py` containing extended metadata from spotdl (cover URLs, lyrics, etc.). Used only by the update script for re-generating `videos.json`. Not directly used by the web app.
 
-```json
-{
-  "youtubeApiKey": "YOUR_YOUTUBE_DATA_API_KEY"
-}
-```
+**Video files:**
+Karaoke video files stored in `videos/`. Ideally named `Artist - Title.mp4` since the filename is used for metadata searches.
 
-## Kiosk Notes
+**Cover art:**
+JPEG images in `covers/`. Downloaded automatically by `update-song-data.py` when internet is available. The app shows a default cover icon when no cover image exists.
 
-Current shortcuts:
-- Ctrl/Cmd+K clears filters and focuses search
-- Escape clears active search/filter state
 
-Search input is auto-focused in browse mode for keyboard-first use.
+### Controls
+- **Search**: Type in the search box to filter songs
+- **Play Video**: Click any song card to start playing
+- **Fullscreen**: Videos fill the window (good for kiosk mode)
+- **Player Controls**: 
+  - ✕ button to close/exit fullscreen
+  - ⏸ Pause/▶ Play button
+  - ↻ Restart button to replay from beginning
+- **Statistics**: Click the chart button to view song popularity and usage stats
+
+### Keyboard shortcuts:
+- **ESC**: Exit fullscreen video, close stats page, or clear search (when idle)
+- **Space**: Pause/play video (when video is active)
+
+
+## Desktop Setup 2025
+
+At ["Kultur ab Hof"](https://kulturabhof.at/) we used a simple 4GB desktop computer
+
+The setup:
+- A sudo user "kah", password can be found on a paper inside the machine
+- A non-privileged user "singer" which is set to auto login and has no password.
+    - After login of user *singer*, Firefox starts the karaoke player in kiosk mode.
+    - Several keyboard shortcuts like ALT + F4, ALT + TAB are disabled in the Ubuntu settings.
+    - It is not impossible to escape, but users cannot break a lot (only delete the statistics and user settings).
+- Use CTRL+ESC and enter the password of the "kah" user. This will kill firefox using the script
+  `desktop-setup/kill-firefox.sh` and therefore allows to change settings or clear the statistics
+  of the user "singer".
+- Use CTRL+ALT+F3 (or F4), and login with user *kah* to download songs or change something in the source folder or download videos and covers. You can also run `sudo -u singer killall firefox`, then switch back to user *singer* to change settings or clear the statistics.
+
+*/home* is a separate partion. The machine runs on Ubuntu with 24.04.3 LTS.
+
+Many manual modifications were made:
+- disable screensaver
+- disable sysem sounds
+- Firefox
+    - allow direct file access
+    - disable devtools
+- allow empty passwords by addng `nullok` in /etc/pam.d/common-password to the line: `password	[success=2 default=ignore]	pam_unix.so obscure use_authtok try_first_pass yescrypt nullok`
+- Disable the Windows key: gsettings set org.gnome.mutter overlay-key 
+- ...
