@@ -74,10 +74,9 @@ const THEME_CONFIG = {
 
 ### Quick start with kiosk mode
 
-Build first, then use the included script to serve `dist/` and open Chromium in kiosk mode:
+Use the included script to automatically start a web server and open the browser in kiosk mode:
 
 ```bash
-npm run build
 chmod +x scripts/start.sh
 scripts/start.sh
 ```
@@ -93,7 +92,7 @@ Modern browsers block direct file access for security reasons (CORS policy). Whe
 
 1. **Local web server (recommended):**
    ```bash
-  python3 -m http.server 8000 --directory dist
+   python3 -m http.server 8000
    # Then visit: http://localhost:8000
    ```
 
@@ -292,22 +291,22 @@ At ["Kultur ab Hof"](https://kulturabhof.at/) we used a simple 4GB desktop compu
 The setup:
 - A sudo user "kah", password can be found on a paper inside the machine
 - A non-privileged user "singer" which is set to auto login and has no password.
-    - After login of user *singer*, Chromium starts the karaoke player in kiosk mode.
+    - After login of user *singer*, Firefox starts the karaoke player in kiosk mode.
     - Several keyboard shortcuts like ALT + F4, ALT + TAB are disabled in the Ubuntu settings.
     - It is not impossible to escape, but users cannot break a lot (only delete the statistics and user settings).
-- Use CTRL+ESC and enter the password of the "kah" user. This will kill the kiosk browser using the script
+- Use CTRL+ESC and enter the password of the "kah" user. This will kill firefox using the script
   `desktop-setup/kill-firefox.sh` and therefore allows to change settings or clear the statistics
   of the user "singer".
-- Use CTRL+ALT+F3 (or F4), and login with user *kah* to download songs or change something in the source folder or download videos and covers. You can also run `sudo -u singer killall chromium-browser`, then switch back to user *singer* to change settings or clear the statistics.
+- Use CTRL+ALT+F3 (or F4), and login with user *kah* to download songs or change something in the source folder or download videos and covers. You can also run `sudo -u singer killall firefox`, then switch back to user *singer* to change settings or clear the statistics.
 
 */home* is a separate partion. The machine runs on Ubuntu with 24.04.3 LTS.
 
 Many manual modifications were made:
 - disable screensaver
 - disable sysem sounds
-- Chromium
-  - kiosk start flags in `scripts/start.sh`
-  - optional hardening via managed policies (devtools, downloads, etc.)
+- Firefox
+    - allow direct file access
+    - disable devtools
 - allow empty passwords by addng `nullok` in /etc/pam.d/common-password to the line: `password	[success=2 default=ignore]	pam_unix.so obscure use_authtok try_first_pass yescrypt nullok`
 - Disable the Windows key: gsettings set org.gnome.mutter overlay-key 
 - ...
