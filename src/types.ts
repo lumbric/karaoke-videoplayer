@@ -114,6 +114,7 @@ export interface SecretConfig {
 }
 
 export interface ThemeConfig {
+  coverFallbackPath?: string;
   ai?: {
     title?: string;
     logoPath?: string;

@@ -16,39 +16,60 @@
 }
 
 :root {
-  --bg: #e8d5e0;
-  --surface: #d4b8e0;
+  --bg: #e6d1d7;
+  --surface: #d9b8dd;
   --surface-2: #ffffff;
-  --text: #2d2a5e;
-  --muted: #5a5280;
-  --accent: #c9a8d4;
-  --accent-2: #e8c547;
-  --danger: #ff8c9d;
+  --text: #2f2853;
+  --muted: #5f567f;
+  --accent: #cca8d8;
+  --accent-2: #f3ce62;
+  --danger: #de6f82;
   --icon-color: #ffffff;
-  --icon-color-inverse: #2d2a5e;
-  --radius: 15px;
-  --shadow: 0 8px 32px rgba(176, 140, 191, 0.3);
+  --icon-color-inverse: #2f2853;
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(144, 92, 153, 0.23);
 }
 
 body {
   margin: 0;
   font-family: "RocknRoll One", "Trebuchet MS", Arial, sans-serif;
   color: #ffffff;
-  background: #e8d5e0;
-  background-image: url("background_left.png"), url("background_right.png");
-  background-position: left bottom, right bottom;
-  background-repeat: no-repeat, no-repeat;
-  background-size: auto 100%, auto 100%;
+  background-color: var(--bg);
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.4;
-  padding-top: 280px;
+  padding-top: 300px;
 }
 
 .page {
-  max-width: 1400px;
+  max-width: 1380px;
   margin: 0 auto;
-  padding: 0 40px 40px;
+  padding: 0 36px 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.theme-side-art {
+  position: fixed;
+  bottom: 0;
+  z-index: 0;
+  width: min(33vw, 500px);
+  height: min(88vh, 920px);
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+
+.theme-side-art-left {
+  left: 0;
+  background-image: url("background_left.png");
+  background-position: left bottom;
+}
+
+.theme-side-art-right {
+  right: 0;
+  background-image: url("background_right.png");
+  background-position: right bottom;
 }
 
 .top-fixed {
@@ -57,14 +78,25 @@ body {
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 1400px;
+  max-width: 1380px;
   z-index: 32;
-  background: transparent;
+  background: #e6d1d7;
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  padding: 48px 40px 24px;
+  padding: 46px 36px 24px;
   box-sizing: border-box;
+}
+
+.top-fixed::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -52px;
+  height: 52px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(230, 209, 215, 1) 0%, rgba(230, 209, 215, 0) 100%);
 }
 
 .catalog-region {
@@ -95,15 +127,16 @@ body {
 .title {
   margin: 0;
   font-size: clamp(2.2rem, 5vw, 4rem);
-  color: #2d2a5e;
+  color: #2f2853;
   font-weight: bolder;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: none;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.45);
 }
 
 .controls {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
   max-width: 900px;
@@ -115,12 +148,12 @@ body {
   min-width: 0;
   padding: 1em 1.5em;
   font-size: 1.2em;
-  border: 0;
+  border: 3px solid rgba(255, 255, 255, 0.88);
   border-radius: 15px;
-  background: #ffffff;
-  color: #4e4e4e;
+  background: #fffaf3;
+  color: #5d4f6c;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 24px rgba(82, 62, 93, 0.2);
   transition: transform 0.1s ease, box-shadow 0.2s ease;
   outline: none;
   height:52px;
@@ -144,7 +177,7 @@ body {
 
 .genre-select,
 .btn {
-  border: 0;
+  border: 2px solid rgba(255, 255, 255, 0.8);
   border-radius: 15px;
   background: #c9a8d4;
   color: #ffffff;
@@ -203,7 +236,7 @@ body {
 .song-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
+  gap: 22px;
   align-items: start;
 }
 
@@ -214,19 +247,25 @@ body {
   grid-template-rows: auto 1fr;
   width: 100%;
   height: 100%;
-  background: #d4b8e0;
-  border-radius: 15px;
-  box-shadow: 0 8px 32px rgba(176, 140, 191, 0.3);
+  background: #d9b8dd;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(176, 140, 191, 0.28);
   overflow: hidden;
   cursor: pointer;
-  padding: 15px;
+  padding: 14px;
+  transform: translateY(0);
   transition: transform 0.1s ease, box-shadow 0.2s ease;
 }
 
 .song-card:hover,
 .song-card:focus-visible {
-  transform: scale(1.04);
+  transform: translateY(-3px) scale(1.02);
   box-shadow: 0 12px 40px rgba(176, 140, 191, 0.45);
+}
+
+.control-buttons .btn:hover,
+.control-buttons .btn:focus-visible {
+  transform: translateY(-1px);
 }
 
 .song-cover-frame {
@@ -234,7 +273,7 @@ body {
   aspect-ratio: 1 / 1;
   width: 100%;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.35) url("cover_fallback.png") center/cover no-repeat;
   border-radius: 15px;
 }
 
@@ -262,17 +301,18 @@ body {
   font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.25;
-  color: #2d2a5e;
+  color: #2f2853;
   text-align: center;
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .song-meta {
   margin: 0;
-  color: #2d2a5e;
+  color: #2f2853;
   font-size: 0.9rem;
   line-height: 1.2;
   text-align: center;
@@ -281,11 +321,12 @@ body {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
 }
 
 .song-meta-extra {
   margin: 0;
-  color: #2d2a5e;
+  color: #2f2853;
   font-size: 0.8rem;
   line-height: 1.2;
   text-align: center;
@@ -294,6 +335,7 @@ body {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .empty {
@@ -690,11 +732,22 @@ body {
   body {
     padding-top: 280px;
   }
+
+  .theme-side-art {
+    width: min(34vw, 430px);
+    height: min(82vh, 820px);
+  }
 }
 
 @media (max-width: 768px) {
   body {
     padding-top: 260px;
+  }
+
+  .theme-side-art {
+    width: min(40vw, 320px);
+    height: min(70vh, 620px);
+    opacity: 0.9;
   }
 
   .page {
@@ -767,6 +820,12 @@ body {
     padding-top: 240px;
   }
 
+  .theme-side-art {
+    width: min(44vw, 250px);
+    height: min(64vh, 480px);
+    opacity: 0.82;
+  }
+
   .logo {
     width: 64px;
   }
@@ -829,7 +888,7 @@ body {
 }
 
 .no-results-panel {
-  background: #d4b8e0;
+  background: #d9b8dd;
   border: 0;
   border-radius: 15px;
   box-shadow: 0 8px 32px rgba(176, 140, 191, 0.3);

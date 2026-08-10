@@ -12,12 +12,13 @@ export const useConfigStore = defineStore("config", {
   state: (): ConfigState => ({
     config: null,
     secret: {},
-    themeConfig: resolveThemeConfig(null)
+    themeConfig: resolveThemeConfig("default", null)
   }),
   getters: {
     isReady: (state) => state.config !== null,
     aiTitle: (state) => state.themeConfig.ai?.title ?? "Automatische Songvorschläge",
-    aiLogoPath: (state) => state.themeConfig.ai?.logoPath
+    aiLogoPath: (state) => state.themeConfig.ai?.logoPath,
+    coverFallbackPath: (state) => state.themeConfig.coverFallbackPath
   },
   actions: {
     setConfig(config: AppConfig): void {
@@ -27,7 +28,8 @@ export const useConfigStore = defineStore("config", {
       this.secret = secret;
     },
     setThemeConfig(themeConfig: ThemeConfig | null): void {
-      this.themeConfig = resolveThemeConfig(themeConfig);
+      const themeName = this.config?.theme.name ?? "default";
+      this.themeConfig = resolveThemeConfig(themeName, themeConfig);
     }
   }
 });

@@ -41,7 +41,7 @@ let observer: IntersectionObserver | null = null;
 
 const logoPath = computed(() => (config.value ? getThemeLogoPath(config.value) : ""));
 const logoFallbackPath = computed(() => (config.value ? getThemeLogoFallbackPath(config.value) : ""));
-const fallbackCover = computed(() => (config.value ? getThemeCoverFallbackPath(config.value) : ""));
+const fallbackCover = computed(() => configStore.coverFallbackPath ?? (config.value ? getThemeCoverFallbackPath(config.value) : ""));
 const showMetadataSnippet = computed(() => config.value?.search.showMetadataSnippet ?? true);
 const hasOfflineResults = computed(() => filteredSongs.value.length > 0);
 const hasOnlineResults = computed(() => onlineResults.value.length > 0);
@@ -319,6 +319,9 @@ const spinnerIcon = `
 
 <template>
   <main class="page">
+    <div class="theme-side-art theme-side-art-left" aria-hidden="true"></div>
+    <div class="theme-side-art theme-side-art-right" aria-hidden="true"></div>
+
     <div class="cosmic-decoration" aria-hidden="true" style="top: 10%; left: 5%;">♪</div>
     <div class="cosmic-decoration" aria-hidden="true" style="top: 20%; right: 8%;">★</div>
     <div class="cosmic-decoration" aria-hidden="true" style="bottom: 15%; left: 10%;">♫</div>

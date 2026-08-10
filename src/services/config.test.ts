@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { getThemeCoverFallbackPath, getThemeCssPath, getThemeLogoPath, loadRuntimeConfig, parseConfig, validateProviderSecrets } from "./config";
+import { getThemeCoverFallbackPath, getThemeCssPath, getThemeLogoPath, loadRuntimeConfig, parseConfig, resolveThemeConfig, validateProviderSecrets } from "./config";
 
 describe("parseConfig", () => {
   const baseProviders = {
@@ -61,6 +61,14 @@ describe("parseConfig", () => {
     expect(getThemeCssPath(config)).toContain("/themes/default/theme.css");
     expect(getThemeLogoPath(config)).toContain("/themes/default/logo.png");
     expect(getThemeCoverFallbackPath(config)).toContain("/themes/default/cover_fallback.svg");
+  });
+
+  it("resolves theme config cover fallback path override", () => {
+    const themeConfig = resolveThemeConfig("karaoke-ab-hof2026", {
+      coverFallbackPath: "themes/karaoke-ab-hof2026/cover_fallback.png"
+    });
+
+    expect(themeConfig.coverFallbackPath).toContain("/themes/karaoke-ab-hof2026/cover_fallback.png");
   });
 
   it("throws for invalid initialOrder", () => {

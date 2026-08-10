@@ -1,4 +1,5 @@
 {
+  "coverFallbackPath": "themes/default/cover_fallback.svg",
   "ai": {
     "title": "Automatische Songvorschläge"
   }

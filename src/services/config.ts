@@ -18,7 +18,8 @@ export function getThemeLogoFallbackPath(config: AppConfig): string {
 }
 
 export function getThemeCoverFallbackPath(config: AppConfig): string {
-  return resolveUrl(`/themes/${normalizeThemeName(config.theme.name)}/cover_fallback.svg`);
+  const themeName = normalizeThemeName(config.theme.name);
+  return resolveUrl(`/themes/${themeName}/cover_fallback.svg`);
 }
 
 export function getThemeConfigPath(themeName: string): string {
@@ -29,20 +30,25 @@ export function getThemeAiLogoPath(themeName: string): string {
   return resolveUrl(`/themes/${normalizeThemeName(themeName)}/ai-logo.png`);
 }
 
-const DEFAULT_THEME_CONFIG: ThemeConfig = {
-  ai: {
-    title: "Automatische Songvorschläge"
-  }
-};
+function getDefaultThemeConfig(themeName: string): ThemeConfig {
+  return {
+    coverFallbackPath: resolveUrl(`/themes/${normalizeThemeName(themeName)}/cover_fallback.svg`),
+    ai: {
+      title: "Automatische Songvorschläge"
+    }
+  };
+}
 
-export function resolveThemeConfig(themeConfig: ThemeConfig | null): ThemeConfig {
+export function resolveThemeConfig(themeName: string, themeConfig: ThemeConfig | null): ThemeConfig {
+  const defaults = getDefaultThemeConfig(themeName);
   if (!themeConfig) {
-    return DEFAULT_THEME_CONFIG;
+    return defaults;
   }
 
   return {
+    coverFallbackPath: themeConfig.coverFallbackPath ? resolveUrl(themeConfig.coverFallbackPath) : defaults.coverFallbackPath,
     ai: {
-      title: themeConfig.ai?.title ?? DEFAULT_THEME_CONFIG.ai!.title,
+      title: themeConfig.ai?.title ?? defaults.ai!.title,
       logoPath: themeConfig.ai?.logoPath ? resolveUrl(themeConfig.ai.logoPath) : undefined
     }
   };

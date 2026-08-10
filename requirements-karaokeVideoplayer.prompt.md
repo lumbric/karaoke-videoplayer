@@ -76,6 +76,26 @@ FR-011 There must be a shared base CSS layer used by all themes to avoid duplica
 
 FR-012 Theme override CSS should only contain necessary differences (colors, fonts, accents, optional spacing tweaks).
 
+#### 7.2.1 Theme Implementation Directive: `karaoke-ab-hof2026`
+FR-013 When implementing or improving the `karaoke-ab-hof2026` theme, the visual composition MUST follow the mockup in `archive/2026-07_kultur-ab-hof/new-artwork/layout-suggestion-chatgpt.png`.
+
+FR-014 For `karaoke-ab-hof2026`, the following are mandatory:
+- use both background assets in the theme CSS: `background_left.png` and `background_right.png`
+- do not show the app logo in the header (hide/remove via CSS only, without deleting component markup)
+- use the theme cover fallback image from the same theme folder for missing/broken cover images
+
+FR-015 Optional style direction for `karaoke-ab-hof2026`:
+- include subtle organic imperfection (slight non-linear/handmade feel)
+- examples: very small card/control rotation offsets, slightly uneven spacing, gently imperfect border feel
+- this style is secondary to usability; readability and click/tap reliability remain higher priority
+
+FR-016 `karaoke-ab-hof2026` acceptance criteria:
+- desktop and mobile layouts load correctly and remain usable
+- search input, filters, and action buttons stay visible and accessible in fixed-header browse mode
+- no overlapping layers may block song card interactions, scrolling, or modal controls
+- infinite scrolling and keyboard-first browse behavior must remain intact
+- visual hierarchy should clearly resemble the referenced mockup (title + controls + card field composition)
+
 ### 7.3 Song Catalog and List Rendering
 FR-020 App must load song collection from songs JSON data file (see Data Contracts section).
 
