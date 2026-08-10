@@ -2,7 +2,7 @@
 """
 Update Song Data
 
-This script generates or updates the videos.json file according to the files in the videos folder
+This script generates or updates the songs.json file according to the files in the data/videos folder
 and downloads cover images and metadata using spotdl for the song (if a network connection is
 available).
 
@@ -24,10 +24,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # Configuration
-VIDEOS_DIR = "videos"
-COVERS_DIR = "covers"
-OUTPUT_JSON = "videos.json"
-EXTRA_METADATA_JSON = "extra_metadata.json"
+VIDEOS_DIR = "data/videos"
+COVERS_DIR = "data/covers"
+OUTPUT_JSON = "data/songs.json"
+EXTRA_METADATA_JSON = "data/extra_metadata.json"
 
 # FIXME this is probably not necessary
 VIDEO_EXTENSIONS = [".mp4", ".avi", ".mkv", ".mov", ".webm", ".flv", ".m4v"]
@@ -101,7 +101,7 @@ def save_json_files(video_data, extra_metadata):
 
 
 def load_existing_data() -> Tuple[List[Dict], Dict]:
-    """Load existing videos.json and extra_metadata.json files."""
+    """Load existing songs.json and extra_metadata.json files."""
     existing_videos = []
     existing_extra_metadata = {}
 
@@ -263,7 +263,7 @@ def process_video_file(
         "video_entry": video_entry,
     }
 
-    # Build video entry for videos.json
+    # Build video entry for songs.json
     if "filename" not in video_entry:
         video_entry["filename"] = base_name
 
@@ -389,10 +389,10 @@ def main():
     ]
     if missing_video_files:
         raise RuntimeError(
-            "Missing video files, please remove from videos.json: "
+            "Missing video files, please remove from songs.json: "
             + ", ".join(missing_video_files)
         )
-    logging.info("Found all {len(video_data)} video files listed in the videos.json.")
+    logging.info("Found all {len(video_data)} video files listed in songs.json.")
 
     # Process each video file
     processed_count = 0

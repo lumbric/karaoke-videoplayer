@@ -1,20 +1,23 @@
-/videos/
-/covers/
+# data / songs / videos
+/data/
+/public/data/
 
 update-song-data.log
 
+# secrets
 /public/secret-config.json
-/public/data/songs.json
-/public/data/extra_metadata.json
+
 
 .env
 .env.*
 
-# All kind of notes and untracked archive
-/archive
-
+# npm / build related
 /node_modules/
 /dist/
 /coverage/
 /playwright-report/
 /test-results/
+
+
+# All kind of notes and untracked archive
+/archive

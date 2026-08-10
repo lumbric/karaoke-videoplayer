@@ -28,10 +28,5 @@
     "maxSuggestions": 5,
     "timeoutMs": 20000,
     "sendCatalog": false
-  },
-  "paths": {
-    "songsJson": "data/songs.json",
-    "videosBase": "videos",
-    "coversBase": "covers"
   }
 }

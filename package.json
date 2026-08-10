@@ -4,9 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "dev": "bash scripts/sync-data-links.sh && vite",
+    "build": "bash scripts/sync-data-links.sh && vue-tsc -b && vite build && rm -rf dist/data/videos dist/data/covers dist/data/songs.json dist/data/extra_metadata.json && bash scripts/sync-data-links.sh",
+    "build:prod": "npm run build",
     "preview": "vite preview",
+    "link:data": "bash scripts/sync-data-links.sh",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:component": "vitest run src/components",

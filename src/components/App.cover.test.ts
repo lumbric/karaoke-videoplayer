@@ -39,12 +39,7 @@ describe("App cover handling", () => {
         searchProviders: [{ type: "invidious", baseUrls: [] }],
         videoProviders: [{ type: "youtube" }]
       },
-      ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000, sendCatalog: true },
-      paths: {
-        songsJson: "data/songs.json",
-        videosBase: "songs",
-        coversBase: "covers"
-      }
+      ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000, sendCatalog: true }
     });
 
     const catalogStore = useCatalogStore();
@@ -55,9 +50,9 @@ describe("App cover handling", () => {
       artist: "Artist",
       genres: ["pop"],
       durationSeconds: 180,
-      filePath: "/songs/Song One.mp4",
-      videoCandidates: ["/songs/Song%20One.mp4"],
-      coverPath: "/covers/missing.jpg",
+      filePath: "/data/videos/Song%20One.mp4",
+      videoCandidates: ["/data/videos/Song%20One.mp4"],
+      coverPath: "/data/covers/missing.jpg",
       displayTitle: "Song One",
       searchIndex: "song one artist"
     }];

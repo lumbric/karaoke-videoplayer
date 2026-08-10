@@ -291,9 +291,6 @@ Suggested shape:
 - ai.model: string
 - ai.maxSuggestions: number
 - ai.timeoutMs: number
-- paths.songsJson: string
-- paths.videosBase: string
-- paths.coversBase: string
 
 ### 8.3 localStorage keys
 - playedLog: array of play events

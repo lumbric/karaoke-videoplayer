@@ -3,6 +3,10 @@ import { getThemeCoverFallbackPath } from "./config";
 import { tokenizeNormalized } from "../utils/normalize";
 import { resolveUrl } from "../utils/basePath";
 
+const VIDEOS_BASE = resolveUrl("/data/videos");
+const COVERS_BASE = resolveUrl("/data/covers");
+const SONGS_JSON_PATH = resolveUrl("/data/songs.json");
+
 function normalizeGenres(genre: string | string[] | undefined): string[] {
   if (!genre) {
     return [];
@@ -32,14 +36,14 @@ function uniquePaths(paths: string[]): string[] {
   return [...new Set(paths.filter((entry) => entry.trim().length > 0))];
 }
 
-function buildVideoCandidates(raw: SongRecordRaw, config: AppConfig): string[] {
+function buildVideoCandidates(raw: SongRecordRaw): string[] {
   if (raw.file?.trim()) {
     return [encodeMediaPath(raw.file.trim())];
   }
 
   const filename = raw.filename.trim();
   const hasExtension = /\.[a-z0-9]+$/i.test(filename);
-  const bases = uniquePaths([config.paths.videosBase, resolveUrl("/songs"), resolveUrl("/videos")]);
+  const bases = uniquePaths([VIDEOS_BASE]);
   const names = hasExtension ? [filename] : [`${filename}.mp4`, `${filename}.webm`, `${filename}.m4v`];
 
   return uniquePaths(
@@ -47,8 +51,8 @@ function buildVideoCandidates(raw: SongRecordRaw, config: AppConfig): string[] {
   );
 }
 
-function resolveFilePath(raw: SongRecordRaw, config: AppConfig): string {
-  return buildVideoCandidates(raw, config)[0] ?? "";
+function resolveFilePath(raw: SongRecordRaw): string {
+  return buildVideoCandidates(raw)[0] ?? "";
 }
 
 function resolveCoverPath(raw: SongRecordRaw, config: AppConfig): string {
@@ -60,7 +64,7 @@ function resolveCoverPath(raw: SongRecordRaw, config: AppConfig): string {
     return getThemeCoverFallbackPath(config);
   }
 
-  return `${config.paths.coversBase}/${raw.filename}.jpg`;
+  return `${COVERS_BASE}/${raw.filename}.jpg`;
 }
 
 function buildSearchSource(raw: SongRecordRaw, displayTitle: string): string {
@@ -105,8 +109,8 @@ export function mapSongRaw(raw: SongRecordRaw, config: AppConfig): SongRecord {
     artist: raw.artist,
     genres,
     durationSeconds: raw.duration_seconds,
-    filePath: resolveFilePath(raw, config),
-    videoCandidates: buildVideoCandidates(raw, config),
+    filePath: resolveFilePath(raw),
+    videoCandidates: buildVideoCandidates(raw),
     coverPath: resolveCoverPath(raw, config),
     displayTitle,
     searchIndex: searchSource,
@@ -115,7 +119,7 @@ export function mapSongRaw(raw: SongRecordRaw, config: AppConfig): SongRecord {
 }
 
 export async function loadSongCatalog(config: AppConfig, fetchImpl: typeof fetch = fetch): Promise<SongRecord[]> {
-  const response = await fetchImpl(config.paths.songsJson, { cache: "no-store" });
+  const response = await fetchImpl(SONGS_JSON_PATH, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`Songdatei konnte nicht geladen werden: HTTP ${response.status}.`);

@@ -35,8 +35,7 @@ function seedStores(showMetadataSnippet = true, onlineSearchEnabled = false): vo
       searchProviders: [{ type: "invidious", baseUrls: [] }],
       videoProviders: [{ type: "youtube" }]
     },
-    ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000, sendCatalog: true },
-    paths: { songsJson: "data/songs.json", videosBase: "songs", coversBase: "covers" }
+    ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000, sendCatalog: true }
   });
 
   const catalogStore = useCatalogStore();
@@ -48,9 +47,9 @@ function seedStores(showMetadataSnippet = true, onlineSearchEnabled = false): vo
       artist: "Alpha",
       genres: ["pop"],
       durationSeconds: 180,
-      filePath: "/songs/One.mp4",
-      videoCandidates: ["/songs/One.mp4"],
-      coverPath: "/covers/One.jpg",
+      filePath: "/data/videos/One.mp4",
+      videoCandidates: ["/data/videos/One.mp4"],
+      coverPath: "/data/covers/One.jpg",
       displayTitle: "One",
       searchIndex: "one alpha pop"
     },
@@ -61,9 +60,9 @@ function seedStores(showMetadataSnippet = true, onlineSearchEnabled = false): vo
       artist: "Beta",
       genres: ["rock"],
       durationSeconds: 200,
-      filePath: "/songs/Two.mp4",
-      videoCandidates: ["/songs/Two.mp4"],
-      coverPath: "/covers/Two.jpg",
+      filePath: "/data/videos/Two.mp4",
+      videoCandidates: ["/data/videos/Two.mp4"],
+      coverPath: "/data/covers/Two.jpg",
       displayTitle: "Two",
       searchIndex: "two beta rock"
     }
@@ -166,7 +165,7 @@ describe("App interactions", () => {
           durationSeconds: 180,
           filePath: "https://www.youtube.com/embed/online-1",
           videoCandidates: ["https://www.youtube.com/embed/online-1"],
-          coverPath: "/covers/online-1.jpg",
+          coverPath: "/data/covers/online-1.jpg",
           displayTitle: "Online One",
           searchIndex: "online one remote"
         }

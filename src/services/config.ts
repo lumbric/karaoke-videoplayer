@@ -155,9 +155,9 @@ export function parseConfig(raw: unknown): AppConfig {
     throw new Error("Ungültige Konfiguration: Wurzelobjekt fehlt.");
   }
 
-  const { theme, features, search, providers, ai, paths } = raw;
+  const { theme, features, search, providers, ai } = raw;
 
-  if (!isObject(theme) || !isObject(features) || !isObject(search) || !isObject(providers) || !isObject(ai) || !isObject(paths)) {
+  if (!isObject(theme) || !isObject(features) || !isObject(search) || !isObject(providers) || !isObject(ai)) {
     throw new Error("Ungültige Konfiguration: Ein oder mehrere Top-Level Abschnitte fehlen.");
   }
 
@@ -195,11 +195,6 @@ export function parseConfig(raw: unknown): AppConfig {
       maxSuggestions: Math.max(1, Math.floor(ensureNumber(ai.maxSuggestions, "ai.maxSuggestions"))),
       timeoutMs: Math.max(250, Math.floor(ensureNumber(ai.timeoutMs, "ai.timeoutMs"))),
       sendCatalog: ai.sendCatalog !== undefined ? ensureBoolean(ai.sendCatalog, "ai.sendCatalog") : true
-    },
-    paths: {
-      songsJson: resolveUrl(ensureString(paths.songsJson, "paths.songsJson")),
-      videosBase: resolveUrl(ensureString(paths.videosBase, "paths.videosBase")),
-      coversBase: resolveUrl(ensureString(paths.coversBase, "paths.coversBase"))
     }
   };
 }

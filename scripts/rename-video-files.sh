@@ -2,6 +2,11 @@
 
 # AI generated script to remove everything after a [ | or ( at the end of the file name.
 
+set -euo pipefail
+
+TARGET_DIR="${1:-data/videos}"
+cd "$TARGET_DIR"
+
 shopt -s nullglob
 for f in *; do
   [ -f "$f" ] || continue

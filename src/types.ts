@@ -75,11 +75,6 @@ export interface AppConfig {
     timeoutMs: number;
     sendCatalog: boolean;
   };
-  paths: {
-    songsJson: string;
-    videosBase: string;
-    coversBase: string;
-  };
 }
 
 export interface SongSuggestion {

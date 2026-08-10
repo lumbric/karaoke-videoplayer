@@ -13,8 +13,7 @@ describe("parseConfig", () => {
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
       search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
       providers: baseProviders,
-      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
 
     expect(config.theme.title).toBe("Test");
@@ -28,8 +27,7 @@ describe("parseConfig", () => {
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
       search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
       providers: baseProviders,
-      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000 },
-      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000 }
     });
 
     expect(config.ai.sendCatalog).toBe(true);
@@ -41,8 +39,7 @@ describe("parseConfig", () => {
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
       search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
       providers: baseProviders,
-      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: false },
-      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: false }
     });
 
     expect(config.ai.sendCatalog).toBe(false);
@@ -54,8 +51,7 @@ describe("parseConfig", () => {
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
       search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
       providers: baseProviders,
-      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
 
     expect(getThemeCssPath(config)).toContain("/themes/default/theme.css");
@@ -78,8 +74,7 @@ describe("parseConfig", () => {
         features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
         search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "desc", randomSeed: 2, showMetadataSnippet: true },
         providers: baseProviders,
-        ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-        paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+        ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
       });
     }).toThrow("search.initialOrder");
   });
@@ -94,8 +89,7 @@ describe("parseConfig", () => {
           searchProviders: [{ type: "unknown", baseUrls: [] }],
           videoProviders: [{ type: "youtube" }]
         },
-        ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-        paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+        ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
       });
     }).toThrow("searchProviders[0].type");
   });
@@ -110,8 +104,7 @@ describe("parseConfig", () => {
           searchProviders: [{ type: "invidious", baseUrls: [] }],
           videoProviders: [{ type: "unknown" }]
         },
-        ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-        paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+        ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
       });
     }).toThrow("videoProviders[0].type");
   });
@@ -129,8 +122,7 @@ describe("loadRuntimeConfig", () => {
           searchProviders: [{ type: "invidious", baseUrls: [] }],
           videoProviders: [{ type: "youtube" }]
         },
-        ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-        paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+        ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
       })
     });
 
@@ -151,8 +143,7 @@ describe("validateProviderSecrets", () => {
         searchProviders: [{ type: "invidious", baseUrls: ["https://example.com"] }],
         videoProviders: [{ type: "youtube" }]
       },
-      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
 
     expect(() => validateProviderSecrets(config, {})).not.toThrow();
@@ -167,8 +158,7 @@ describe("validateProviderSecrets", () => {
         searchProviders: [{ type: "youtube" }],
         videoProviders: [{ type: "youtube" }]
       },
-      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
 
     expect(() => validateProviderSecrets(config, {})).toThrow("youtubeApiKey");
@@ -183,8 +173,7 @@ describe("validateProviderSecrets", () => {
         searchProviders: [{ type: "youtube" }],
         videoProviders: [{ type: "youtube" }]
       },
-      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true },
-      paths: { songsJson: "songs.json", videosBase: "videos", coversBase: "covers" }
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
 
     expect(() => validateProviderSecrets(config, { youtubeApiKey: "KEY" })).not.toThrow();
