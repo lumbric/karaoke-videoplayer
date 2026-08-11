@@ -26,7 +26,7 @@ describe("searchOnline", () => {
     const songs = await searchOnline({ query: "karaoke", providers, secret });
 
     expect(songs).toHaveLength(1);
-    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ query: "karaoke" }));
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ query: "karaoke karaoke" }));
 
     spy.mockRestore();
   });
@@ -52,7 +52,7 @@ describe("searchOnline", () => {
     const songs = await searchOnline({ query: "karaoke", providers, secret });
 
     expect(songs).toHaveLength(1);
-    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ query: "karaoke", apiKey: "TEST_KEY" }));
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ query: "karaoke karaoke", apiKey: "TEST_KEY" }));
 
     spy.mockRestore();
   });

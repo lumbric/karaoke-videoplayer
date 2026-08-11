@@ -20,6 +20,8 @@ export async function searchOnline(options: OnlineSearchOptions): Promise<SongRe
     return [];
   }
 
+  const providerQuery = `${trimmedQuery} karaoke`;
+
   if (providers.length === 0) {
     throw new Error("Keine Online-Search-Provider konfiguriert.");
   }
@@ -30,7 +32,7 @@ export async function searchOnline(options: OnlineSearchOptions): Promise<SongRe
     try {
       if (provider.type === "invidious") {
         return await searchInvidious({
-          query: trimmedQuery,
+          query: providerQuery,
           provider,
           maxResults,
           timeoutMs,
@@ -46,7 +48,7 @@ export async function searchOnline(options: OnlineSearchOptions): Promise<SongRe
         }
 
         return await searchYouTube({
-          query: trimmedQuery,
+          query: providerQuery,
           apiKey: secret.youtubeApiKey,
           maxResults,
           timeoutMs,
