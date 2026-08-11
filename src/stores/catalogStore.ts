@@ -116,6 +116,12 @@ export const useCatalogStore = defineStore("catalog", {
     },
     hasMoreVisible(state): boolean {
       return this.filteredSongs.length > Math.min(state.renderedCount, state.maxDisplayCount);
+    },
+    hasHitDisplayCap(state): boolean {
+      return state.query.trim().length === 0
+        && state.initialOrder === "random"
+        && state.renderedCount >= state.maxDisplayCount
+        && this.filteredSongs.length > state.maxDisplayCount;
     }
   },
   actions: {
@@ -212,6 +218,14 @@ export const useCatalogStore = defineStore("catalog", {
     },
     loadMore(): void {
       this.renderedCount = Math.min(this.renderedCount + this.batchSize, this.maxDisplayCount);
+    },
+    resetRandomView(): void {
+      if (this.initialOrder !== "random") {
+        return;
+      }
+
+      this.reshuffleIdleOrder();
+      this.renderedCount = this.batchSize;
     }
   }
 });

@@ -11,7 +11,7 @@
   },
   "search": {
     "batchSize": 30,
-    "maxDisplayCount": 240,
+    "maxDisplayCount": 500,
     "initialOrder": "random",
     "randomSeed": 42,
     "showMetadataSnippet": false

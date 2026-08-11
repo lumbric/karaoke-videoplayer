@@ -22,7 +22,7 @@ const onlineSearchStore = useOnlineSearchStore();
 const aiSuggestionStore = useAiSuggestionStore();
 
 const { config, secret } = storeToRefs(configStore);
-const { visibleSongs, filteredSongs, availableGenres, loading, error, selectedGenres, query, hasMoreVisible } = storeToRefs(catalogStore);
+const { visibleSongs, filteredSongs, availableGenres, loading, error, selectedGenres, query, hasMoreVisible, hasHitDisplayCap } = storeToRefs(catalogStore);
 const { activeSong } = storeToRefs(playbackStore);
 const { results: onlineResults, loading: onlineLoading, error: onlineError } = storeToRefs(onlineSearchStore);
 const onlineSearchActive = computed(() =>
@@ -133,6 +133,14 @@ function clearAll(): void {
   resetScrollPosition();
   onlineSearchStore.clearResults();
   catalogStore.clearFilters();
+  nextTick(() => {
+    searchInput.value?.focus();
+  });
+}
+
+function loadMoreRandom(): void {
+  catalogStore.resetRandomView();
+  resetScrollPosition();
   nextTick(() => {
     searchInput.value?.focus();
   });
@@ -416,6 +424,12 @@ const spinnerIcon = `
           </div>
         </button>
       </section>
+
+      <div v-if="hasHitDisplayCap" class="load-more-container">
+        <button class="btn load-more-btn" type="button" @click="loadMoreRandom">
+          Weitere Songs laden
+        </button>
+      </div>
 
       <section v-if="showOnlineResultsSection" class="online-results" aria-label="Online-Suchergebnisse">
         <p v-if="onlineLoading" class="online-search-feedback">Online-Suche läuft...</p>
