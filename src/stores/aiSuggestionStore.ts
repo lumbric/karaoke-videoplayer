@@ -283,7 +283,8 @@ export const useAiSuggestionStore = defineStore("aiSuggestion", {
               secret,
               maxResults: 1,
               timeoutMs: config.ai.timeoutMs,
-              abortSignal: signal
+              abortSignal: signal,
+              requireEmbeddable: config.features.filterEmbeddableVideos
             })
           )
         );

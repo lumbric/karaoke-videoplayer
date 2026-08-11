@@ -108,6 +108,30 @@ describe("parseConfig", () => {
       });
     }).toThrow("videoProviders[0].type");
   });
+
+  it("defaults filterEmbeddableVideos to false when not provided", () => {
+    const config = parseConfig({
+      theme: { name: "default", title: "Test" },
+      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      providers: baseProviders,
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
+    });
+
+    expect(config.features.filterEmbeddableVideos).toBe(false);
+  });
+
+  it("parses filterEmbeddableVideos when explicitly set to true", () => {
+    const config = parseConfig({
+      theme: { name: "default", title: "Test" },
+      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false, filterEmbeddableVideos: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      providers: baseProviders,
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
+    });
+
+    expect(config.features.filterEmbeddableVideos).toBe(true);
+  });
 });
 
 describe("loadRuntimeConfig", () => {

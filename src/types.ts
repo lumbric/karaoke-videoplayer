@@ -57,6 +57,7 @@ export interface AppConfig {
     onlineFeatures: boolean;
     onlineSearch: boolean;
     aiSuggestions: boolean;
+    filterEmbeddableVideos: boolean;
   };
   search: {
     batchSize: number;

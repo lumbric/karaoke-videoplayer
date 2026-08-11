@@ -177,7 +177,10 @@ export function parseConfig(raw: unknown): AppConfig {
     features: {
       onlineFeatures: ensureBoolean(features.onlineFeatures, "features.onlineFeatures"),
       onlineSearch: ensureBoolean(features.onlineSearch, "features.onlineSearch"),
-      aiSuggestions: ensureBoolean(features.aiSuggestions, "features.aiSuggestions")
+      aiSuggestions: ensureBoolean(features.aiSuggestions, "features.aiSuggestions"),
+      filterEmbeddableVideos: features.filterEmbeddableVideos !== undefined
+        ? ensureBoolean(features.filterEmbeddableVideos, "features.filterEmbeddableVideos")
+        : false
     },
     search: {
       batchSize: Math.max(1, Math.floor(ensureNumber(search.batchSize, "search.batchSize"))),

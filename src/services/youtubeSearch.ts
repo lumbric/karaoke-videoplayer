@@ -21,19 +21,24 @@ export interface YouTubeSearchOptions {
   timeoutMs?: number;
   abortSignal?: AbortSignal;
   fetchImpl?: typeof fetch;
+  requireEmbeddable?: boolean;
 }
 
-function buildSearchUrl(query: string, apiKey: string, maxResults: number): string {
-  const params = new URLSearchParams({
+function buildSearchUrl(query: string, apiKey: string, maxResults: number, requireEmbeddable: boolean): string {
+  const params: Record<string, string> = {
     part: "snippet",
     type: "video",
     q: query,
     maxResults: String(maxResults),
     key: apiKey,
     safeSearch: "moderate"
-  });
+  };
 
-  return `https://www.googleapis.com/youtube/v3/search?${params.toString()}`;
+  if (requireEmbeddable) {
+    params.videoEmbeddable = "true";
+  }
+
+  return `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams(params).toString()}`;
 }
 
 export function mapYouTubeResultToSong(result: YouTubeSearchResult): SongRecord | null {
@@ -71,7 +76,7 @@ export function createYouTubeProviderMeta(videoId: string): PlayEventProviderMet
 }
 
 export async function searchYouTube(options: YouTubeSearchOptions): Promise<SongRecord[]> {
-  const { query, apiKey, maxResults = 20, timeoutMs = 8000, abortSignal, fetchImpl = fetch } = options;
+  const { query, apiKey, maxResults = 20, timeoutMs = 8000, abortSignal, fetchImpl = fetch, requireEmbeddable = false } = options;
   const trimmedQuery = query.trim();
 
   if (!trimmedQuery) {
@@ -86,7 +91,7 @@ export async function searchYouTube(options: YouTubeSearchOptions): Promise<Song
   }
 
   try {
-    const response = await fetchImpl(buildSearchUrl(trimmedQuery, apiKey, maxResults), {
+    const response = await fetchImpl(buildSearchUrl(trimmedQuery, apiKey, maxResults, requireEmbeddable), {
       signal: controller.signal,
       headers: { Accept: "application/json" }
     });

@@ -146,6 +146,45 @@ python3 -m http.server 8000 --directory dist
 This avoids copying videos/covers into `dist/` and still lets you do last-minute updates by replacing files inside `data/`.
 
 
+## Online Search Configuration
+
+The app supports online search via YouTube Data API or Invidious instances. Configure this in `config.json`:
+
+```json
+{
+  "features": {
+    "onlineFeatures": true,
+    "onlineSearch": true,
+    "filterEmbeddableVideos": true
+  },
+  "providers": {
+    "searchProviders": [
+      { "type": "youtube" }
+    ],
+    "videoProviders": [
+      { "type": "youtube" }
+    ]
+  }
+}
+```
+
+### Filter Embeddable Videos
+
+When using YouTube as both search and video provider, some videos may fail to play because the content creator has restricted embedding. Set `"filterEmbeddableVideos": true` to only show videos that can be embedded in the search results.
+
+**When to enable:**
+- You use YouTube for both searching AND playback
+- You want to avoid showing videos that will fail during playback
+
+**When to disable:**
+- You use Invidious as video provider (Invidious can play most restricted videos)
+- You prefer more search results and don't mind some videos failing
+
+**Default:** `false` (if not specified in config)
+
+**Note:** This filter only applies to YouTube search results. Invidious search is not affected.
+
+
 ## How it works
 
 The app is a single HTML file (`index.html`) that loads a JSON file (`videos.json`) containing your song library. Each entry provides metadata for search (artist/title), duration (for statistics), and cover art information.

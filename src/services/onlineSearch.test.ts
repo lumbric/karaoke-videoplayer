@@ -67,4 +67,31 @@ describe("searchOnline", () => {
 
     await expect(searchOnline({ query: "karaoke", providers, secret })).rejects.toThrow("API-Key fehlt");
   });
+
+  it("passes requireEmbeddable to youtube provider", async () => {
+    const spy = vi.spyOn(youtubeSearch, "searchYouTube").mockResolvedValue([]);
+
+    const providers: SearchProviderConfig[] = [{ type: "youtube" }];
+    const secret: SecretConfig = { youtubeApiKey: "TEST_KEY" };
+
+    await searchOnline({ query: "test", providers, secret, requireEmbeddable: true });
+
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ requireEmbeddable: true }));
+
+    spy.mockRestore();
+  });
+
+  it("does not pass requireEmbeddable to invidious provider", async () => {
+    const spy = vi.spyOn(invidiousSearch, "searchInvidious").mockResolvedValue([]);
+
+    const providers: SearchProviderConfig[] = [{ type: "invidious", baseUrls: ["https://iv.example.com"] }];
+    const secret: SecretConfig = {};
+
+    await searchOnline({ query: "test", providers, secret, requireEmbeddable: true });
+
+    const callArgs = spy.mock.calls[0][0];
+    expect(callArgs).not.toHaveProperty("requireEmbeddable");
+
+    spy.mockRestore();
+  });
 });

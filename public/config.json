@@ -6,7 +6,8 @@
   "features": {
     "onlineFeatures": true,
     "onlineSearch": true,
-    "aiSuggestions": true
+    "aiSuggestions": true,
+    "filterEmbeddableVideos": true
   },
   "search": {
     "batchSize": 30,

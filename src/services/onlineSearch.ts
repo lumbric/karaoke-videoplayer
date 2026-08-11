@@ -10,10 +10,11 @@ export interface OnlineSearchOptions {
   timeoutMs?: number;
   abortSignal?: AbortSignal;
   fetchImpl?: typeof fetch;
+  requireEmbeddable?: boolean;
 }
 
 export async function searchOnline(options: OnlineSearchOptions): Promise<SongRecord[]> {
-  const { query, providers, secret, maxResults = 20, timeoutMs = 8000, abortSignal, fetchImpl = fetch } = options;
+  const { query, providers, secret, maxResults = 20, timeoutMs = 8000, abortSignal, fetchImpl = fetch, requireEmbeddable = false } = options;
   const trimmedQuery = query.trim();
 
   if (trimmedQuery.length === 0) {
@@ -53,7 +54,8 @@ export async function searchOnline(options: OnlineSearchOptions): Promise<SongRe
           maxResults,
           timeoutMs,
           abortSignal,
-          fetchImpl
+          fetchImpl,
+          requireEmbeddable
         });
       }
 

@@ -75,6 +75,25 @@ describe("searchYouTube", () => {
     expect(url).toContain("key=KEY");
     expect(url).toContain("q=karaoke+test");
     expect(url).toContain("type=video");
+    expect(url).not.toContain("videoEmbeddable");
+  });
+
+  it("adds videoEmbeddable=true when requireEmbeddable is set", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ items: [] })
+    });
+
+    await searchYouTube({
+      query: "karaoke test",
+      apiKey: "KEY",
+      maxResults: 10,
+      requireEmbeddable: true,
+      fetchImpl: fetchMock as unknown as typeof fetch
+    });
+
+    const url = fetchMock.mock.calls[0][0] as string;
+    expect(url).toContain("videoEmbeddable=true");
   });
 
   it("throws a quota error on HTTP 403 with quota message", async () => {

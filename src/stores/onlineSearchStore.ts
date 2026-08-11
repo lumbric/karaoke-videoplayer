@@ -75,7 +75,8 @@ export const useOnlineSearchStore = defineStore("onlineSearch", {
           secret,
           maxResults: config.search.maxDisplayCount,
           timeoutMs: 10000,
-          abortSignal: controller.signal
+          abortSignal: controller.signal,
+          requireEmbeddable: config.features.filterEmbeddableVideos
         });
 
         if (!controller.signal.aborted) {
