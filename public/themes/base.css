@@ -661,6 +661,8 @@ textarea {
 }
 
 .no-results-panel {
+  position: relative;
+  z-index: 1;
   display: grid;
   gap: 14px;
   padding: 48px 16px;
