@@ -27,7 +27,7 @@ describe("App cover handling", () => {
         name: "default",
         title: "Test"
       },
-      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
+      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false, filterEmbeddableVideos: false },
       search: {
         batchSize: 30,
         maxDisplayCount: 100,

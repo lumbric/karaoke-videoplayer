@@ -23,7 +23,7 @@ function seedStores(showMetadataSnippet = true, onlineSearchEnabled = false): vo
       name: "default",
       title: "Karaoke Test"
     },
-    features: { onlineFeatures: onlineSearchEnabled, onlineSearch: onlineSearchEnabled, aiSuggestions: false },
+    features: { onlineFeatures: onlineSearchEnabled, onlineSearch: onlineSearchEnabled, aiSuggestions: false, filterEmbeddableVideos: false },
     search: {
       batchSize: 20,
       maxDisplayCount: 100,

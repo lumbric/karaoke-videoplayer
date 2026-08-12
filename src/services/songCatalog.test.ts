@@ -4,7 +4,7 @@ import type { AppConfig, SongRecordRaw } from "../types";
 
 const config: AppConfig = {
   theme: { name: "default", title: "Test" },
-  features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
+  features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false, filterEmbeddableVideos: false },
   search: {
     batchSize: 20,
     maxDisplayCount: 100,
