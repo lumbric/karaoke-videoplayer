@@ -27,13 +27,6 @@ function closePanel(): void {
   emit("close");
 }
 
-function refreshData(): void {
-  playedLog.value = loadPlayedLog();
-  searchSessions.value = loadSearchSessions();
-  aiChatLog.value = loadAiChatLog();
-  songRequests.value = loadSongSuggestions();
-}
-
 function toDataUri(data: string): string {
   return `data:application/json;charset=utf-8,${encodeURIComponent(data)}`;
 }
@@ -57,27 +50,6 @@ function exportStats(): void {
   }, `karaoke-stats-${new Date().toISOString().slice(0, 10)}.json`);
 }
 
-function exportSearchSessions(): void {
-  downloadJson({
-    exportedAt: new Date().toISOString(),
-    searchSessions: searchSessions.value
-  }, `karaoke-searches-${new Date().toISOString().slice(0, 10)}.json`);
-}
-
-function exportAiChatLog(): void {
-  downloadJson({
-    exportedAt: new Date().toISOString(),
-    aiChatLog: aiChatLog.value
-  }, `karaoke-ai-chats-${new Date().toISOString().slice(0, 10)}.json`);
-}
-
-function exportSongRequests(): void {
-  downloadJson({
-    exportedAt: new Date().toISOString(),
-    songRequests: songRequests.value
-  }, `karaoke-song-requests-${new Date().toISOString().slice(0, 10)}.json`);
-}
-
 function formatTimestamp(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.valueOf())) {
@@ -93,6 +65,13 @@ function formatTimestamp(value: string): string {
   });
 }
 
+function formatSongName(title: string, artist?: string): string {
+  if (artist?.trim()) {
+    return `${artist} - ${title}`;
+  }
+  return title;
+}
+
 function createTopSongsChart(): void {
   if (!topSongsCanvas.value) {
     return;
@@ -100,7 +79,7 @@ function createTopSongsChart(): void {
 
   topSongsChart.value?.destroy();
 
-  const labels = summary.value.topSongs.map((song) => song.title);
+  const labels = summary.value.topSongs.map((song) => formatSongName(song.title, song.artist));
   const data = summary.value.topSongs.map((song) => song.count);
 
   const config: ChartConfiguration<"bar"> = {
@@ -277,18 +256,14 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="stats-overlay" role="dialog" aria-modal="true" aria-label="Statistik">
+    <button class="stats-close btn btn-icon" type="button" title="Schließen" aria-label="Schließen" @click="closePanel">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+      </svg>
+    </button>
+
     <div class="stats-shell">
-      <header class="stats-header">
-        <h2 class="stats-title">Statistik</h2>
-        <div class="stats-actions">
-          <button class="btn" type="button" @click="refreshData">Neu laden</button>
-          <button class="btn" type="button" @click="exportStats">Export alle Daten</button>
-          <button class="btn" type="button" @click="exportSearchSessions">Export Suchen</button>
-          <button class="btn" type="button" @click="exportAiChatLog">Export AI Chats</button>
-          <button class="btn" type="button" @click="exportSongRequests">Export Liedwünsche</button>
-          <button class="btn btn-icon" type="button" title="Schließen" aria-label="Schließen" @click="closePanel">X</button>
-        </div>
-      </header>
+      <h2 class="stats-title-centered">📊 Karaoke Statistiken</h2>
 
       <section class="stats-grid">
         <article class="stats-card">
@@ -303,7 +278,7 @@ onBeforeUnmount(() => {
 
         <article class="stats-card">
           <h3>Meistgespielter Song</h3>
-          <p>{{ summary.mostPlayedSong ?? "-" }}</p>
+          <p>{{ summary.mostPlayedSong ? formatSongName(summary.mostPlayedSong, summary.topSongs[0]?.artist) : "-" }}</p>
         </article>
 
         <article class="stats-card">
@@ -312,21 +287,21 @@ onBeforeUnmount(() => {
         </article>
       </section>
 
+      <article class="stats-card stats-chart-full">
+        <h3>Top Songs</h3>
+        <div class="stats-chart-wrap">
+          <canvas ref="topSongsCanvas" />
+        </div>
+      </article>
+
+      <article class="stats-card stats-chart-full">
+        <h3>Aktivität nach Stunde</h3>
+        <div class="stats-chart-wrap">
+          <canvas ref="hourlyCanvas" />
+        </div>
+      </article>
+
       <section class="stats-chart-grid">
-        <article class="stats-card stats-chart-card">
-          <h3>Top Songs</h3>
-          <div class="stats-chart-wrap">
-            <canvas ref="topSongsCanvas" />
-          </div>
-        </article>
-
-        <article class="stats-card stats-chart-card">
-          <h3>Aktivität nach Stunde</h3>
-          <div class="stats-chart-wrap">
-            <canvas ref="hourlyCanvas" />
-          </div>
-        </article>
-
         <article class="stats-card stats-chart-card">
           <h3>Completion Verteilung</h3>
           <div class="stats-chart-wrap">
@@ -342,41 +317,29 @@ onBeforeUnmount(() => {
         </article>
       </section>
 
-      <section class="stats-grid">
-        <article class="stats-card">
-          <h3>Recent Activity</h3>
-          <ul class="stats-recent-list">
-            <li v-for="event in summary.recentActivity" :key="`${event.timestamp}-${event.title}`">
-              <span>{{ formatTimestamp(event.timestamp) }}</span>
-              <strong>{{ event.title }}</strong>
-              <span>{{ event.playPercentage }}%</span>
-            </li>
-            <li v-if="summary.recentActivity.length === 0">Keine Aktivität</li>
-          </ul>
-        </article>
-      </section>
-
-      <section class="stats-lists">
-        <article class="stats-card">
-          <h3>Instant Skips (&lt;30s)</h3>
-          <ul>
-            <li v-for="item in summary.instantSkips" :key="item.title">{{ item.title }} ({{ item.count }})</li>
-            <li v-if="summary.instantSkips.length === 0">Keine</li>
-          </ul>
-        </article>
-
+      <section class="stats-lists-grid">
         <article class="stats-card">
           <h3>Skipped Songs</h3>
           <ul>
-            <li v-for="item in summary.skippedSongs" :key="item.title">{{ item.title }} ({{ item.averageCompletion }}%)</li>
+            <li v-for="item in summary.skippedSongs" :key="item.title">{{ formatSongName(item.title, item.artist) }} ({{ item.averageCompletion }}%)</li>
             <li v-if="summary.skippedSongs.length === 0">Keine</li>
           </ul>
         </article>
 
         <article class="stats-card">
+          <h3>Instant Skips (&lt;30s)</h3>
+          <ul>
+            <li v-for="item in summary.instantSkips" :key="item.title">{{ formatSongName(item.title, item.artist) }} ({{ item.count }})</li>
+            <li v-if="summary.instantSkips.length === 0">Keine</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="stats-lists-grid">
+        <article class="stats-card">
           <h3>Hidden Gems</h3>
           <ul>
-            <li v-for="item in summary.hiddenGems" :key="item.title">{{ item.title }} ({{ item.averageCompletion }}%)</li>
+            <li v-for="item in summary.hiddenGems" :key="item.title">{{ formatSongName(item.title, item.artist) }} ({{ item.averageCompletion }}%)</li>
             <li v-if="summary.hiddenGems.length === 0">Keine</li>
           </ul>
         </article>
@@ -384,11 +347,27 @@ onBeforeUnmount(() => {
         <article class="stats-card">
           <h3>Retry Patterns</h3>
           <ul>
-            <li v-for="item in summary.retryPatterns" :key="item.title">{{ item.title }} ({{ item.count }}x)</li>
+            <li v-for="item in summary.retryPatterns" :key="item.title">{{ formatSongName(item.title, item.artist) }} ({{ item.count }}x)</li>
             <li v-if="summary.retryPatterns.length === 0">Keine</li>
           </ul>
         </article>
       </section>
+
+      <article class="stats-card stats-recent-card">
+        <h3>Recent Activity</h3>
+        <ul class="stats-recent-list">
+          <li v-for="event in summary.recentActivity" :key="`${event.timestamp}-${event.title}`">
+            <span>{{ formatTimestamp(event.timestamp) }}</span>
+            <strong>{{ formatSongName(event.title, event.artist) }}</strong>
+            <span>{{ event.playPercentage }}%</span>
+          </li>
+          <li v-if="summary.recentActivity.length === 0">Keine Aktivität</li>
+        </ul>
+      </article>
+
+      <div class="stats-export-section">
+        <button class="btn btn-primary" type="button" @click="exportStats">📁 Export Data</button>
+      </div>
     </div>
   </section>
 </template>

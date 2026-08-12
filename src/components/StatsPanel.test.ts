@@ -82,27 +82,23 @@ describe("StatsPanel", () => {
     expect(wrapper.emitted("close")).toBeTruthy();
   });
 
-  it("reloads stats data", async () => {
-    loadPlayedLogMock
-      .mockReturnValueOnce([])
-      .mockReturnValueOnce([
-        {
-          title: "Song B",
-          timestamp: "2026-07-25T12:00:00.000Z",
-          playedSeconds: 125,
-          totalDuration: 200,
-          completed: false,
-          playPercentage: 62,
-          source: "local"
-        }
-      ]);
+  it("renders Recent Activity section", async () => {
+    loadPlayedLogMock.mockReturnValue([
+      {
+        title: "Song C",
+        timestamp: "2026-07-25T12:00:00.000Z",
+        playedSeconds: 125,
+        totalDuration: 200,
+        completed: false,
+        playPercentage: 62,
+        source: "local"
+      }
+    ]);
 
     const wrapper = mount(StatsPanel);
-    expect(wrapper.text()).toContain("0m 0s");
-
-    await wrapper.find("button").trigger("click");
     await Promise.resolve();
 
-    expect(wrapper.text()).toContain("2m 5s");
+    expect(wrapper.text()).toContain("Recent Activity");
+    expect(wrapper.text()).toContain("Song C");
   });
 });

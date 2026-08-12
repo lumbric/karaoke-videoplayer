@@ -93,6 +93,7 @@ export interface OnlineSongResult {
 
 export interface PlayEvent {
   title: string;
+  artist?: string;
   timestamp: string;
   playedSeconds: number;
   totalDuration: number;

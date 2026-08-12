@@ -76,6 +76,7 @@ export const usePlaybackStore = defineStore("playback", {
 
       appendPlayEvent({
         title: this.activeSong.displayTitle,
+        artist: this.activeSong.artist,
         timestamp: new Date().toISOString(),
         playedSeconds: roundSeconds(playedSeconds),
         totalDuration: roundSeconds(totalDuration),

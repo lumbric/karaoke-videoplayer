@@ -541,6 +541,29 @@ body {
   height: 22px;
 }
 
+.stats-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 40;
+  width: 52px;
+  height: 52px;
+  min-height: 52px;
+  background: #c9a8d4;
+  color: #ffffff;
+  border: 0;
+  border-radius: 15px;
+}
+
+.stats-close:hover {
+  background: #b08cbf;
+}
+
+.stats-close svg {
+  width: 22px;
+  height: 22px;
+}
+
 .stats-overlay {
   position: fixed;
   inset: 0;
@@ -557,42 +580,17 @@ body {
   gap: 14px;
 }
 
-.stats-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  background: rgba(45, 42, 94, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 15px;
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.35);
-  padding: 12px 14px;
-  backdrop-filter: blur(10px);
-}
-
-.stats-title {
-  margin: 0;
-  color: #c9a8d4;
+.stats-title-centered {
+  margin: 0 0 10px;
+  text-align: center;
   font-size: 1.8rem;
-}
-
-.stats-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.stats-actions .btn {
-  background: #c9a8d4;
-}
-
-.stats-actions .btn:hover {
-  background: #b08cbf;
+  color: #c9a8d4;
 }
 
 .stats-grid,
 .stats-lists,
-.stats-chart-grid {
+.stats-chart-grid,
+.stats-lists-grid {
   display: grid;
   gap: 12px;
 }
@@ -601,12 +599,16 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.stats-chart-grid {
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+.stats-chart-full {
+  min-height: 320px;
 }
 
-.stats-lists {
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+.stats-chart-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.stats-lists-grid {
+  grid-template-columns: 1fr 1fr;
 }
 
 .stats-card {
@@ -629,6 +631,10 @@ body {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
+}
+
+.stats-grid .stats-card p {
+  font-size: 1.6rem;
 }
 
 .stats-card ul {
@@ -661,6 +667,11 @@ body {
   border-bottom: 0;
 }
 
+.stats-recent-card {
+  max-height: 440px;
+  overflow-y: auto;
+}
+
 .stats-chart-card {
   min-height: 260px;
 }
@@ -668,6 +679,23 @@ body {
 .stats-chart-wrap {
   position: relative;
   height: 210px;
+}
+
+.stats-chart-full .stats-chart-wrap {
+  height: 340px;
+}
+
+.stats-export-section {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.stats-export-section .btn {
+  background: #c9a8d4;
+}
+
+.stats-export-section .btn:hover {
+  background: #b08cbf;
 }
 
 .error-box {
@@ -805,9 +833,9 @@ body {
     padding: 12px;
   }
 
-  .stats-header {
-    align-items: flex-start;
-    flex-direction: column;
+  .stats-chart-grid,
+  .stats-lists-grid {
+    grid-template-columns: 1fr;
   }
 
   .stats-recent-list li {

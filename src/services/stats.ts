@@ -2,6 +2,7 @@ import type { PlayEvent } from "../types";
 
 export interface SongAggregate {
   title: string;
+  artist?: string;
   count: number;
   averageCompletion: number;
 }
@@ -35,18 +36,23 @@ function toSortedRecent(events: PlayEvent[]): PlayEvent[] {
 }
 
 function buildSongAggregates(events: PlayEvent[]): SongAggregate[] {
-  const map = new Map<string, { count: number; completionTotal: number }>();
+  const map = new Map<string, { title: string; artist?: string; count: number; completionTotal: number }>();
 
   for (const event of events) {
-    const previous = map.get(event.title) ?? { count: 0, completionTotal: 0 };
+    const key = event.title;
+    const previous = map.get(key) ?? { title: event.title, artist: event.artist, count: 0, completionTotal: 0 };
     previous.count += 1;
     previous.completionTotal += clampPercent(event.playPercentage);
-    map.set(event.title, previous);
+    if (!previous.artist && event.artist) {
+      previous.artist = event.artist;
+    }
+    map.set(key, previous);
   }
 
-  return [...map.entries()]
-    .map(([title, value]) => ({
-      title,
+  return [...map.values()]
+    .map((value) => ({
+      title: value.title,
+      artist: value.artist,
       count: value.count,
       averageCompletion: round(value.completionTotal / value.count)
     }))
