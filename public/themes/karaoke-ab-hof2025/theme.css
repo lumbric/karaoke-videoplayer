@@ -511,14 +511,15 @@ body {
   width: 52px;
   height: 52px;
   min-height: 52px;
-  background: #44467f;
+  background: var(--accent);
   color: #ffffff;
   border: 0;
-  border-radius: 15px;
+  border-radius: var(--radius);
 }
 
 .stats-close:hover {
-  background: #cd6391;
+  background: var(--accent-2);
+  color: var(--text);
 }
 
 .stats-close svg {
@@ -546,7 +547,7 @@ body {
   margin: 0 0 10px;
   text-align: center;
   font-size: 1.8rem;
-  color: #cd6391;
+  color: var(--accent);
 }
 
 .stats-grid,
@@ -576,7 +577,7 @@ body {
 .stats-card {
   background: rgba(11, 10, 28, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 15px;
+  border-radius: var(--radius);
   box-shadow: 0 10px 34px rgba(0, 0, 0, 0.35);
   padding: 12px 14px;
   backdrop-filter: blur(10px);
@@ -586,13 +587,14 @@ body {
 .stats-card h3 {
   margin: 0 0 8px;
   font-size: 0.98rem;
-  color: #cd6391;
+  color: var(--accent);
 }
 
 .stats-card p {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
+  color: #ffffff;
 }
 
 .stats-grid .stats-card p {
@@ -653,11 +655,13 @@ body {
 }
 
 .stats-export-section .btn {
-  background: #44467f;
+  background: var(--accent);
+  color: #ffffff;
 }
 
 .stats-export-section .btn:hover {
-  background: #cd6391;
+  background: var(--accent-2);
+  color: var(--text);
 }
 
 .error-box {

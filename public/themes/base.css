@@ -363,10 +363,10 @@ textarea {
   width: 52px;
   height: 52px;
   min-height: 52px;
-  border-radius: 0;
-  color: #000;
-  background: #fff;
-  border: 1px solid #000;
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--accent);
 }
 
 .stats-close svg {
@@ -374,12 +374,17 @@ textarea {
   height: 20px;
 }
 
+.stats-close:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+
 .stats-overlay {
   position: fixed;
   inset: 0;
   z-index: 39;
   overflow: auto;
-  background: #fff;
+  background: var(--bg);
   padding: 24px;
 }
 
@@ -394,6 +399,7 @@ textarea {
   margin: 0 0 10px;
   text-align: center;
   font-size: 1.8rem;
+  color: var(--accent);
 }
 
 .stats-grid,
@@ -422,21 +428,24 @@ textarea {
 
 .stats-card {
   background: var(--surface);
-  border: 1px solid #000;
-  border-radius: 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 15%, var(--surface));
+  border-radius: var(--radius);
   box-shadow: none;
   padding: 12px 14px;
+  color: var(--text);
 }
 
 .stats-card h3 {
   margin: 0 0 8px;
   font-size: 0.98rem;
+  color: var(--accent);
 }
 
 .stats-card p {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
+  color: var(--text);
 }
 
 .stats-grid .stats-card p {
@@ -448,6 +457,11 @@ textarea {
   padding-left: 18px;
   display: grid;
   gap: 4px;
+  color: var(--text);
+}
+
+.stats-card li {
+  color: var(--text);
 }
 
 .stats-recent-list {
@@ -461,7 +475,8 @@ textarea {
   gap: 8px;
   align-items: baseline;
   padding: 6px 0;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 20%, var(--surface));
+  color: var(--text);
 }
 
 .stats-recent-list li:last-child {
@@ -489,6 +504,16 @@ textarea {
 .stats-export-section {
   text-align: center;
   margin-top: 10px;
+}
+
+.stats-export-section .btn {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.stats-export-section .btn:hover {
+  background: var(--accent-2);
+  color: var(--text);
 }
 
 .song-card {

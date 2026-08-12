@@ -263,7 +263,7 @@ onBeforeUnmount(() => {
     </button>
 
     <div class="stats-shell">
-      <h2 class="stats-title-centered">📊 Karaoke Statistiken</h2>
+      <h2 class="stats-title-centered">Statistik</h2>
 
       <section class="stats-grid">
         <article class="stats-card">
