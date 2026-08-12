@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
 import { useAiSuggestionStore, matchAgainstCatalog } from "./aiSuggestionStore";
-import type { SongRecord } from "../types";
+import type { SongRecord, AppConfig, SecretConfig } from "../types";
+import * as onlineSearch from "../services/onlineSearch";
 
 describe("aiSuggestionStore", () => {
   beforeEach(() => {
@@ -170,6 +171,96 @@ describe("aiSuggestionStore", () => {
       
       // Wait for the promise to complete (it will fail due to fake API key, but that's ok)
       await promise;
+    });
+  });
+
+  describe("resolveSuggestions", () => {
+    it("passes filterEmbeddableVideos to searchOnline when enabled", async () => {
+      const spy = vi.spyOn(onlineSearch, "searchOnline").mockResolvedValue([]);
+
+      const store = useAiSuggestionStore();
+      const catalog: SongRecord[] = [];
+      const config: AppConfig = {
+        theme: { name: "default", title: "Test" },
+        features: {
+          onlineFeatures: true,
+          onlineSearch: true,
+          aiSuggestions: true,
+          filterEmbeddableVideos: true
+        },
+        search: {
+          batchSize: 20,
+          maxDisplayCount: 100,
+          initialOrder: "alphabetical",
+          randomSeed: 1,
+          showMetadataSnippet: true
+        },
+        providers: {
+          searchProviders: [{ type: "youtube" }],
+          videoProviders: []
+        },
+        ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000, sendCatalog: true }
+      };
+      const secret: SecretConfig = { youtubeApiKey: "TEST_KEY" };
+      const signal = new AbortController().signal;
+
+      const suggestions = [
+        { title: "Test Song", artist: "Test Artist", reason: "test" }
+      ];
+
+      await store.resolveSuggestions(suggestions, catalog, config, secret, signal);
+
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requireEmbeddable: true
+        })
+      );
+
+      spy.mockRestore();
+    });
+
+    it("passes filterEmbeddableVideos=false to searchOnline when disabled", async () => {
+      const spy = vi.spyOn(onlineSearch, "searchOnline").mockResolvedValue([]);
+
+      const store = useAiSuggestionStore();
+      const catalog: SongRecord[] = [];
+      const config: AppConfig = {
+        theme: { name: "default", title: "Test" },
+        features: {
+          onlineFeatures: true,
+          onlineSearch: true,
+          aiSuggestions: true,
+          filterEmbeddableVideos: false
+        },
+        search: {
+          batchSize: 20,
+          maxDisplayCount: 100,
+          initialOrder: "alphabetical",
+          randomSeed: 1,
+          showMetadataSnippet: true
+        },
+        providers: {
+          searchProviders: [{ type: "youtube" }],
+          videoProviders: []
+        },
+        ai: { model: "x", maxSuggestions: 5, timeoutMs: 5000, sendCatalog: true }
+      };
+      const secret: SecretConfig = { youtubeApiKey: "TEST_KEY" };
+      const signal = new AbortController().signal;
+
+      const suggestions = [
+        { title: "Test Song", artist: "Test Artist", reason: "test" }
+      ];
+
+      await store.resolveSuggestions(suggestions, catalog, config, secret, signal);
+
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requireEmbeddable: false
+        })
+      );
+
+      spy.mockRestore();
     });
   });
 });
