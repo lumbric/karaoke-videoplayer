@@ -165,7 +165,6 @@ body {
 }
 
 .search:focus {
-  transform: scale(1.03);
   outline: none;
   box-shadow: 0 8px 28px rgba(176, 140, 191, 0.35), 0 0 0 3px rgba(176, 140, 191, 0.45);
 }
