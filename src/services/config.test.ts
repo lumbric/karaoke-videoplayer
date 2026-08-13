@@ -11,7 +11,7 @@ describe("parseConfig", () => {
     const config = parseConfig({
       theme: { name: "default", title: "Test" },
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
@@ -19,13 +19,15 @@ describe("parseConfig", () => {
     expect(config.theme.title).toBe("Test");
     expect(config.search.initialOrder).toBe("alphabetical");
     expect(config.providers.searchProviders[0].type).toBe("invidious");
+    expect(config.search.featuredProbability).toBe(0.3);
+    expect(config.search.featuredWindow).toBe(8);
   });
 
   it("defaults sendCatalog to true when not provided", () => {
     const config = parseConfig({
       theme: { name: "default", title: "Test" },
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000 }
     });
@@ -37,7 +39,7 @@ describe("parseConfig", () => {
     const config = parseConfig({
       theme: { name: "default", title: "Test" },
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: false }
     });
@@ -49,7 +51,7 @@ describe("parseConfig", () => {
     const config = parseConfig({
       theme: { name: "/default/", title: "Demo" },
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
@@ -72,7 +74,7 @@ describe("parseConfig", () => {
       parseConfig({
         theme: { name: "default", title: "Test" },
         features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-        search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "desc", randomSeed: 2, showMetadataSnippet: true },
+        search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "desc", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
         providers: baseProviders,
         ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
       });
@@ -84,7 +86,7 @@ describe("parseConfig", () => {
       parseConfig({
         theme: { name: "default", title: "Test" },
         features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-        search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+        search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
         providers: {
           searchProviders: [{ type: "unknown", baseUrls: [] }],
           videoProviders: [{ type: "youtube" }]
@@ -99,7 +101,7 @@ describe("parseConfig", () => {
       parseConfig({
         theme: { name: "default", title: "Test" },
         features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-        search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+        search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
         providers: {
           searchProviders: [{ type: "invidious", baseUrls: [] }],
           videoProviders: [{ type: "unknown" }]
@@ -113,7 +115,7 @@ describe("parseConfig", () => {
     const config = parseConfig({
       theme: { name: "default", title: "Test" },
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
@@ -125,12 +127,59 @@ describe("parseConfig", () => {
     const config = parseConfig({
       theme: { name: "default", title: "Test" },
       features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false, filterEmbeddableVideos: true },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: baseProviders,
       ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
     });
 
     expect(config.features.filterEmbeddableVideos).toBe(true);
+  });
+
+  it("defaults featuredProbability to 0.3 and featuredWindow to 8 when not provided", () => {
+    const config = parseConfig({
+      theme: { name: "default", title: "Test" },
+      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      providers: baseProviders,
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
+    });
+
+    expect(config.search.featuredProbability).toBe(0.3);
+    expect(config.search.featuredWindow).toBe(8);
+  });
+
+  it("clamps featuredProbability to 0-1 range", () => {
+    const config1 = parseConfig({
+      theme: { name: "default", title: "Test" },
+      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: -0.5 },
+      providers: baseProviders,
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
+    });
+
+    expect(config1.search.featuredProbability).toBe(0);
+
+    const config2 = parseConfig({
+      theme: { name: "default", title: "Test" },
+      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 1.5 },
+      providers: baseProviders,
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
+    });
+
+    expect(config2.search.featuredProbability).toBe(1);
+  });
+
+  it("clamps featuredWindow to minimum of 1", () => {
+    const config = parseConfig({
+      theme: { name: "default", title: "Test" },
+      features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredWindow: 0 },
+      providers: baseProviders,
+      ai: { model: "x", maxSuggestions: 3, timeoutMs: 2000, sendCatalog: true }
+    });
+
+    expect(config.search.featuredWindow).toBe(1);
   });
 });
 
@@ -141,7 +190,7 @@ describe("loadRuntimeConfig", () => {
       json: async () => ({
         theme: { name: "default", title: "Demo" },
         features: { onlineFeatures: false, onlineSearch: false, aiSuggestions: false },
-        search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "random", randomSeed: 2, showMetadataSnippet: true },
+        search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "random", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
         providers: {
           searchProviders: [{ type: "invidious", baseUrls: [] }],
           videoProviders: [{ type: "youtube" }]
@@ -162,7 +211,7 @@ describe("validateProviderSecrets", () => {
     const config = parseConfig({
       theme: { name: "default", title: "Test" },
       features: { onlineFeatures: true, onlineSearch: true, aiSuggestions: false },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: {
         searchProviders: [{ type: "invidious", baseUrls: ["https://example.com"] }],
         videoProviders: [{ type: "youtube" }]
@@ -177,7 +226,7 @@ describe("validateProviderSecrets", () => {
     const config = parseConfig({
       theme: { name: "default", title: "Test" },
       features: { onlineFeatures: true, onlineSearch: true, aiSuggestions: false },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: {
         searchProviders: [{ type: "youtube" }],
         videoProviders: [{ type: "youtube" }]
@@ -192,7 +241,7 @@ describe("validateProviderSecrets", () => {
     const config = parseConfig({
       theme: { name: "default", title: "Test" },
       features: { onlineFeatures: true, onlineSearch: true, aiSuggestions: false },
-      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true },
+      search: { batchSize: 20, maxDisplayCount: 100, initialOrder: "alphabetical", randomSeed: 2, showMetadataSnippet: true, featuredProbability: 0.3, featuredWindow: 8 },
       providers: {
         searchProviders: [{ type: "youtube" }],
         videoProviders: [{ type: "youtube" }]

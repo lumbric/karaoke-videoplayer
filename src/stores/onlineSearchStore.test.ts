@@ -27,7 +27,9 @@ describe("onlineSearchStore", () => {
           maxDisplayCount: 100,
           initialOrder: "alphabetical",
           randomSeed: 1,
-          showMetadataSnippet: true
+          showMetadataSnippet: true,
+          featuredProbability: 0.3,
+          featuredWindow: 8
         },
         providers: {
           searchProviders: [{ type: "youtube" }],
@@ -66,7 +68,9 @@ describe("onlineSearchStore", () => {
           maxDisplayCount: 100,
           initialOrder: "alphabetical",
           randomSeed: 1,
-          showMetadataSnippet: true
+          showMetadataSnippet: true,
+          featuredProbability: 0.3,
+          featuredWindow: 8
         },
         providers: {
           searchProviders: [{ type: "youtube" }],

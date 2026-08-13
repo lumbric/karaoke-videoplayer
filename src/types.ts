@@ -31,6 +31,7 @@ export interface SongRecordRaw {
   file?: string;
   cover?: string;
   has_cover?: boolean;
+  featured?: boolean;
 }
 
 export interface SongRecord {
@@ -46,6 +47,7 @@ export interface SongRecord {
   displayTitle: string;
   searchIndex: string;
   searchTokens?: string[];
+  featured: boolean;
 }
 
 export interface AppConfig {
@@ -65,6 +67,8 @@ export interface AppConfig {
     initialOrder: "alphabetical" | "random";
     randomSeed: number;
     showMetadataSnippet: boolean;
+    featuredProbability: number;
+    featuredWindow: number;
   };
   providers: {
     searchProviders: SearchProviderConfig[];

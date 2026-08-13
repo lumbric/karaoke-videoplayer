@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { useCatalogStore } from "./catalogStore";
 import type { SongRecord } from "../types";
 
-function createSong(id: string, displayTitle: string, filename: string): SongRecord {
+function createSong(id: string, displayTitle: string, filename: string, featured: boolean = false): SongRecord {
   return {
     id,
     filename,
@@ -15,7 +15,8 @@ function createSong(id: string, displayTitle: string, filename: string): SongRec
     videoCandidates: [`/songs/${filename}.mp4`],
     coverPath: `/covers/${filename}.jpg`,
     displayTitle,
-    searchIndex: `${displayTitle.toLowerCase()} artist pop`
+    searchIndex: `${displayTitle.toLowerCase()} artist pop`,
+    featured
   };
 }
 
@@ -166,5 +167,92 @@ describe("catalogStore load more", () => {
 
     expect(store.idleShuffleSeed).toBe(42);
     expect(store.renderedCount).toBe(100);
+  });
+});
+
+describe("catalogStore featured songs", () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+  });
+
+  it("injects featured song into first n songs in random mode", () => {
+    const store = useCatalogStore();
+    store.initialOrder = "random";
+    store.featuredProbability = 1.0;
+    store.featuredWindow = 8;
+    store.idleShuffleSeed = 42;
+    store.allSongs = Array.from({ length: 20 }, (_, i) =>
+      createSong(String(i), `Song ${i}`, `song${i}`, i === 15)
+    );
+
+    const filtered = store.filteredSongs;
+    const featuredInWindow = filtered.slice(0, 8).some((song) => song.featured);
+
+    expect(featuredInWindow).toBe(true);
+  });
+
+  it("does not inject featured songs in alphabetical mode", () => {
+    const store = useCatalogStore();
+    store.initialOrder = "alphabetical";
+    store.featuredProbability = 1.0;
+    store.featuredWindow = 8;
+    store.allSongs = Array.from({ length: 20 }, (_, i) =>
+      createSong(String(i), `Song ${i}`, `song${i}`, i === 15)
+    );
+
+    const filtered = store.filteredSongs;
+    const featuredInWindow = filtered.slice(0, 8).some((song) => song.featured);
+
+    expect(featuredInWindow).toBe(false);
+  });
+
+  it("does not inject featured songs when query is active", () => {
+    const store = useCatalogStore();
+    store.initialOrder = "random";
+    store.featuredProbability = 1.0;
+    store.featuredWindow = 8;
+    store.idleShuffleSeed = 42;
+    store.query = "song";
+    store.allSongs = Array.from({ length: 20 }, (_, i) =>
+      createSong(String(i), `Song ${i}`, `song${i}`, i === 15)
+    );
+
+    const filtered = store.filteredSongs;
+    const featuredInWindow = filtered.slice(0, 8).some((song) => song.featured);
+
+    expect(featuredInWindow).toBe(false);
+  });
+
+  it("does not inject when probability is 0", () => {
+    const store = useCatalogStore();
+    store.initialOrder = "random";
+    store.featuredProbability = 0.0;
+    store.featuredWindow = 8;
+    store.idleShuffleSeed = 42;
+    store.allSongs = Array.from({ length: 20 }, (_, i) =>
+      createSong(String(i), `Song ${i}`, `song${i}`, i === 15)
+    );
+
+    const filtered = store.filteredSongs;
+    const featuredInWindow = filtered.slice(0, 8).some((song) => song.featured);
+
+    expect(featuredInWindow).toBe(false);
+  });
+
+  it("does not duplicate songs after injection", () => {
+    const store = useCatalogStore();
+    store.initialOrder = "random";
+    store.featuredProbability = 1.0;
+    store.featuredWindow = 8;
+    store.idleShuffleSeed = 42;
+    store.allSongs = Array.from({ length: 20 }, (_, i) =>
+      createSong(String(i), `Song ${i}`, `song${i}`, i === 15)
+    );
+
+    const filtered = store.filteredSongs;
+    const ids = filtered.map((song) => song.id);
+    const uniqueIds = new Set(ids);
+
+    expect(uniqueIds.size).toBe(ids.length);
   });
 });

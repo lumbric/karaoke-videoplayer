@@ -403,6 +403,7 @@ const spinnerIcon = `
           v-for="song in visibleSongs"
           :key="song.id"
           class="song-card"
+          :class="{ 'song-card-featured': song.featured }"
           type="button"
           @click="onSongClicked(song, 'local')"
         >

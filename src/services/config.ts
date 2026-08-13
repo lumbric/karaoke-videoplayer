@@ -187,7 +187,13 @@ export function parseConfig(raw: unknown): AppConfig {
       maxDisplayCount: Math.max(1, Math.floor(ensureNumber(search.maxDisplayCount, "search.maxDisplayCount"))),
       initialOrder,
       randomSeed: Math.floor(ensureNumber(search.randomSeed, "search.randomSeed")),
-      showMetadataSnippet: ensureBoolean(search.showMetadataSnippet, "search.showMetadataSnippet")
+      showMetadataSnippet: ensureBoolean(search.showMetadataSnippet, "search.showMetadataSnippet"),
+      featuredProbability: search.featuredProbability !== undefined
+        ? Math.max(0, Math.min(1, ensureNumber(search.featuredProbability, "search.featuredProbability")))
+        : 0.3,
+      featuredWindow: search.featuredWindow !== undefined
+        ? Math.max(1, Math.floor(ensureNumber(search.featuredWindow, "search.featuredWindow")))
+        : 8
     },
     providers: {
       searchProviders,

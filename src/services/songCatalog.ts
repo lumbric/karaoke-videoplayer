@@ -83,6 +83,51 @@ function seededRandom(value: number): number {
   return x - Math.floor(x);
 }
 
+export function injectFeaturedSongs(
+  items: SongRecord[],
+  probability: number,
+  window: number,
+  seed: number
+): SongRecord[] {
+  if (probability <= 0 || window <= 0 || items.length === 0) {
+    return items;
+  }
+
+  const featuredIndices: number[] = [];
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].featured) {
+      featuredIndices.push(i);
+    }
+  }
+
+  if (featuredIndices.length === 0) {
+    return items;
+  }
+
+  const roll = seededRandom(seed * 31 + 7919);
+  if (roll >= probability) {
+    return items;
+  }
+
+  const effectiveWindow = Math.min(window, items.length);
+  for (let i = 0; i < effectiveWindow; i++) {
+    if (items[i].featured) {
+      return items;
+    }
+  }
+
+  const result = [...items];
+  const featuredPick = Math.floor(seededRandom(seed * 37 + 7907) * featuredIndices.length);
+  const featuredSongIndex = featuredIndices[featuredPick];
+  const targetPos = Math.floor(seededRandom(seed * 41 + 7883) * effectiveWindow);
+
+  const temp = result[targetPos];
+  result[targetPos] = result[featuredSongIndex];
+  result[featuredSongIndex] = temp;
+
+  return result;
+}
+
 export function applyInitialOrder(items: SongRecord[], order: AppConfig["search"]["initialOrder"], randomSeed: number): SongRecord[] {
   if (order === "alphabetical") {
     return [...items].sort((a, b) => a.displayTitle.localeCompare(b.displayTitle, "de"));
@@ -114,7 +159,8 @@ export function mapSongRaw(raw: SongRecordRaw, config: AppConfig): SongRecord {
     coverPath: resolveCoverPath(raw, config),
     displayTitle,
     searchIndex: searchSource,
-    searchTokens: tokenizeNormalized(searchSource)
+    searchTokens: tokenizeNormalized(searchSource),
+    featured: raw.featured === true
   };
 }
 

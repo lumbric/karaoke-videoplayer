@@ -14,7 +14,9 @@
     "maxDisplayCount": 500,
     "initialOrder": "random",
     "randomSeed": 42,
-    "showMetadataSnippet": false
+    "showMetadataSnippet": false,
+    "featuredProbability": 0.3,
+    "featuredWindow": 8
   },
   "providers": {
     "searchProviders": [

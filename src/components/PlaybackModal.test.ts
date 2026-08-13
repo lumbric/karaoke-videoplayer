@@ -16,7 +16,8 @@ const youtubeSong: SongRecord = {
   videoCandidates: ["https://www.youtube.com/embed/youtube-id"],
   coverPath: "/covers/online.jpg",
   displayTitle: "Online Karaoke Track",
-  searchIndex: "online karaoke track"
+  searchIndex: "online karaoke track",
+  featured: false
 };
 
 const song: SongRecord = {
@@ -30,7 +31,8 @@ const song: SongRecord = {
   videoCandidates: ["/songs/Track.mp4"],
   coverPath: "/covers/Track.jpg",
   displayTitle: "Track",
-  searchIndex: "track singer pop"
+  searchIndex: "track singer pop",
+  featured: false
 };
 
 describe("PlaybackModal", () => {

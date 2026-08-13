@@ -64,7 +64,8 @@ export function mapYouTubeResultToSong(result: YouTubeSearchResult): SongRecord 
     coverPath: coverUrl,
     displayTitle: title,
     searchIndex: artist ? `${artist} ${title}` : title,
-    searchTokens: tokenizeNormalized(artist ? `${artist} ${title}` : title)
+    searchTokens: tokenizeNormalized(artist ? `${artist} ${title}` : title),
+    featured: false
   };
 }
 

@@ -67,7 +67,8 @@ export function mapInvidiousResultToSong(result: InvidiousSearchResult): SongRec
     coverPath: coverUrl || "",
     displayTitle,
     searchIndex: artist ? `${artist} ${displayTitle}` : displayTitle,
-    searchTokens: tokenizeNormalized(artist ? `${artist} ${displayTitle}` : displayTitle)
+    searchTokens: tokenizeNormalized(artist ? `${artist} ${displayTitle}` : displayTitle),
+    featured: false
   };
 }
 

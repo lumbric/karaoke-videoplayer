@@ -23,7 +23,8 @@ describe("aiSuggestionStore", () => {
         coverPath: "/covers/one-kiss.jpg",
         displayTitle: "One Kiss (with Dua Lipa)",
         searchIndex: "Calvin Harris One Kiss (with Dua Lipa)",
-        searchTokens: ["calvin", "harris", "one", "kiss", "with", "dua", "lipa"]
+        searchTokens: ["calvin", "harris", "one", "kiss", "with", "dua", "lipa"],
+        featured: false
       },
       {
         id: "2",
@@ -37,7 +38,8 @@ describe("aiSuggestionStore", () => {
         coverPath: "/covers/bohemian-rhapsody.jpg",
         displayTitle: "Bohemian Rhapsody",
         searchIndex: "Queen Bohemian Rhapsody",
-        searchTokens: ["queen", "bohemian", "rhapsody"]
+        searchTokens: ["queen", "bohemian", "rhapsody"],
+        featured: false
       }
     ];
 
@@ -193,7 +195,9 @@ describe("aiSuggestionStore", () => {
           maxDisplayCount: 100,
           initialOrder: "alphabetical",
           randomSeed: 1,
-          showMetadataSnippet: true
+          showMetadataSnippet: true,
+          featuredProbability: 0.3,
+          featuredWindow: 8
         },
         providers: {
           searchProviders: [{ type: "youtube" }],
@@ -237,7 +241,9 @@ describe("aiSuggestionStore", () => {
           maxDisplayCount: 100,
           initialOrder: "alphabetical",
           randomSeed: 1,
-          showMetadataSnippet: true
+          showMetadataSnippet: true,
+          featuredProbability: 0.3,
+          featuredWindow: 8
         },
         providers: {
           searchProviders: [{ type: "youtube" }],

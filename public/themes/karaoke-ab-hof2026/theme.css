@@ -263,6 +263,15 @@ body {
   box-shadow: 0 12px 40px rgba(176, 140, 191, 0.45);
 }
 
+.song-card-featured {
+  box-shadow: 0 0 17px 3px rgba(243, 206, 98, 0.95);
+}
+
+.song-card-featured:hover,
+.song-card-featured:focus-visible {
+  box-shadow: 0 0 28px 6px rgba(243, 206, 98, 0.8);
+}
+
 .control-buttons .btn:hover,
 .control-buttons .btn:focus-visible {
   transform: translateY(-1px);

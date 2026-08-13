@@ -29,7 +29,9 @@ function seedStores(showMetadataSnippet = true, onlineSearchEnabled = false): vo
       maxDisplayCount: 100,
       initialOrder: "alphabetical",
       randomSeed: 1,
-      showMetadataSnippet
+      showMetadataSnippet,
+      featuredProbability: 0.3,
+      featuredWindow: 8
     },
     providers: {
       searchProviders: [{ type: "invidious", baseUrls: [] }],

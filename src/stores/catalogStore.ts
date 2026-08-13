@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import type { AppConfig, SearchOutcome, SearchSession, SongRecord } from "../types";
-import { loadSongCatalog } from "../services/songCatalog";
+import { injectFeaturedSongs, loadSongCatalog } from "../services/songCatalog";
 import { getSearchScore } from "../utils/fuzzy";
 import { saveSearchSession } from "../services/storage";
 
@@ -13,6 +13,8 @@ interface CatalogState {
   renderedCount: number;
   maxDisplayCount: number;
   batchSize: number;
+  featuredProbability: number;
+  featuredWindow: number;
   loading: boolean;
   error: string | null;
   currentSearchSession: {
@@ -56,6 +58,8 @@ export const useCatalogStore = defineStore("catalog", {
     renderedCount: 0,
     maxDisplayCount: 200,
     batchSize: 30,
+    featuredProbability: 0.3,
+    featuredWindow: 8,
     loading: false,
     error: null,
     currentSearchSession: null
@@ -109,7 +113,13 @@ export const useCatalogStore = defineStore("catalog", {
         }
       }
 
-      return ranked.map((entry) => entry.song);
+      const sorted = ranked.map((entry) => entry.song);
+
+      if (!hasQuery && state.initialOrder === "random") {
+        return injectFeaturedSongs(sorted, state.featuredProbability, state.featuredWindow, state.idleShuffleSeed);
+      }
+
+      return sorted;
     },
     visibleSongs(state): SongRecord[] {
       return this.filteredSongs.slice(0, Math.min(state.renderedCount, state.maxDisplayCount));
@@ -139,6 +149,8 @@ export const useCatalogStore = defineStore("catalog", {
 
       this.batchSize = config.search.batchSize;
       this.maxDisplayCount = config.search.maxDisplayCount;
+      this.featuredProbability = config.search.featuredProbability;
+      this.featuredWindow = config.search.featuredWindow;
 
       try {
         this.allSongs = await loadSongCatalog(config);
