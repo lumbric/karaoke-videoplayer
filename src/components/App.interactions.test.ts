@@ -53,7 +53,8 @@ function seedStores(showMetadataSnippet = true, onlineSearchEnabled = false): vo
       videoCandidates: ["/data/videos/One.mp4"],
       coverPath: "/data/covers/One.jpg",
       displayTitle: "One",
-      searchIndex: "one alpha pop"
+      searchIndex: "one alpha pop",
+      featured: false
     },
     {
       id: "song-2",
@@ -66,7 +67,8 @@ function seedStores(showMetadataSnippet = true, onlineSearchEnabled = false): vo
       videoCandidates: ["/data/videos/Two.mp4"],
       coverPath: "/data/covers/Two.jpg",
       displayTitle: "Two",
-      searchIndex: "two beta rock"
+      searchIndex: "two beta rock",
+      featured: false
     }
   ];
   catalogStore.batchSize = 20;
@@ -169,7 +171,8 @@ describe("App interactions", () => {
           videoCandidates: ["https://www.youtube.com/embed/online-1"],
           coverPath: "/data/covers/online-1.jpg",
           displayTitle: "Online One",
-          searchIndex: "online one remote"
+          searchIndex: "online one remote",
+          featured: false
         }
       ];
       onlineSearchStore.loading = false;

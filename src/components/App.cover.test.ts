@@ -56,7 +56,8 @@ describe("App cover handling", () => {
       videoCandidates: ["/data/videos/Song%20One.mp4"],
       coverPath: "/data/covers/missing.jpg",
       displayTitle: "Song One",
-      searchIndex: "song one artist"
+      searchIndex: "song one artist",
+      featured: false
     }];
     catalogStore.batchSize = 30;
     catalogStore.maxDisplayCount = 100;

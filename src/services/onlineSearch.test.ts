@@ -16,7 +16,8 @@ describe("searchOnline", () => {
         filePath: "https://www.youtube.com/embed/v1",
         videoCandidates: ["https://www.youtube.com/embed/v1"],
         coverPath: "",
-        searchIndex: "online song artist"
+        searchIndex: "online song artist",
+        featured: false
       }
     ]);
 
@@ -42,7 +43,8 @@ describe("searchOnline", () => {
         filePath: "https://www.youtube.com/embed/v1",
         videoCandidates: ["https://www.youtube.com/embed/v1"],
         coverPath: "",
-        searchIndex: "youtube song artist"
+        searchIndex: "youtube song artist",
+        featured: false
       }
     ]);
 

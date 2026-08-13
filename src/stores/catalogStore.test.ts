@@ -197,7 +197,7 @@ describe("catalogStore featured songs", () => {
     store.featuredProbability = 1.0;
     store.featuredWindow = 8;
     store.allSongs = Array.from({ length: 20 }, (_, i) =>
-      createSong(String(i), `Song ${i}`, `song${i}`, i === 15)
+      createSong(String(i), `Song ${i}`, `song${i}`, i === 19)
     );
 
     const filtered = store.filteredSongs;
@@ -230,7 +230,7 @@ describe("catalogStore featured songs", () => {
     store.featuredWindow = 8;
     store.idleShuffleSeed = 42;
     store.allSongs = Array.from({ length: 20 }, (_, i) =>
-      createSong(String(i), `Song ${i}`, `song${i}`, i === 15)
+      createSong(String(i), `Song ${i}`, `song${i}`, i === 19)
     );
 
     const filtered = store.filteredSongs;
