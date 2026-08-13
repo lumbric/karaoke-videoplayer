@@ -191,6 +191,10 @@ body {
   width: 10em;
   padding: 0 18px;
   min-height: 52px;
+  height: 52px;
+  line-height: 52px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .btn {
@@ -895,6 +899,8 @@ body {
 
 .ai-shell {
   border: none;
+  border-radius: 16px;
+  overflow: hidden;
   box-shadow: 0 8px 32px rgba(176, 140, 191, 0.3), 0 0 0 2px rgba(176, 140, 191, 0.3);
 }
 
@@ -904,6 +910,26 @@ body {
 
 .ai-input-area {
   border-top: none;
+  border-radius: 0 0 16px 16px;
+}
+
+.ai-input {
+  min-height: 52px;
+  border: 3px solid rgba(255, 255, 255, 0.88);
+  border-radius: 15px;
+  background: #fffaf3;
+  color: #5d4f6c;
+  box-shadow: 0 8px 24px rgba(82, 62, 93, 0.2);
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.ai-input::placeholder {
+  color: #9a8a9e;
+}
+
+.ai-input:focus {
+  outline: none;
+  box-shadow: 0 8px 28px rgba(176, 140, 191, 0.35), 0 0 0 3px rgba(176, 140, 191, 0.45);
 }
 
 .ai-message-bubble {
