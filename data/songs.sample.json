@@ -6,7 +6,8 @@
     "artist": "Nena",
     "genre": ["pop", "deutschpop"],
     "duration_seconds": 231,
-    "has_cover": false
+    "has_cover": false,
+    "featured": true
   },
   {
     "id": "sample-2",
