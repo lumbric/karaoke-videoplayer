@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # Starte locale web server - necessary for video streaming
-cd "$(dirname "$0")/../dist"
-python3 -m http.server 8000 &
-
-sleep 2
+#cd "$(dirname "$0")/../dist"
+#python3 -m http.server 8000 &
+#sleep 2
 
 # Start browser in kiosk mode
 if command -v OpenKiosk >/dev/null; then
