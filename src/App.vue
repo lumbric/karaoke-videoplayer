@@ -359,7 +359,10 @@ const spinnerIcon = `
         </select>
 
         <div class="control-buttons">
-          <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll">{{ resetIcon }}</button>
+          <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll">
+            <span class="btn-icon-symbol">{{ resetIcon }}</span>
+            <span class="btn-icon-label">Rest</span>
+          </button>
           <button
             v-if="onlineSearchActive"
             class="btn btn-icon online-search-icon-button"
@@ -371,6 +374,7 @@ const spinnerIcon = `
           >
             <span v-if="onlineLoading" class="button-spinner" v-html="spinnerIcon"></span>
             <span v-else v-html="globeIcon"></span>
+            <span class="btn-icon-label">Online suchen</span>
           </button>
           <button
             v-if="aiSuggestionsEnabled"
@@ -383,6 +387,7 @@ const spinnerIcon = `
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" fill="currentColor" />
             </svg>
+            <span class="btn-icon-label">Frag das Huhn</span>
           </button>
         </div>
       </section>

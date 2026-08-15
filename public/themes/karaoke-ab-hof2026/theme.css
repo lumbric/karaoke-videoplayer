@@ -146,8 +146,8 @@ body {
 .search {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 1em 1.5em;
-  font-size: 1.2em;
+  padding: 0.5em 1em;
+  font-size: 1em;
   border: 3px solid rgba(255, 255, 255, 0.88);
   border-radius: 15px;
   background: #fffaf3;
@@ -156,7 +156,7 @@ body {
   box-shadow: 0 8px 24px rgba(82, 62, 93, 0.2);
   transition: transform 0.1s ease, box-shadow 0.2s ease;
   outline: none;
-  height:52px;
+  height: 52px;
 }
 
 .search::placeholder {
@@ -190,16 +190,16 @@ body {
 .genre-select {
   width: 10em;
   padding: 0 18px;
-  min-height: 52px;
-  height: 52px;
-  line-height: 52px;
+  min-height: 68px;
+  height: 68px;
+  line-height: 68px;
   padding-top: 0;
   padding-bottom: 0;
 }
 
 .btn {
   padding: 15px 20px;
-  min-height: 52px;
+  min-height: 68px;
 }
 
 .btn:hover,
@@ -211,18 +211,33 @@ body {
 }
 
 .btn-icon {
-  width: 52px;
-  padding: 0;
+  width: auto;
+  height: 68px;
+  padding: 0 14px;
   display: inline-flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   font-size: 1.35rem;
 }
 
+.btn-icon-label {
+  font-size: 0.7rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.btn-icon-symbol {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
 .btn-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 16px;
+  height: 16px;
   color: currentColor;
+  flex-shrink: 0;
 }
 
 .stats-button {
