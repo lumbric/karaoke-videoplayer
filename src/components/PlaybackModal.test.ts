@@ -153,4 +153,55 @@ describe("PlaybackModal", () => {
     expect(wrapper.find("video").exists()).toBe(false);
     expect(wrapper.find(".youtube-player-container").exists()).toBe(true);
   });
+
+  it("requires minimum mouse movement threshold before showing controls", async () => {
+    const wrapper = mount(PlaybackModal, {
+      props: {
+        song,
+        fallbackCover: "/themes/default/cover_fallback.svg"
+      }
+    });
+
+    await wrapper.vm.$nextTick();
+
+    const overlay = wrapper.get(".player-overlay");
+
+    await overlay.trigger("mousemove", { clientX: 100, clientY: 100 });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.controlsVisible).toBe(true);
+
+    await overlay.trigger("mousemove", { clientX: 105, clientY: 105 });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.controlsVisible).toBe(true);
+
+    (wrapper.vm as any).controlsVisible = false;
+    await wrapper.vm.$nextTick();
+
+    await overlay.trigger("mousemove", { clientX: 106, clientY: 106 });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.controlsVisible).toBe(false);
+
+    await overlay.trigger("mousemove", { clientX: 120, clientY: 120 });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.controlsVisible).toBe(true);
+  });
+
+  it("shows controls immediately on keyboard input regardless of mouse position", async () => {
+    const wrapper = mount(PlaybackModal, {
+      props: {
+        song,
+        fallbackCover: "/themes/default/cover_fallback.svg"
+      }
+    });
+
+    await wrapper.vm.$nextTick();
+    (wrapper.vm as any).controlsVisible = false;
+    await wrapper.vm.$nextTick();
+
+    const overlay = wrapper.get(".player-overlay");
+    await overlay.trigger("keydown", { key: "Enter" });
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.controlsVisible).toBe(true);
+  });
 });

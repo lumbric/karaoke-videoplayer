@@ -31,6 +31,10 @@ const hideDelayMs = 2200;
 let loadingIndicatorTimer: number | null = null;
 const loadingIndicatorDelayMs = 450;
 
+const mouseMoveThreshold = 10;
+let lastMouseX = -1;
+let lastMouseY = -1;
+
 const displayMeta = computed(() => {
   const bits = [props.song.artist ?? "", props.song.genres.join(", ")].filter(Boolean);
   return bits.join(" - ");
@@ -234,8 +238,46 @@ function handleActivity(): void {
   revealControls();
 }
 
+function handleMouseEvent(event: MouseEvent): void {
+  if (lastMouseX === -1 && lastMouseY === -1) {
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+    revealControls();
+    return;
+  }
+
+  const dx = event.clientX - lastMouseX;
+  const dy = event.clientY - lastMouseY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance >= mouseMoveThreshold) {
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+    revealControls();
+  }
+}
+
 function onWindowActivity(): void {
   revealControls();
+}
+
+function onWindowMouseEvent(event: MouseEvent): void {
+  if (lastMouseX === -1 && lastMouseY === -1) {
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+    revealControls();
+    return;
+  }
+
+  const dx = event.clientX - lastMouseX;
+  const dy = event.clientY - lastMouseY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance >= mouseMoveThreshold) {
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+    revealControls();
+  }
 }
 
 function lockDocumentScroll(): void {
@@ -326,8 +368,8 @@ watch(
 onMounted(() => {
   startLoadingState();
   lockDocumentScroll();
-  window.addEventListener("pointermove", onWindowActivity);
-  window.addEventListener("mousemove", onWindowActivity);
+  window.addEventListener("pointermove", onWindowMouseEvent);
+  window.addEventListener("mousemove", onWindowMouseEvent);
   window.addEventListener("keydown", onWindowActivity);
   window.addEventListener("touchstart", onWindowActivity, { passive: true });
   nextTick(() => {
@@ -348,8 +390,8 @@ onBeforeUnmount(() => {
   clearLoadingIndicatorTimer();
   unlockDocumentScroll();
   destroyYouTubePlayer();
-  window.removeEventListener("pointermove", onWindowActivity);
-  window.removeEventListener("mousemove", onWindowActivity);
+  window.removeEventListener("pointermove", onWindowMouseEvent);
+  window.removeEventListener("mousemove", onWindowMouseEvent);
   window.removeEventListener("keydown", onWindowActivity);
   window.removeEventListener("touchstart", onWindowActivity);
 });
@@ -364,8 +406,8 @@ onBeforeUnmount(() => {
     aria-modal="true"
     :aria-label="`Wiedergabe von ${song.displayTitle}`"
     tabindex="0"
-    @pointermove="handleActivity"
-    @mousemove="handleActivity"
+    @pointermove="handleMouseEvent"
+    @mousemove="handleMouseEvent"
     @keydown="handleActivity"
     @touchstart="handleActivity"
     @focusin="handleActivity"
