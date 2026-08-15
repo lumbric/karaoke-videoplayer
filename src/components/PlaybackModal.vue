@@ -4,6 +4,7 @@ import type { SongRecord } from "../types";
 import { usePlaybackStore } from "../stores/playbackStore";
 import { YouTubePlayerController } from "../services/youtubePlayer";
 import { extractYouTubeVideoId, isYouTubeSource } from "../services/youtubeEmbed";
+import ProblemReportModal from "./ProblemReportModal.vue";
 
 const props = defineProps<{
   song: SongRecord;
@@ -21,6 +22,7 @@ const isLoading = ref(true);
 const showLoadingIndicator = ref(false);
 const candidateIndex = ref(0);
 const controlsVisible = ref(true);
+const showProblemReport = ref(false);
 const youtubeContainerId = ref(`youtube-player-${Math.random().toString(36).slice(2)}`);
 const youtubeController = ref<YouTubePlayerController | null>(null);
 let previousBodyOverflow = "";
@@ -232,6 +234,14 @@ function restartFromBeginning(): void {
   syncProgress(0, videoElement.value.duration || props.song.durationSeconds || 0);
   void videoElement.value.play();
   playbackStore.setPaused(false);
+}
+
+function openProblemReport(): void {
+  showProblemReport.value = true;
+}
+
+function closeProblemReport(): void {
+  showProblemReport.value = false;
 }
 
 function handleActivity(): void {
@@ -459,7 +469,13 @@ onBeforeUnmount(() => {
           <span v-html="restartIcon"></span>
         </button>
       </div>
+
+      <button class="btn problem-report-button" type="button" title="Problem melden" aria-label="Problem melden" @click="openProblemReport">
+        Problem melden
+      </button>
     </div>
+
+    <ProblemReportModal v-if="showProblemReport" :song="song" @close="closeProblemReport" />
 
     <div v-if="showLoadingIndicator" class="player-loading-layer" aria-hidden="true">
       <span class="player-loader"></span>

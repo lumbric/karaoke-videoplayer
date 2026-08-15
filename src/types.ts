@@ -90,6 +90,16 @@ export interface SongSuggestion {
   createdAt: string;
 }
 
+export interface ProblemReport {
+  songId: string;
+  songTitle: string;
+  songArtist?: string;
+  issueType: string;
+  description: string;
+  reportedBy?: string;
+  createdAt: string;
+}
+
 export interface OnlineSongResult {
   song: SongRecord;
   provider: PlayEventProviderMeta;

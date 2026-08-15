@@ -204,4 +204,36 @@ describe("PlaybackModal", () => {
 
     expect(wrapper.vm.controlsVisible).toBe(true);
   });
+
+  it("renders problem report button in controls", async () => {
+    const wrapper = mount(PlaybackModal, {
+      props: {
+        song,
+        fallbackCover: "/themes/default/cover_fallback.svg"
+      }
+    });
+
+    await wrapper.vm.$nextTick();
+
+    const problemButton = wrapper.find('button[aria-label="Problem melden"]');
+    expect(problemButton.exists()).toBe(true);
+  });
+
+  it("opens problem report modal when button is clicked", async () => {
+    const wrapper = mount(PlaybackModal, {
+      props: {
+        song,
+        fallbackCover: "/themes/default/cover_fallback.svg"
+      }
+    });
+
+    await wrapper.vm.$nextTick();
+
+    const problemButton = wrapper.get('button[aria-label="Problem melden"]');
+    await problemButton.trigger("click");
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.showProblemReport).toBe(true);
+    expect(wrapper.findComponent({ name: "ProblemReportModal" }).exists()).toBe(true);
+  });
 });
