@@ -405,6 +405,11 @@ onBeforeUnmount(() => {
   window.removeEventListener("keydown", onWindowActivity);
   window.removeEventListener("touchstart", onWindowActivity);
 });
+
+defineExpose({
+  controlsVisible,
+  showProblemReport
+});
 </script>
 
 <template>
