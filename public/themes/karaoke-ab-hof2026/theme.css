@@ -190,16 +190,16 @@ body {
 .genre-select {
   width: 10em;
   padding: 0 18px;
-  min-height: 68px;
-  height: 68px;
-  line-height: 68px;
+  min-height: 52px;
+  height: 52px;
+  line-height: 52px;
   padding-top: 0;
   padding-bottom: 0;
 }
 
 .btn {
   padding: 15px 20px;
-  min-height: 68px;
+  min-height: 52px;
 }
 
 .btn:hover,
@@ -212,7 +212,7 @@ body {
 
 .btn-icon {
   width: auto;
-  height: 68px;
+  height: 52px;
   padding: 0 14px;
   display: inline-flex;
   flex-direction: row;
