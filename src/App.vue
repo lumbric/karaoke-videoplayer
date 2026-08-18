@@ -361,7 +361,7 @@ const spinnerIcon = `
         <div class="control-buttons">
           <button class="btn btn-icon" type="button" title="Reset" aria-label="Reset" @click="clearAll">
             <span class="btn-icon-symbol">{{ resetIcon }}</span>
-            <span class="btn-icon-label">Rest</span>
+            <span class="btn-icon-label">Reset</span>
           </button>
           <button
             v-if="onlineSearchActive"
